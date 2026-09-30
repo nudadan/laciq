@@ -24,16 +24,15 @@ adalah 3.44.3 (C:\flutter) yang terlalu lama untuk proyek ini.
 ## Hasil verifikasi migrasi (2026-09-30)
 - 213 file identik dengan server (SHA-256).
 - `flutter analyze`: 1 info lint lama (`database.dart` curly braces), tidak ada error.
-- `flutter test`: 415 lulus, 1 gagal (lihat di bawah).
+- `flutter test`: 416/416 lulus (saat migrasi 415 + 1 gagal karena tanggal; sudah diperbaiki, lihat di bawah).
 - Tes Worker: 9/9 lulus.
 - `flutter build appbundle --release`: berhasil (85,2 MB), ditandatangani kunci upload yang sama dengan AAB yang sudah
   diunggah ke Play Console (SHA-256 `C3:E7:62:D8:…:53:9B`).
 
-## Kegagalan tes yang diketahui
-`test/dashboard_projection_card_test.dart` → "premium dengan agenda + transaksi berulang bulan ini". Tes memakai
-`DateTime.now() + 1 hari` sebagai `startDate` aturan berulang; pada tanggal 30/31 setiap bulan "besok" jatuh di bulan
-berikutnya sehingga tidak masuk proyeksi bulan berjalan. Bukan akibat migrasi; lulus lagi mulai tanggal 1. Perbaikan
-permanen: hitung `startDate` relatif terhadap sisa hari bulan itu, bukan `now + 1`.
+## Kegagalan tes yang sempat ada (sudah diperbaiki)
+`test/dashboard_projection_card_test.dart` → "premium dengan agenda + transaksi berulang bulan ini" gagal pada hari
+terakhir bulan karena `startDate = now + 1 hari` jatuh di bulan berikutnya (di luar proyeksi bulan berjalan). Bukan
+akibat migrasi. Diperbaiki 2026-09-30: ekspektasi kini mengikuti kalender. Setelah perbaikan: 416/416 lulus.
 
 ## Keanehan lingkungan PC ini (sudah diatasi, jangan dihapus tanpa tahu alasannya)
 1. **Avast Web/Mail Shield mencegat HTTPS.** JVM (Gradle, wrapper) tidak percaya sertifikatnya →
