@@ -214,11 +214,36 @@ F1 harus selesai sebelum yang lain; F2 sebelum F3–F5. F4 bisa paralel dengan F
 
 ## 10. Checklist
 
-- [ ] F0 keputusan K1–K7 · daftar kategori Bisnis final
-- [ ] F1 tabel `Ledgers` + kolom `ledgerId` + migrasi v10 + tes v9 → v10
-- [ ] F2 API ber-buku (parameter opsional) · `seedId` · invarian · template · tes
-- [ ] F3 berulang · pengingat · notifikasi anggaran · hapus semua · CSV per buku
-- [ ] F4 backup v7 · default `ledger-main` bila kunci tidak ada · satu fixture v6 · integritas · tes
-- [ ] F5 `ledgersProvider`/`activeLedgerIdProvider` · gerbang Ultimate · pengalih · Kelola buku kas · "Mencatat di" · kondisi terkunci
-- [ ] F6 teks manfaat Ultimate · upsell · listing Play
+Status per 2026-09-30 (K1–K7 memakai rekomendasi; lihat §11).
+
+- [x] F0 keputusan K1–K7 (rekomendasi dipakai) · daftar kategori Bisnis final (11 pengeluaran, 6 pemasukan)
+- [x] F1 tabel `Ledgers` + kolom `ledgerId` + migrasi v10 + tes migrasi v1…v9 → v10 (semua versi lulus)
+- [x] F2 API ber-buku (parameter opsional) · `ledgerSeedId` · invarian · template · tes (`test/ledgers_db_test.dart`, 30 tes)
+- [x] F3 berulang (buku terjeda) · pengingat · notifikasi anggaran · hapus semua · CSV per buku (dari Kelola Buku Kas)
+- [x] F4 backup v7 · default `ledger-main` bila kunci tidak ada · integritas lintas buku · tes (fixture v6 disintesis dari ekspor)
+- [x] F5 `ledgersProvider`/`activeLedgerIdProvider` · gerbang Ultimate · pengalih · Kelola buku kas · "Mencatat di" · kondisi terkunci
+- [x] F6 teks manfaat Ultimate (halaman langganan) · tile Buku Kas (upsell/terkunci) · draf teks listing Play (belum dipasang)
 - [ ] F7 pemeriksaan singkat di Redmi (upgrade dari rilis 3) · backup sebelum update · rilis
+
+## 11. Catatan implementasi (2026-09-30)
+
+Keputusan yang dipakai (rekomendasi §2): K1 buku tambahan terkunci saat Ultimate berakhir, data utuh, Ekspor CSV
+tetap bisa · K2 transaksi berulang di buku terkunci dijeda dan disusul saat terbuka · K3 batas 5 buku aktif ·
+K4 tag global · K5 template Pribadi/Bisnis/Kosong · K6 Ultimate dirilis bersama fitur ini · K7 harga tidak berubah.
+
+Hal-hal yang berbeda dari rencana atau baru ditemukan saat mengerjakan:
+- **Tanpa foreign key di `ledgerId`.** SQLite menolak `ALTER TABLE ADD COLUMN ... REFERENCES` berdefault non-NULL
+  saat foreign key aktif, jadi kolom itu tidak bisa ditambahkan lewat migrasi kalau diberi referensi. Integritas
+  dijaga di kode (`_checkSameLedger`, `_requireLedger`) dan `BackupService._checkIntegrity`.
+- **Default kolom memakai literal `'ledger-main'`**, bukan konstanta `kMainLedgerId`: berkas skema tergenerasi untuk
+  tes migrasi menyalin ekspresi default apa adanya dan tidak bisa mengimpor konstanta.
+- **Parameter `ledgerId` pada watcher bertipe `String?`**: bawaan Buku Utama; `null` = semua buku (dipakai
+  penjadwal pengingat dan notifikasi anggaran yang harus lintas buku). `getTransactions` bawaannya `null`.
+- **Pembuatan transaksi berulang lewat `recurringGeneratorProvider`**, bukan `generateDueRecurring()` langsung,
+  supaya buku terkunci selalu dijeda. Ada empat pemanggil (app, form Catat, halaman berulang, restore).
+- **Harness tes:** `FakeSubscriptionStatus` kini mengirim nilai awal lewat generator `async*` (bukan `onListen`
+  pada stream broadcast). Riverpod menjeda langganan saat rantai provider baru dibuat, dan event broadcast yang
+  datang saat itu hilang, sehingga provider macet di loading. Implementasi produksi sudah memakai `async*`.
+- **Pengalih buku hanya untuk Ultimate.** Pengguna yang Ultimate-nya berakhir tetap melihat buku tambahan di
+  halaman Kelola Buku Kas (terkunci, dengan Ekspor CSV), bukan di pengalih.
+- Belum diverifikasi di perangkat nyata (F7). Migrasi dari skema v9 ke v10 diuji otomatis dari semua versi lama.

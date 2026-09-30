@@ -234,32 +234,42 @@ formulir, seperti pada Premium.
 
 ## 7. Checklist
 
+Status per 2026-09-30. Kode fase A, B, dan C selesai dan diuji otomatis (490 tes Flutter, 38 tes Worker); yang
+tersisa butuh kunci/akun pemilik (Gemini, Cloudflare, Play, RevenueCat) atau perangkat nyata.
+
 ### A — Jalur upgrade dan UI
-- [ ] A1 `ActiveTier` + `subscriptionTierProvider` + `activeSubscriptionProductId()` + fake di harness
-- [ ] A2 penggantian produk (`StoreProductChangeInfo`) + `shouldReplaceProduct` + tes
-- [ ] A3 tile Pengaturan tiga kondisi + `SubscriptionPage(upgradeOnly)` + teks manfaat
-- [ ] A4 tampilan sisa kuota + tes
-- [ ] A5 ajakan Ultimate di alur Scan struk + aturan tampil + tes
+- [x] A1 `ActiveTier` + `subscriptionTierProvider` + `activeSubscriptionProductId()` + fake di harness
+- [x] A2 penggantian produk (`StoreProductChangeInfo`, `chargeProratedPrice`) + `shouldReplaceProduct` + tes.
+      **Nilai ID produk lama yang benar untuk Google Play belum diverifikasi di perangkat** (lihat §8)
+- [x] A3 tile Pengaturan tiga kondisi + `SubscriptionPage(upgradeOnly)` + teks manfaat (memuat multi buku kas)
+- [x] A4 tampilan sisa kuota (10 scan terakhir) + tes
+- [x] A5 ajakan Ultimate di alur Scan struk (sekali per sesi, berhenti setelah ditutup 2x) + tes
 
 ### B — Penyedia AI dan total/tanggal dari AI
 - [x] Keputusan pemilik: pakai Google Gemini (2026-09-30), model dipilih di B3
-- [ ] B0.1 verifikasi endpoint dan format keluaran terstruktur Gemini · [ ] B0.2 `src/gemini.ts`
-- [ ] B0.3 `GEMINI_API_KEY` + `AI_MODEL` + log token · [ ] B0.4 tes unit `gemini.ts`
-- [ ] B0.5 bersih-bersih setelah pemilihan · [ ] B0.6 skrip evaluasi
-- [ ] Cek target audiens/rating konten Play (klausul di bawah 18 tahun)
-- [ ] B1 Worker: skema `total`/`date`, validasi, prompt, tes handler
-- [ ] B2 Klien: parsing, penerapan di `_enhanceWithAi`, tes
-- [ ] B3 Evaluasi 10 struk (heuristik, 3.1 Flash-Lite, 3.8 Flash, Haiku 4.5) + pilih model + biaya per scan dari token nyata
+- [ ] B0.1 verifikasi endpoint dan format keluaran terstruktur Gemini dengan **satu permintaan nyata** (butuh kunci)
+- [x] B0.2 `src/gemini.ts` (`generateContent`, tanpa SDK; kunci di header)
+- [x] B0.3 `AI_PROVIDER`/`AI_MODEL`/`AI_THINKING_CONFIG`/`GEMINI_API_KEY` + log `ai_usage`
+- [x] B0.4 tes unit `gemini.ts`, `extractor.ts` (fetch palsu)
+- [ ] B0.5 bersih-bersih setelah pemilihan model (hapus `anthropic.ts` + dependensi bila Gemini menang)
+- [x] B0.6 skrip evaluasi `eval/` + 10 struk sintetis + penilai (bertes)
+- [ ] Cek target audiens/rating konten Play (klausul di bawah 18 tahun pada ketentuan Gemini)
+- [x] B1 Worker: `total`/`date`, validasi, prompt, tes handler
+- [x] B2 Klien: parsing, penerapan di `_enhanceWithAi` (tidak menimpa suntingan pengguna), tes
+- [ ] B3 Jalankan `eval/` (heuristik, 3.1 Flash-Lite, 3.8 Flash, Haiku 4.5), pilih model, hitung biaya dari token nyata
 
 ### C — Pengerasan Worker
-- [ ] C1 batas harian · [ ] C2 cache entitlement · [ ] C3 rate limit per IP · [ ] C4 anggaran Google Cloud Billing (atau batas Anthropic bila Haiku menang)
+- [x] C1 batas harian (`DAILY_LIMIT`, 429 `daily_limit_exceeded`; klien menampilkan pesan berbeda)
+- [x] C2 cache entitlement di KV (5 menit / 1 menit)
+- [x] C3 pembatas per IP (`IP_LIMITER`, opsional; **sintaks binding di wrangler.toml belum diuji**, aktifkan saat deploy)
+- [ ] C4 anggaran Google Cloud Billing (atau batas Anthropic bila Haiku menang) — konsol
 - [x] C5 dan C6 diputuskan tidak dikerjakan sekarang (lihat tabel C)
 
 ### D — Operasional
 - [ ] D0 project Google Cloud khusus kunci Gemini + billing aktif (paid tier)
 - [ ] D1 deploy Worker + secret + KV + `AI_MODEL` · [ ] D2 produk Play Ultimate · [ ] D3 impor produk RevenueCat
 - [ ] D4 entitlement `ultimate` (+ `premium`) · [ ] D5 paket di offering `dompetku` · [ ] D6 build dengan `AI_EXTRACTION_URL`
-- [ ] D7 listing dan Data Safety · [ ] D8 kebijakan privasi: Anthropic → Google, hosting ulang (setelah Worker di-deploy)
+- [ ] D7 listing dan Data Safety (draf teks listing sudah ada di `docs/LISTING-PLAY-STORE.md`) · [ ] D8 kebijakan privasi: Anthropic → Google, hosting ulang (setelah Worker di-deploy)
 
 ### E — Rilis dan uji
 - [ ] E1 versi `1.0.0+4`, build AAB, unggah ke uji internal
@@ -268,9 +278,15 @@ formulir, seperti pada Premium.
 
 ## 8. Catatan hasil (diisi saat dikerjakan)
 
-- Nilai `oldProductId` yang benar untuk penggantian produk: _belum diuji_.
-- Hasil evaluasi 10 struk (B3): _belum dilakukan_. Tabel yang harus diisi: baris = struk, kolom = heuristik / 3.1
-  Flash-Lite / 3.8 Flash / Haiku 4.5, sel = benar/salah untuk total, tanggal, toko, kategori.
-- Model AI terpilih dan ID model: _belum dipilih_ (keputusan penyedia: Gemini).
-- Endpoint Gemini yang berlaku (`generateContent` atau `interactions`) dan nama field keluaran terstruktur: _belum diverifikasi_.
+- Nilai `oldProductId` yang benar untuk penggantian produk: _belum diuji_. Kode memakai
+  `EntitlementInfo.productIdentifier` (ID langganan, mis. `dompetku_premium`). Bila Play menolak, coba
+  `langganan:base-plan` (`dompetku_premium:monthly`).
+- Hasil evaluasi 10 struk (B3): _belum dilakukan_ (butuh kunci API). Jalankan `eval/run.ts`, tempel ringkasannya di sini.
+- Model AI terpilih dan ID model: _belum dipilih_ (keputusan penyedia: Gemini; bawaan sementara di
+  `wrangler.toml`: `gemini-3.1-flash-lite`).
+- Endpoint Gemini: kode memakai `generateContent` (masih terdokumentasi, tidak ditandai usang per 2026-09-30);
+  dokumentasi terbaru menonjolkan `interactions`. Nama field keluaran terstruktur (`responseSchema`, tipe huruf
+  besar, `nullable`) dan `thinkingConfig` _belum diverifikasi dengan permintaan nyata_.
 - Token nyata per scan dan biaya per scan setelah B: _belum diukur_.
+- Temuan saat implementasi: fake langganan di tes memakai `onListen` pada stream broadcast sehingga nilai awal hilang
+  saat Riverpod menjeda langganan; diganti generator `async*` (sama dengan produksi). Lihat MULTI-BUKU-KAS §11.

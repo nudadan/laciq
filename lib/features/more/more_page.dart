@@ -10,6 +10,7 @@ import '../goals/goals_page.dart';
 import '../ledgers/ledgers_page.dart';
 import '../recurring/recurring_page.dart';
 import '../subscription/subscription_page.dart';
+import '../subscription/subscription_plans.dart' show ActiveTier;
 import '../tags/tags_page.dart';
 import '../trends/trend_page.dart';
 
@@ -25,6 +26,8 @@ class MorePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final premium = ref.watch(isPremiumProvider).value ?? false;
     final ultimate = ref.watch(isUltimateProvider).value ?? false;
+    final isPremiumTier =
+        ref.watch(subscriptionTierProvider) == ActiveTier.premium;
     final ledgerCount = ref.watch(ledgersProvider).value?.length ?? 1;
     // Jangan menawarkan Buku Kas bila Ultimate belum dijual dan belum ada buku tambahan.
     final ultimateOnSale = ref.watch(ultimateAvailableProvider).value ?? false;
@@ -45,7 +48,7 @@ class MorePage extends ConsumerWidget {
                 MaterialPageRoute<void>(
                   builder: (_) => ultimate || ledgerCount > 1
                       ? const LedgersPage()
-                      : const SubscriptionPage(),
+                      : SubscriptionPage(upgradeOnly: isPremiumTier),
                 ),
               ),
             ),

@@ -51,8 +51,8 @@ Produk yang sudah aktif di Play Console dan RevenueCat: hanya **Premium**. Ultim
 
 | Fitur | Gratis | Premium | Ultimate | Status implementasi |
 |---|---|---|---|---|
-| Ekstraksi struk dengan AI: nama toko dan kategori terisi otomatis (kuota 60 scan/bulan) | ❌ | ❌ | ✅ | 🔴 Kode klien dan Worker selesai (saat ini memanggil Claude Haiku 4.5; tes 416 + 9 lulus). Penyedia diputuskan beralih ke **Google Gemini** (2026-09-30), model dipilih lewat uji 10 struk; lihat [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md §3 B0](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md). **Belum bisa dipakai**: lihat bagian 6 |
-| **Multi buku kas**: pembukuan terpisah (mis. pribadi vs bisnis), masing-masing punya dompet, kategori, anggaran, transaksi berulang, agenda, utang/piutang, dan target sendiri; sampai 5 buku, pengalih buku di aplikasi | ❌ (satu Buku Utama) | ❌ (satu Buku Utama) | ✅ | ⬜ Belum dibuat. Rencana lengkap di [RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md](RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md); perubahan skema v9 → v10 dan backup v6 → v7 |
+| Ekstraksi struk dengan AI: nama toko, kategori, **total, dan tanggal** terisi otomatis (kuota 60 scan/bulan, 15/hari) | ❌ | ❌ | ✅ | 🟡 Kode klien dan Worker selesai (Gemini bawaan, Claude sebagai pembanding; 490 tes Flutter + 38 tes Worker lulus). **Belum bisa dipakai**: Worker belum di-deploy, model belum dipilih (uji 10 struk butuh kunci), bentuk keluaran Gemini belum diverifikasi dengan permintaan nyata; lihat bagian 6 dan [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md) |
+| **Multi buku kas**: pembukuan terpisah (mis. pribadi vs bisnis), masing-masing punya dompet, kategori, anggaran, transaksi berulang, agenda, utang/piutang, dan target sendiri; sampai 5 buku, pengalih buku di aplikasi | ❌ (satu Buku Utama) | ❌ (satu Buku Utama) | ✅ | 🟡 Kode selesai dan diuji otomatis (skema v10, backup v7, pengalih, Kelola Buku Kas, operasi lintas buku; 30 tes DB + tes UI). **Belum diuji di perangkat nyata** (upgrade dari rilis 3, F7). Rincian: [RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md](RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md) |
 
 Cara kerja ekstraksi AI bila aktif: hasil OCR on-device diisi dulu oleh heuristik, lalu Ultimate meminta AI (Cloudflare Worker) menyempurnakan nama toko dan kategori. Tanpa `AI_EXTRACTION_URL`, fitur mati diam-diam dan scan tetap jalan dengan heuristik.
 
@@ -62,7 +62,7 @@ Cara kerja ekstraksi AI bila aktif: hasil OCR on-device diisi dulu oleh heuristi
 |---|---|---|
 | Gratis | 13 inti + 3 dengan batas | Ya |
 | Premium | Semua Gratis + 7 fitur Premium penuh, tanpa iklan, batas dibuka | Ya (produk aktif, RevenueCat valid; uji beli di HP belum dilakukan) |
-| Ultimate | Semua Premium + 2 fitur khusus (ekstraksi AI, multi buku kas) | Belum (AI: kode selesai, belum di-deploy; multi buku kas: baru rencana) |
+| Ultimate | Semua Premium + 2 fitur khusus (ekstraksi AI, multi buku kas) | Belum (kode kedua fitur selesai; AI menunggu deploy Worker + pilihan model, multi buku kas menunggu uji di perangkat, dan produk Ultimate belum dibuat di Play/RevenueCat) |
 
 ## 6. Yang menghalangi Ultimate (semua belum dikerjakan)
 

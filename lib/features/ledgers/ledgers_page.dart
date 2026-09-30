@@ -10,6 +10,7 @@ import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../settings/share_file.dart';
 import '../subscription/subscription_page.dart';
+import '../subscription/subscription_plans.dart' show ActiveTier;
 
 /// Ikon yang ditawarkan untuk sebuah buku kas (subset dari [categoryIcons]).
 const ledgerIconKeys = <String>[
@@ -366,7 +367,11 @@ class LedgersPage extends ConsumerWidget {
                           child: FilledButton(
                             onPressed: () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
-                                builder: (_) => const SubscriptionPage(),
+                                builder: (_) => SubscriptionPage(
+                                  upgradeOnly:
+                                      ref.read(subscriptionTierProvider) ==
+                                      ActiveTier.premium,
+                                ),
                               ),
                             ),
                             child: const Text('Lihat Ultimate'),

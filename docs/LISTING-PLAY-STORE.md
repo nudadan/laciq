@@ -61,6 +61,19 @@ Kebijakan privasi: https://dompetku.hardan-ti.com/privacy
 Bantuan: support@hardan-ti.com
 ```
 
+## Tambahan deskripsi saat Ultimate dirilis (JANGAN dipasang sebelum produk Ultimate bisa dibeli)
+Sisipkan setelah blok "FITUR PREMIUM"; total deskripsi tetap jauh di bawah 4.000 karakter. Sesuaikan kalimat
+Scan struk di Premium agar tidak tumpang tindih (Premium = dibaca di HP; Ultimate = dilengkapi AI).
+```
+FITUR ULTIMATE (BERLANGGANAN)
+• Semua fitur Premium
+• Multi buku kas: pisahkan pembukuan pribadi dan bisnis, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri (sampai 5 buku)
+• Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis. Teks hasil scan (bukan foto) dikirim ke server AI kami untuk diproses dan tidak disimpan
+```
+Kalimat "kami tidak punya server yang menampungnya" di bagian Privasi juga perlu dilunakkan saat Ultimate rilis
+(mis. "Data keuangan tersimpan di perangkat Anda; hanya teks struk yang dikirim ke server AI bila Anda memakai
+fitur Ultimate dan menyetujuinya").
+
 ## Aset yang harus disediakan (belum ada di repo)
 | Aset | Ukuran | Catatan |
 |---|---|---|

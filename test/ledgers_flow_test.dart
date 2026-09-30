@@ -28,8 +28,8 @@ Finder get _chip => find.widgetWithText(ActionChip, 'Buku Utama');
 void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
 
-  appTest('bukan Ultimate: tidak ada pengalih buku; tile Buku Kas mengarah ke '
-      'halaman langganan', (tester, h) async {
+  appTest('Premium: tidak ada pengalih buku; tile Buku Kas mengarah ke '
+      'halaman upgrade Ultimate', (tester, h) async {
     expect(find.byType(ActionChip), findsNothing);
     await _openTab(tester, 'Lainnya');
     expect(find.text('Buku Kas'), findsOneWidget);
@@ -37,7 +37,8 @@ void main() {
 
     await tester.tap(find.text('Buku Kas'));
     await settle(tester);
-    expect(find.text('DompetKu Premium'), findsOneWidget);
+    // Premium diarahkan ke halaman upgrade khusus Ultimate.
+    expect(find.text('Upgrade ke Ultimate'), findsOneWidget);
   }, subscription: FakeSubscriptionStatus(premium: true));
 
   appTest('Ultimate: chip menampilkan Buku Utama; buat buku Bisnis lewat '
