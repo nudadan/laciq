@@ -3,8 +3,7 @@
 Cloudflare Worker: menerima teks OCR struk + daftar kategori pengguna, memastikan pemanggil punya
 entitlement `ultimate` aktif (server-ke-server ke RevenueCat), membatasi pemakaian (60 scan/bulan dan
 15/hari per pengguna), lalu meminta model AI mengembalikan `merchant`, `categoryId`, `total`, dan `date`.
-Penyedia bawaan: **Google Gemini** (paid tier); Claude tetap tersedia sebagai pilihan/pembanding
-(`AI_PROVIDER = "anthropic"`). Desain dan alasan pemilihan:
+Penyedia: **Google Gemini** (paid tier); Claude dipertimbangkan lalu tidak dipakai. Desain dan alasan pemilihan:
 `docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md` (B0, B3) dan `docs/RENCANA-IMPLEMENTASI-OCR-SCAN-STRUK.md` §3.
 
 `POST /extract` — body `{appUserId, rawText, categories:[{id,name}]}` →
@@ -26,7 +25,6 @@ npx wrangler login
 npx wrangler kv namespace create RATE_LIMIT      # tempel id ke wrangler.toml
 npx wrangler secret put GEMINI_API_KEY           # kunci paid tier
 npx wrangler secret put REVENUECAT_SECRET_KEY    # RevenueCat > API keys > Secret key (sk_...)
-# hanya bila AI_PROVIDER = "anthropic":  npx wrangler secret put ANTHROPIC_API_KEY
 npx wrangler deploy                              # mencetak URL https://....workers.dev
 ```
 

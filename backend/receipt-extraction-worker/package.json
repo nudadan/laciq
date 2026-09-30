@@ -8,9 +8,6 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test \"test/*.test.ts\""
   },
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.129.0"
-  },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260929.1",
     "@types/node": "^24.0.0",

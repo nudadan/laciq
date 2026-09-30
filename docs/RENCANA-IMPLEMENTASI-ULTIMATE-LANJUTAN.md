@@ -247,16 +247,16 @@ tersisa butuh kunci/akun pemilik (Gemini, Cloudflare, Play, RevenueCat) atau per
 
 ### B — Penyedia AI dan total/tanggal dari AI
 - [x] Keputusan pemilik: pakai Google Gemini (2026-09-30), model dipilih di B3
-- [ ] B0.1 verifikasi endpoint dan format keluaran terstruktur Gemini dengan **satu permintaan nyata** (butuh kunci)
+- [x] B0.1 endpoint dan format keluaran terstruktur Gemini diverifikasi dengan permintaan nyata (2026-09-30: HTTP 200, JSON sesuai skema)
 - [x] B0.2 `src/gemini.ts` (`generateContent`, tanpa SDK; kunci di header)
 - [x] B0.3 `AI_PROVIDER`/`AI_MODEL`/`AI_THINKING_CONFIG`/`GEMINI_API_KEY` + log `ai_usage`
 - [x] B0.4 tes unit `gemini.ts`, `extractor.ts` (fetch palsu)
-- [ ] B0.5 bersih-bersih setelah pemilihan model (hapus `anthropic.ts` + dependensi bila Gemini menang)
+- [x] B0.5 `anthropic.ts`, dependensi `@anthropic-ai/sdk`, dan cabang penyedia Claude dihapus (Gemini terpilih)
 - [x] B0.6 skrip evaluasi `eval/` + 10 struk sintetis + penilai (bertes)
 - [ ] Cek target audiens/rating konten Play (klausul di bawah 18 tahun pada ketentuan Gemini)
 - [x] B1 Worker: `total`/`date`, validasi, prompt, tes handler
 - [x] B2 Klien: parsing, penerapan di `_enhanceWithAi` (tidak menimpa suntingan pengguna), tes
-- [ ] B3 Jalankan `eval/` (heuristik, 3.1 Flash-Lite, 3.8 Flash, Haiku 4.5), pilih model, hitung biaya dari token nyata
+- [x] B3 `eval/` dijalankan pada 10 struk sintetis; model terpilih `gemini-3.1-flash-lite` (lihat §8). **Ulangi dengan struk nyata (disamarkan, paid tier) sebelum klaim akurasi**
 
 ### C — Pengerasan Worker
 - [x] C1 batas harian (`DAILY_LIMIT`, 429 `daily_limit_exceeded`; klien menampilkan pesan berbeda)
@@ -281,12 +281,26 @@ tersisa butuh kunci/akun pemilik (Gemini, Cloudflare, Play, RevenueCat) atau per
 - Nilai `oldProductId` yang benar untuk penggantian produk: _belum diuji_. Kode memakai
   `EntitlementInfo.productIdentifier` (ID langganan, mis. `dompetku_premium`). Bila Play menolak, coba
   `langganan:base-plan` (`dompetku_premium:monthly`).
-- Hasil evaluasi 10 struk (B3): _belum dilakukan_ (butuh kunci API). Jalankan `eval/run.ts`, tempel ringkasannya di sini.
-- Model AI terpilih dan ID model: _belum dipilih_ (keputusan penyedia: Gemini; bawaan sementara di
-  `wrangler.toml`: `gemini-3.1-flash-lite`).
-- Endpoint Gemini: kode memakai `generateContent` (masih terdokumentasi, tidak ditandai usang per 2026-09-30);
-  dokumentasi terbaru menonjolkan `interactions`. Nama field keluaran terstruktur (`responseSchema`, tipe huruf
-  besar, `nullable`) dan `thinkingConfig` _belum diverifikasi dengan permintaan nyata_.
-- Token nyata per scan dan biaya per scan setelah B: _belum diukur_.
+- **Evaluasi B3 (2026-09-30, 10 struk sintetis, `eval/run.ts`, kunci Gemini milik pemilik):**
+
+  | Model | Total | Tanggal | Toko | Kategori | Token in / out (rata-rata) | Perkiraan per scan |
+  |---|---|---|---|---|---|---|
+  | `gemini-3.1-flash-lite` | 10/10 | 10/10 | 10/10* | 9/10** | 492 / 58 | ≈ Rp3,4 |
+  | `gemini-3.5-flash-lite` | 10/10 | 10/10 | 10/10* | 9/10** | 492 / 56 | lebih mahal, akurasi sama |
+  | `gemini-3.8-flash` | 10/10 | 10/10 | 10/10* | 10/10 | 492 / 42 | ≈ Rp8,5 (≈ Rp16,6 mulai 2027) |
+  | `gemini-2.5-flash-lite` | - | - | - | - | - | HTTP 404: tidak tersedia untuk kunci ini |
+
+  * Semula 9/10: label saya keliru (struk bertuliskan "GoRide", bukan "Gojek"); label sudah diperbaiki.
+  ** Buku pemrograman dari toko buku online: model memilih Belanja, label saya Pendidikan; keduanya wajar (ambigu).
+  Struk SPBU dua kolom, yang gagal di heuristik on-device, benar pada ketiga model 3.x (total 244.850).
+- **Keputusan model:** `gemini-3.1-flash-lite` (termurah yang lolos; aturan B3). Biaya 60 scan/bulan ≈ Rp200,
+  sekitar 2% dari pendapatan bersih Ultimate. `gemini-3.8-flash` menjadi cadangan bila struk nyata menunjukkan
+  banyak salah baca (cukup ubah `AI_MODEL` di `wrangler.toml`). Sampel hanya 10 struk sintetis; belum membuktikan
+  akurasi pada struk nyata.
+- **Verifikasi B0.1:** `generateContent` dengan `responseSchema` (tipe huruf besar, `nullable`, `enum`) diterima
+  (HTTP 200) dan mengembalikan JSON sesuai skema. `usageMetadata` tidak memuat `thoughtsTokenCount` pada model ini,
+  jadi tanpa `thinkingConfig` tidak ada token berpikir yang ditagih; `AI_THINKING_CONFIG` dibiarkan kosong. Bagian
+  respons memuat `thoughtSignature` tambahan (tidak mengganggu, hanya `text` yang dibaca).
+- Kunci Gemini dibagikan lewat obrolan; anggap terbuka. Buat kunci baru di project Google Cloud khusus untuk produksi.
 - Temuan saat implementasi: fake langganan di tes memakai `onListen` pada stream broadcast sehingga nilai awal hilang
   saat Riverpod menjeda langganan; diganti generator `async*` (sama dengan produksi). Lihat MULTI-BUKU-KAS §11.

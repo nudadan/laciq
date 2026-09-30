@@ -5,18 +5,16 @@ export type Extractor = (rawText: string, categories: CategoryOption[]) => Promi
 
 /** Variabel lingkungan yang menentukan penyedia dan model AI. */
 export interface AiEnv {
-  /** `gemini` (bawaan) atau `anthropic`. */
+  /** Saat ini hanya `gemini` (bawaan). Penyedia lain = galat saat dipanggil. */
   AI_PROVIDER?: string;
   /** ID model; kosong = bawaan penyedia. Simpan di wrangler.toml, bukan di kode. */
   AI_MODEL?: string;
   /** JSON mentah untuk `thinkingConfig` Gemini (opsional; lihat gemini.ts). */
   AI_THINKING_CONFIG?: string;
   GEMINI_API_KEY?: string;
-  ANTHROPIC_API_KEY?: string;
 }
 
 export const DEFAULT_GEMINI_MODEL = "gemini-3.1-flash-lite";
-export const DEFAULT_ANTHROPIC_MODEL = "claude-haiku-4-5";
 
 /** JSON rusak/bukan objek diabaikan (bukan menggagalkan seluruh permintaan). */
 export function parseThinkingConfig(raw: string | undefined): Record<string, unknown> | undefined {
@@ -54,15 +52,6 @@ export function buildExtractor(
           ),
       });
       return extract(rawText, categories);
-    };
-  }
-
-  if (provider === "anthropic") {
-    const key = env.ANTHROPIC_API_KEY;
-    return async (rawText, categories) => {
-      if (!key) throw new Error("ANTHROPIC_API_KEY belum diisi");
-      const { makeExtractor } = await import("./anthropic.ts");
-      return makeExtractor(key, env.AI_MODEL || DEFAULT_ANTHROPIC_MODEL)(rawText, categories);
     };
   }
 

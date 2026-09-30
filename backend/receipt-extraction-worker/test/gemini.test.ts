@@ -157,8 +157,8 @@ describe("buildExtractor (pemilih penyedia)", () => {
   it("tanpa kunci atau penyedia tak dikenal: gagal saat dipanggil (handler menjawab 502)", async () => {
     await assert.rejects(() => buildExtractor({})("x", CATS), /GEMINI_API_KEY/);
     await assert.rejects(
-      () => buildExtractor({ AI_PROVIDER: "anthropic" })("x", CATS),
-      /ANTHROPIC_API_KEY/,
+      () => buildExtractor({ AI_PROVIDER: "anthropic", GEMINI_API_KEY: "k" })("x", CATS),
+      /tidak dikenal/,
     );
     await assert.rejects(
       () => buildExtractor({ AI_PROVIDER: "lain", GEMINI_API_KEY: "k" })("x", CATS),

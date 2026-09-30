@@ -1,13 +1,13 @@
 # Evaluasi model ekstraksi struk
 
-Membandingkan model (Gemini, Claude) pada struk berlabel. Dipakai di fase B3 rencana Ultimate untuk memilih
+Membandingkan model Gemini pada struk berlabel. Dipakai di fase B3 rencana Ultimate untuk memilih
 model **termurah yang lolos**: benar pada `total` di ≥ 8 dari 10 struk dan tidak lebih buruk dari heuristik
 pada struk yang heuristiknya sudah benar.
 
 ```bash
 cd backend/receipt-extraction-worker
-GEMINI_API_KEY=... ANTHROPIC_API_KEY=... \
-  node eval/run.ts gemini:gemini-3.1-flash-lite gemini:gemini-3.8-flash anthropic:claude-haiku-4-5
+GEMINI_API_KEY=... \
+  node eval/run.ts gemini:gemini-3.1-flash-lite gemini:gemini-3.5-flash-lite gemini:gemini-3.8-flash
 ```
 
 Keluaran: tabel per struk (total, tanggal, toko, kategori) dan jumlah token, lalu ringkasan per kandidat.

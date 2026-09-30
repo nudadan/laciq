@@ -40,7 +40,7 @@
     {
       "name": "ojek online dengan diskon",
       "rawText": "GoRide\nPerjalanan selesai\n24 Sep 2026, 07:48\nTarif perjalanan   Rp 32.000\nBiaya layanan      Rp 2.000\nDiskon promo      -Rp 8.000\nTotal bayar       Rp 26.000\nDibayar dengan GoPay",
-      "expected": { "merchant": "Gojek", "categoryId": "cat-exp-transport", "total": 26000, "date": "2026-09-24" }
+      "expected": { "merchant": "GoRide", "categoryId": "cat-exp-transport", "total": 26000, "date": "2026-09-24" }
     },
     {
       "name": "token listrik",

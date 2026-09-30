@@ -2,7 +2,7 @@
  * Evaluasi model ekstraksi struk (B0.6/B3). Contoh:
  *
  *   GEMINI_API_KEY=... node eval/run.ts gemini:gemini-3.1-flash-lite gemini:gemini-3.8-flash
- *   ANTHROPIC_API_KEY=... GEMINI_API_KEY=... node eval/run.ts anthropic:claude-haiku-4-5 gemini:gemini-3.1-flash-lite
+  *   node eval/run.ts gemini:gemini-3.8-flash   (model apa pun yang diberikan Google)
  *
  * Kandidat berformat `penyedia:model`. Opsional: `AI_THINKING_CONFIG` (JSON
  * thinkingConfig Gemini) dan `EVAL_FILE=jalur/struk.json` (bawaan:
@@ -39,7 +39,6 @@ for (const candidate of candidates) {
       AI_MODEL: model,
       AI_THINKING_CONFIG: process.env.AI_THINKING_CONFIG,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     },
     (line) => {
       const m = /in=(\d+) out=(\d+)/.exec(line);

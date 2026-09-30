@@ -9,7 +9,7 @@ MONTHLY_LIMIT = "60"
 # satu ID pengguna bocor.
 DAILY_LIMIT = "15"
 
-# Penyedia dan model AI. Penyedia: "gemini" (bawaan) atau "anthropic".
+# Penyedia dan model AI. Penyedia: "gemini" (satu-satunya yang didukung).
 # ID model SENGAJA di sini, bukan di kode, supaya ganti model tidak perlu rilis.
 # Pilih model lewat evaluasi (eval/), lihat docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md B3.
 AI_PROVIDER = "gemini"
@@ -36,5 +36,4 @@ id = "GANTI_DENGAN_ID_KV_NAMESPACE"
 
 # Rahasia (jangan ditaruh di file ini):
 #   npx wrangler secret put GEMINI_API_KEY          # kunci PAID TIER, project Google Cloud khusus
-#   npx wrangler secret put ANTHROPIC_API_KEY       # hanya bila AI_PROVIDER = "anthropic"
 #   npx wrangler secret put REVENUECAT_SECRET_KEY
