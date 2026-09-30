@@ -45,6 +45,17 @@ akibat migrasi. Diperbaiki 2026-09-30: ekspektasi kini mengikuti kalender. Setel
 3. **`android/local.properties`** dibuat manual (sdk.dir + flutter.sdk ke Flutter 3.47.5). Berkas ini tidak ikut
    disalin dari server karena berisi path khusus mesin; jangan dimasukkan ke version control.
 
+4. **Login Google (Backup Cloud) butuh SHA-1 kunci penanda tangan terdaftar di Google Cloud.** Build debug dari PC ini
+   memakai `~/.android/debug.keystore` milik PC ini, SHA-1 `42:80:14:01:8E:04:9C:E9:7B:6F:32:27:45:E1:D9:88:7A:34:8C:B8`,
+   berbeda dari kunci debug server (`68:AF:B0:14:…:9E:3C`). Sebelum didaftarkan, login gagal dengan
+   `UNREGISTERED_ON_API_CONSOLE`; setelah didaftarkan sebagai OAuth client Android ke-3 (2026-09-30) restore dari
+   Drive berhasil di HP. Daftar client Android yang harus ada: rilis `86:E7:F6:D6:…`, debug server `68:AF:B0:14:…`,
+   debug PC ini `42:80:14:01:…`. **Belum:** SHA-1 sertifikat Play App Signing (Play Console → Integritas aplikasi)
+   agar Backup Cloud jalan di HP tester uji internal/produksi.
+5. **HP uji lewat adb nirkabel.** Xiaomi/HyperOS menolak pemasangan (`INSTALL_FAILED_USER_RESTRICTED`) kecuali
+   "Instal via USB" diaktifkan di Opsi pengembang. Ganti kunci penanda tangan berarti harus uninstall dulu
+   (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`), yang menghapus data lokal; backup ke cloud dulu.
+
 ## Rahasia yang ikut dimigrasi
 `android/key.properties` dan `android/app/upload-keystore.jks` (kunci upload Play Store). Kehilangan keduanya berarti
 tidak bisa merilis pembaruan. Simpan salinan cadangan di luar PC ini (mis. password manager). Berkas-berkas ini
