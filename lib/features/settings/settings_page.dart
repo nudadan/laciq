@@ -205,6 +205,8 @@ class SettingsPage extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final db = ref.read(databaseProvider);
     final month = ref.read(selectedMonthProvider);
+    // Ekspor mengikuti buku kas yang sedang aktif (tidak mencampur semua buku).
+    final ledgerId = ref.read(activeLedgerIdProvider);
     final monthLabel = DateFormat('MMMM yyyy', 'id_ID').format(month);
 
     final scope = await showDialog<_CsvScope>(
@@ -230,8 +232,9 @@ class SettingsPage extends ConsumerWidget {
           ? await db.getTransactions(
               from: AppDatabase.monthStart(month),
               to: AppDatabase.monthEnd(month),
+              ledgerId: ledgerId,
             )
-          : await db.getTransactions();
+          : await db.getTransactions(ledgerId: ledgerId);
       if (items.isEmpty) {
         messenger.showSnackBar(
           const SnackBar(content: Text('Tidak ada transaksi untuk diekspor.')),
