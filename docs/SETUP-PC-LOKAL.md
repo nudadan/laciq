@@ -50,8 +50,11 @@ akibat migrasi. Diperbaiki 2026-09-30: ekspektasi kini mengikuti kalender. Setel
    berbeda dari kunci debug server (`68:AF:B0:14:…:9E:3C`). Sebelum didaftarkan, login gagal dengan
    `UNREGISTERED_ON_API_CONSOLE`; setelah didaftarkan sebagai OAuth client Android ke-3 (2026-09-30) restore dari
    Drive berhasil di HP. Daftar client Android yang harus ada: rilis `86:E7:F6:D6:…`, debug server `68:AF:B0:14:…`,
-   debug PC ini `42:80:14:01:…`. **Belum:** SHA-1 sertifikat Play App Signing (Play Console → Integritas aplikasi)
-   agar Backup Cloud jalan di HP tester uji internal/produksi.
+   debug PC ini `42:80:14:01:…`, dan **Play App Signing** `21:30:93:26:02:43:4C:7C:57:B9:B2:2C:15:65:05:A6:7B:F2:61:45`
+   (client "DompetKu - Play App Signing", didaftarkan 2026-09-30; aktif setelah 5 menit sampai beberapa jam).
+   **Layar persetujuan OAuth masih berstatus Testing**: hanya *test user* (saat ini hanya nudadan@gmail.com, kuota 100)
+   yang bisa login Google/Backup Cloud. Tester lain harus ditambahkan di Google Auth Platform → Audience → Test users,
+   atau aplikasi dipublikasikan (scope `drive.appdata` non-sensitif; butuh Branding lengkap).
 5. **HP uji lewat adb nirkabel.** Xiaomi/HyperOS menolak pemasangan (`INSTALL_FAILED_USER_RESTRICTED`) kecuali
    "Instal via USB" diaktifkan di Opsi pengembang. Ganti kunci penanda tangan berarti harus uninstall dulu
    (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`), yang menghapus data lokal; backup ke cloud dulu.
