@@ -58,6 +58,7 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
         ? _run(
             () => db.addCategory(
               type: widget.type,
+              ledgerId: ref.read(activeLedgerIdProvider),
               name: _nameCtrl.text,
               icon: _icon,
               color: _color,

@@ -36,16 +36,123 @@ final selectedMonthProvider = NotifierProvider<SelectedMonth, DateTime>(
   SelectedMonth.new,
 );
 
+// ----------------------------------------------------------- buku kas
+//
+// Multi buku kas adalah fitur Ultimate (lihat
+// docs/RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md). Semua provider data di bawah
+// membaca [activeLedgerIdProvider], jadi widget tidak perlu tahu soal buku.
+
+/// Semua buku kas (yang diarsipkan di urutan bawah). Buku Utama selalu ada.
+final ledgersProvider = StreamProvider<List<Ledger>>(
+  (ref) => ref.watch(databaseProvider).watchLedgers(),
+);
+
+/// Total saldo dompet aktif per buku (id buku -> saldo), untuk pengalih buku.
+final ledgerBalancesProvider = StreamProvider.autoDispose<Map<String, int>>(
+  (ref) => ref.watch(databaseProvider).watchLedgerBalances(),
+);
+
+const _kActiveLedgerKey = 'active_ledger_id';
+
+/// Pilihan buku aktif pengguna, disimpan di [KeyValueStore]. Null = belum
+/// dibaca / belum memilih. Jangan dipakai langsung untuk menampilkan data:
+/// pakai [activeLedgerIdProvider], yang sudah memeriksa hak Ultimate dan
+/// keberadaan bukunya.
+class ActiveLedgerPref extends Notifier<String?> {
+  @override
+  String? build() {
+    _load();
+    return null;
+  }
+
+  Future<void> _load() async {
+    try {
+      final saved = await ref
+          .read(keyValueStoreProvider)
+          .read(_kActiveLedgerKey);
+      if (ref.mounted && state == null && saved != null) state = saved;
+    } catch (_) {
+      // Penyimpanan tak terbaca: tetap di Buku Utama.
+    }
+  }
+
+  Future<void> select(String ledgerId) async {
+    state = ledgerId;
+    await ref.read(keyValueStoreProvider).write(_kActiveLedgerKey, ledgerId);
+  }
+}
+
+final activeLedgerPrefProvider = NotifierProvider<ActiveLedgerPref, String?>(
+  ActiveLedgerPref.new,
+);
+
+/// Buku yang tidak boleh dipakai: diarsipkan, atau semua selain Buku Utama
+/// bila bukan Ultimate (datanya tetap utuh, hanya terkunci).
+Set<String> lockedLedgerIds(List<Ledger> ledgers, {required bool ultimate}) => {
+  for (final l in ledgers)
+    if (l.archived || (!ultimate && l.id != kMainLedgerId)) l.id,
+};
+
+/// Buku yang benar-benar dipakai saat ini. Bukan Ultimate, buku yang dipilih
+/// tidak ada, atau buku itu diarsipkan -> Buku Utama.
+final activeLedgerIdProvider = Provider<String>((ref) {
+  final ultimate = ref.watch(isUltimateProvider).value ?? false;
+  if (!ultimate) return kMainLedgerId;
+  final pref = ref.watch(activeLedgerPrefProvider);
+  final ledgers = ref.watch(ledgersProvider).value;
+  if (pref == null || ledgers == null) return kMainLedgerId;
+  final usable = ledgers.any((l) => l.id == pref && !l.archived);
+  return usable ? pref : kMainLedgerId;
+});
+
+/// Buku yang sedang aktif beserta datanya (nama, warna, ikon).
+final activeLedgerProvider = Provider<Ledger?>((ref) {
+  final id = ref.watch(activeLedgerIdProvider);
+  final ledgers = ref.watch(ledgersProvider).value;
+  if (ledgers == null) return null;
+  return ledgers.where((l) => l.id == id).firstOrNull;
+});
+
+/// Pengalih buku dan penanda "Mencatat di" hanya tampil untuk Ultimate.
+final multiLedgerEnabledProvider = Provider<bool>(
+  (ref) => ref.watch(isUltimateProvider).value ?? false,
+);
+
+/// Mencatat transaksi berulang yang jatuh tempo di SEMUA buku kas yang dapat
+/// dipakai; buku terkunci dijeda (lihat [AppDatabase.generateDueRecurring]).
+/// Semua pemanggil memakai ini, bukan `generateDueRecurring()` langsung.
+final recurringGeneratorProvider = Provider<Future<int> Function()>((ref) {
+  return () async {
+    final db = ref.read(databaseProvider);
+    // Langsung ke sumber status (bukan isUltimateProvider.future): tidak
+    // bergantung pada ada-tidaknya pendengar provider stream saat dipanggil.
+    final ultimate = await ref
+        .read(subscriptionStatusProvider)
+        .watchIsUltimate()
+        .first;
+    final ledgers = await db.watchLedgers().first;
+    return db.generateDueRecurring(
+      pausedLedgerIds: lockedLedgerIds(ledgers, ultimate: ultimate),
+    );
+  };
+});
+
 final accountBalancesProvider =
     StreamProvider.autoDispose<List<AccountBalance>>(
-      (ref) => ref.watch(databaseProvider).watchAccountBalances(),
+      (ref) => ref
+          .watch(databaseProvider)
+          .watchAccountBalances(ledgerId: ref.watch(activeLedgerIdProvider)),
     );
 
 /// Termasuk dompet yang diarsipkan (di urutan bawah): untuk layar Dompet dan
 /// untuk mengubah transaksi yang memakai dompet yang sudah diarsipkan.
 final allAccountsProvider = StreamProvider.autoDispose<List<AccountBalance>>(
-  (ref) =>
-      ref.watch(databaseProvider).watchAccountBalances(includeArchived: true),
+  (ref) => ref
+      .watch(databaseProvider)
+      .watchAccountBalances(
+        includeArchived: true,
+        ledgerId: ref.watch(activeLedgerIdProvider),
+      ),
 );
 
 /// Termasuk yang diarsipkan (di urutan bawah): untuk layar kelola kategori dan
@@ -54,37 +161,57 @@ final allCategoriesProvider = StreamProvider.autoDispose
     .family<List<Category>, TxType>(
       (ref, type) => ref
           .watch(databaseProvider)
-          .watchCategories(type, includeArchived: true),
+          .watchCategories(
+            type,
+            includeArchived: true,
+            ledgerId: ref.watch(activeLedgerIdProvider),
+          ),
     );
 
 final monthTotalsProvider = StreamProvider.autoDispose<MonthTotals>(
-  (ref) =>
-      ref.watch(databaseProvider).watchTotals(ref.watch(selectedMonthProvider)),
+  (ref) => ref
+      .watch(databaseProvider)
+      .watchTotals(
+        ref.watch(selectedMonthProvider),
+        ledgerId: ref.watch(activeLedgerIdProvider),
+      ),
 );
 
 final monthlyTrendProvider = StreamProvider.autoDispose<List<MonthlyTotal>>(
   (ref) => ref
       .watch(databaseProvider)
-      .watchMonthlyTrend(ref.watch(selectedMonthProvider)),
+      .watchMonthlyTrend(
+        ref.watch(selectedMonthProvider),
+        ledgerId: ref.watch(activeLedgerIdProvider),
+      ),
 );
 
 final expenseByCategoryProvider =
     StreamProvider.autoDispose<List<CategorySpend>>(
       (ref) => ref
           .watch(databaseProvider)
-          .watchExpenseByCategory(ref.watch(selectedMonthProvider)),
+          .watchExpenseByCategory(
+            ref.watch(selectedMonthProvider),
+            ledgerId: ref.watch(activeLedgerIdProvider),
+          ),
     );
 
 final monthTransactionsProvider = StreamProvider.autoDispose<List<TxView>>(
   (ref) => ref
       .watch(databaseProvider)
-      .watchTransactions(ref.watch(selectedMonthProvider)),
+      .watchTransactions(
+        ref.watch(selectedMonthProvider),
+        ledgerId: ref.watch(activeLedgerIdProvider),
+      ),
 );
 
 final budgetProgressProvider = StreamProvider.autoDispose<List<BudgetProgress>>(
   (ref) => ref
       .watch(databaseProvider)
-      .watchBudgetProgress(ref.watch(selectedMonthProvider)),
+      .watchBudgetProgress(
+        ref.watch(selectedMonthProvider),
+        ledgerId: ref.watch(activeLedgerIdProvider),
+      ),
 );
 
 /// Provider terpisah (bukan langsung di dalam [budgetNotificationServiceProvider])
@@ -102,11 +229,15 @@ final budgetNotificationServiceProvider = Provider<BudgetNotificationService>(
 );
 
 final recurringRulesProvider = StreamProvider.autoDispose<List<RuleView>>(
-  (ref) => ref.watch(databaseProvider).watchRecurringRules(),
+  (ref) => ref
+      .watch(databaseProvider)
+      .watchRecurringRules(ledgerId: ref.watch(activeLedgerIdProvider)),
 );
 
 final goalsProvider = StreamProvider.autoDispose<List<GoalView>>(
-  (ref) => ref.watch(databaseProvider).watchGoals(),
+  (ref) => ref
+      .watch(databaseProvider)
+      .watchGoals(ledgerId: ref.watch(activeLedgerIdProvider)),
 );
 
 final goalContributionsProvider = StreamProvider.autoDispose
@@ -190,12 +321,16 @@ final agendaReminderServiceProvider = Provider<AgendaReminderService>(
 
 final agendaRemindersProvider =
     StreamProvider.autoDispose<List<AgendaReminder>>(
-      (ref) => ref.watch(databaseProvider).watchAgendaReminders(),
+      (ref) => ref
+          .watch(databaseProvider)
+          .watchAgendaReminders(ledgerId: ref.watch(activeLedgerIdProvider)),
     );
 
 /// Utang/piutang (fitur Premium) — lihat docs/RENCANA-IMPLEMENTASI-UTANG-PIUTANG.md.
 final debtsProvider = StreamProvider.autoDispose<List<Debt>>(
-  (ref) => ref.watch(databaseProvider).watchDebts(),
+  (ref) => ref
+      .watch(databaseProvider)
+      .watchDebts(ledgerId: ref.watch(activeLedgerIdProvider)),
 );
 
 /// 2 item Agenda terdekat jatuh temponya (aktif, belum selesai), untuk kartu
@@ -355,5 +490,6 @@ final categoryTrendProvider =
           .watchCategoryMonthlyTrend(
             ref.watch(selectedMonthProvider),
             months: months,
+            ledgerId: ref.watch(activeLedgerIdProvider),
           );
     });

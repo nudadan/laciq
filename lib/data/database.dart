@@ -63,7 +63,8 @@ class Accounts extends Table {
   /// non-NULL saat foreign key aktif, jadi kolom ini tidak bisa ditambahkan
   /// lewat migrasi kalau diberi referensi. Integritasnya dijaga di kode
   /// (lihat `AppDatabase._ledgerOfAccounts`) dan `BackupService`.
-  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
+  TextColumn get ledgerId =>
+      text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override
@@ -81,7 +82,8 @@ class Categories extends Table {
 
   /// Buku kas pemilik kategori ini (tanpa foreign key, lihat [Accounts.ledgerId]).
   /// Sub-kategori selalu satu buku dengan induknya.
-  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
+  TextColumn get ledgerId =>
+      text().withDefault(const Constant('ledger-main'))();
 
   /// Kategori induk (satu tingkat saja: sub-kategori tidak boleh punya
   /// sub-kategori lagi). Null = kategori tingkat atas.
@@ -222,7 +224,8 @@ class AgendaReminders extends Table {
       integer().nullable().check(estimatedAmount.isBiggerThanValue(0))();
 
   /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
-  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
+  TextColumn get ledgerId =>
+      text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -258,7 +261,8 @@ class Debts extends Table {
   TextColumn get accountId => text().nullable()();
 
   /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
-  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
+  TextColumn get ledgerId =>
+      text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -291,7 +295,8 @@ class SavingsGoals extends Table {
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
 
   /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
-  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
+  TextColumn get ledgerId =>
+      text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -766,11 +771,7 @@ class AppDatabase extends _$AppDatabase {
         updatedAt: now,
       ),
     );
-    await _seedLedgerContent(
-      kMainLedgerId,
-      LedgerTemplate.personal,
-      now: now,
-    );
+    await _seedLedgerContent(kMainLedgerId, LedgerTemplate.personal, now: now);
   }
 
   /// Mengisi kategori dan satu dompet awal untuk buku [ledgerId] sesuai
@@ -783,7 +784,11 @@ class AppDatabase extends _$AppDatabase {
   }) async {
     final (expense, income, accountName) = switch (template) {
       LedgerTemplate.personal => (_personalExpense, _personalIncome, 'Tunai'),
-      LedgerTemplate.business => (_businessExpense, _businessIncome, 'Kas Usaha'),
+      LedgerTemplate.business => (
+        _businessExpense,
+        _businessIncome,
+        'Kas Usaha',
+      ),
       LedgerTemplate.blank => (_blankExpense, _blankIncome, 'Tunai'),
     };
 
@@ -897,13 +902,11 @@ class AppDatabase extends _$AppDatabase {
     String? exceptId,
   }) async {
     final clash =
-        (await (select(accounts)..where((a) => a.ledgerId.equals(ledgerId)))
-                .get())
-            .where(
-              (a) =>
-                  a.id != exceptId &&
-                  a.name.toLowerCase() == name.toLowerCase(),
-            );
+        (await (select(
+          accounts,
+        )..where((a) => a.ledgerId.equals(ledgerId))).get()).where(
+          (a) => a.id != exceptId && a.name.toLowerCase() == name.toLowerCase(),
+        );
     if (clash.isNotEmpty) {
       throw AccountException(
         clash.first.archived
@@ -1132,8 +1135,7 @@ class AppDatabase extends _$AppDatabase {
       final last =
           await (select(categories)
                 ..where(
-                  (c) =>
-                      c.type.equalsValue(type) & c.ledgerId.equals(ledgerId),
+                  (c) => c.type.equalsValue(type) & c.ledgerId.equals(ledgerId),
                 )
                 ..orderBy([(c) => OrderingTerm.desc(c.sortOrder)])
                 ..limit(1))
@@ -1177,12 +1179,7 @@ class AppDatabase extends _$AppDatabase {
         current.ledgerId,
         exceptId: id,
       );
-      await _checkParent(
-        current.type,
-        parentId,
-        current.ledgerId,
-        selfId: id,
-      );
+      await _checkParent(current.type, parentId, current.ledgerId, selfId: id);
       if (parentId != null) {
         final children = await (select(
           categories,
@@ -1584,10 +1581,9 @@ class AppDatabase extends _$AppDatabase {
       final pausedAccountIds = pausedLedgerIds.isEmpty
           ? const <String>{}
           : {
-              for (final a
-                  in await (select(
-                    accounts,
-                  )..where((a) => a.ledgerId.isIn(pausedLedgerIds))).get())
+              for (final a in await (select(
+                accounts,
+              )..where((a) => a.ledgerId.isIn(pausedLedgerIds))).get())
                 a.id,
             };
 
@@ -2767,7 +2763,9 @@ class AppDatabase extends _$AppDatabase {
         await (selectOnly(transactions)
               ..addColumns([transactions.id.count()])
               ..where(
-                transactions.accountId.isIn([for (final a in accountRows) a.id]) &
+                transactions.accountId.isIn([
+                      for (final a in accountRows) a.id,
+                    ]) &
                     transactions.deletedAt.isNull(),
               ))
             .map((r) => r.read(transactions.id.count()) ?? 0)
@@ -2787,7 +2785,8 @@ class AppDatabase extends _$AppDatabase {
       final exists = await (select(
         ledgers,
       )..where((l) => l.id.equals(id))).getSingleOrNull();
-      if (exists == null) throw const LedgerException('Buku kas tidak ditemukan.');
+      if (exists == null)
+        throw const LedgerException('Buku kas tidak ditemukan.');
 
       // `categories.parent_id` menunjuk ke dirinya sendiri; urutan hapus dan
       // defer_foreign_keys sama alasannya dengan eraseAllData/restore.
@@ -2816,13 +2815,16 @@ class AppDatabase extends _$AppDatabase {
         )..where((t) => t.accountId.isIn(accountIds))).get())
           t.id,
       ];
-      await (delete(transactionTags)..where((t) => t.transactionId.isIn(txIds)))
-          .go();
+      await (delete(
+        transactionTags,
+      )..where((t) => t.transactionId.isIn(txIds))).go();
       await (delete(transactions)..where((t) => t.id.isIn(txIds))).go();
       await (delete(
         recurringRules,
       )..where((r) => r.accountId.isIn(accountIds))).go();
-      await (delete(budgets)..where((b) => b.categoryId.isIn(categoryIds))).go();
+      await (delete(
+        budgets,
+      )..where((b) => b.categoryId.isIn(categoryIds))).go();
       await (delete(
         goalContributions,
       )..where((c) => c.goalId.isIn(goalIds))).go();

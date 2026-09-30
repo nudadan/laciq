@@ -22,18 +22,35 @@ class BudgetNotificationService {
   /// pengguna di tab Anggaran) terhadap anggaran tiap kategori, dan mengirim
   /// notifikasi untuk yang baru menyeberang ambang warning/over — maksimal
   /// sekali per kategori, per bulan, per ambang (dedup lewat [KeyValueStore]).
-  Future<void> checkAndNotify(AppDatabase db) async {
+  ///
+  /// Bekerja lintas buku kas: semua buku diperiksa kecuali [lockedLedgerIds].
+  /// [ledgerNames] (id buku -> nama) diisi hanya bila ada lebih dari satu buku
+  /// aktif; nama buku lalu ditambahkan ke judul notifikasi. ID kategori unik
+  /// global, jadi kunci dedup tidak perlu berubah.
+  Future<void> checkAndNotify(
+    AppDatabase db, {
+    Set<String> lockedLedgerIds = const {},
+    Map<String, String> ledgerNames = const {},
+  }) async {
     await _sender.init();
     final now = DateTime.now();
-    final progress = await db.watchBudgetProgress(now).first;
+    final progress = await db.watchBudgetProgress(now, ledgerId: null).first;
     for (final p in progress) {
+      if (lockedLedgerIds.contains(p.category.ledgerId)) continue;
       final budget = p.budget;
       if (budget == null) continue;
       final status = budgetStatusOf(p.spent, budget);
       if (status == BudgetStatus.ok) continue;
       final key = _dedupKey(p.category.id, now, status);
       if (await _store.read(key) != null) continue;
-      await _show(p.category.id, p.category.name, status, p.spent, budget);
+      final name = ledgerNames[p.category.ledgerId];
+      await _show(
+        p.category.id,
+        name == null ? p.category.name : '${p.category.name} · $name',
+        status,
+        p.spent,
+        budget,
+      );
       await _store.write(key, '1');
     }
   }

@@ -13,6 +13,7 @@ import 'features/accounts/accounts_page.dart';
 import 'features/ads/banner_ad_widget.dart';
 import 'features/budget/budget_page.dart';
 import 'features/dashboard/dashboard_page.dart';
+import 'features/ledgers/ledgers_page.dart' show LedgerChip;
 import 'features/more/more_page.dart';
 import 'features/onboarding/onboarding_page.dart';
 import 'features/onboarding/onboarding_providers.dart';
@@ -125,7 +126,7 @@ class _HomeShellState extends ConsumerState<HomeShell>
   /// Mencatat transaksi berulang yang sudah jatuh tempo. Idempoten.
   Future<void> _generateRecurring() async {
     try {
-      final n = await ref.read(databaseProvider).generateDueRecurring();
+      final n = await ref.read(recurringGeneratorProvider)();
       if (n > 0 && mounted) {
         notify(ScaffoldMessenger.of(context), '$n transaksi berulang dicatat');
       }
@@ -138,9 +139,21 @@ class _HomeShellState extends ConsumerState<HomeShell>
   /// anggaran bulan berjalan. Idempoten (dedup per kategori/bulan/ambang).
   Future<void> _checkBudgetNotifications() async {
     try {
+      final db = ref.read(databaseProvider);
+      final ultimate = await ref.read(isUltimateProvider.future);
+      final ledgers = await db.watchLedgers().first;
+      final locked = lockedLedgerIds(ledgers, ultimate: ultimate);
+      // Nama buku hanya disebut di notifikasi bila ada lebih dari satu buku aktif.
+      final usable = ledgers.where((l) => !locked.contains(l.id)).toList();
       await ref
           .read(budgetNotificationServiceProvider)
-          .checkAndNotify(ref.read(databaseProvider));
+          .checkAndNotify(
+            db,
+            lockedLedgerIds: locked,
+            ledgerNames: usable.length > 1
+                ? {for (final l in usable) l.id: l.name}
+                : const {},
+          );
     } catch (e) {
       debugPrint('Gagal memeriksa notifikasi anggaran: $e');
     }
@@ -188,16 +201,35 @@ class _HomeShellState extends ConsumerState<HomeShell>
   Future<void> _rescheduleReminders() async {
     try {
       final premium = await ref.read(isPremiumProvider.future);
+      final ultimate = await ref.read(isUltimateProvider.future);
       final db = ref.read(databaseProvider);
       await db.advancePastAgenda();
-      final agenda = await db.watchAgendaReminders().first;
+      // Pengingat bekerja lintas buku (bukan hanya buku aktif); buku terkunci
+      // tidak mendapat pengingat. Nama buku disebut hanya bila ada >1 buku aktif.
+      final ledgers = await db.watchLedgers().first;
+      final locked = lockedLedgerIds(ledgers, ultimate: ultimate);
+      final usable = ledgers.where((l) => !locked.contains(l.id)).toList();
+      final names = usable.length > 1
+          ? {for (final l in usable) l.id: l.name}
+          : const <String, String>{};
+
+      final agenda = (await db.watchAgendaReminders(ledgerId: null).first)
+          .where((a) => !locked.contains(a.ledgerId));
       await ref
           .read(agendaReminderServiceProvider)
-          .reschedule(agenda.map(AgendaView.new).toList(), premium: premium);
+          .reschedule(
+            agenda.map(AgendaView.new).toList(),
+            premium: premium,
+            ledgerNames: names,
+          );
 
       if (!premium) return;
-      final rules = await db.watchRecurringRules().first;
-      await ref.read(recurringReminderServiceProvider).reschedule(rules);
+      final rules = (await db.watchRecurringRules(ledgerId: null).first)
+          .where((r) => !locked.contains(r.account.ledgerId))
+          .toList();
+      await ref
+          .read(recurringReminderServiceProvider)
+          .reschedule(rules, ledgerNames: names);
     } catch (e) {
       debugPrint('Gagal menjadwalkan pengingat: $e');
     }
@@ -237,6 +269,7 @@ class _HomeShellState extends ConsumerState<HomeShell>
         appBar: AppBar(
           title: Text(_titles[_index]),
           actions: [
+            const LedgerChip(),
             IconButton(
               tooltip: 'Pengaturan',
               icon: const Icon(Icons.tune_rounded),

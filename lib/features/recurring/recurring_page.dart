@@ -147,7 +147,7 @@ class _RuleTile extends ConsumerWidget {
         await db.setRecurringActive(v.rule.id, active: !v.rule.active);
         if (v.rule.active) return; // baru dijeda; tidak ada yang dicatat
         // Baru dilanjutkan: catat yang jatuh tempo hari ini bila ada.
-        await db.generateDueRecurring();
+        await ref.read(recurringGeneratorProvider)();
       case 'delete':
         final ok = await showDialog<bool>(
           context: context,

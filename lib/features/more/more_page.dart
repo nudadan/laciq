@@ -7,6 +7,7 @@ import '../agenda/agenda_page.dart';
 import '../categories/categories_page.dart';
 import '../debts/debts_page.dart';
 import '../goals/goals_page.dart';
+import '../ledgers/ledgers_page.dart';
 import '../recurring/recurring_page.dart';
 import '../subscription/subscription_page.dart';
 import '../tags/tags_page.dart';
@@ -23,10 +24,28 @@ class MorePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final premium = ref.watch(isPremiumProvider).value ?? false;
+    final ultimate = ref.watch(isUltimateProvider).value ?? false;
+    final ledgerCount = ref.watch(ledgersProvider).value?.length ?? 1;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, kBottomPad),
       children: [
         _MoreGroup([
+          _MoreTile(
+            icon: Icons.menu_book_rounded,
+            title: 'Buku Kas',
+            subtitle: ultimate
+                ? 'Pisahkan pembukuan pribadi dan bisnis · $ledgerCount buku'
+                : ledgerCount > 1
+                ? '${ledgerCount - 1} buku terkunci · Fitur Ultimate'
+                : 'Fitur Ultimate',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ultimate || ledgerCount > 1
+                    ? const LedgersPage()
+                    : const SubscriptionPage(),
+              ),
+            ),
+          ),
           _MoreTile(
             icon: Icons.category_rounded,
             title: 'Kategori',

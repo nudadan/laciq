@@ -24,9 +24,13 @@ class AgendaReminderService {
   /// semua item kalau premium, atau [kFreeAgendaLimit] item TERTUA (berdasar
   /// `createdAt`) kalau tidak — deterministik untuk pengguna yang memang
   /// selalu gratis maupun yang baru berhenti berlangganan dengan >3 item.
+  ///
+  /// [ledgerNames] (id buku -> nama) diisi hanya bila ada lebih dari satu buku
+  /// aktif; nama buku lalu ditambahkan ke judul notifikasi.
   Future<void> reschedule(
     List<AgendaView> items, {
     required bool premium,
+    Map<String, String> ledgerNames = const {},
   }) async {
     await _sender.init();
     final now = DateTime.now();
@@ -52,7 +56,7 @@ class AgendaReminderService {
       }
       await _sender.schedule(
         id: id,
-        title: v.item.title,
+        title: _withLedger(v.item.title, ledgerNames[v.item.ledgerId]),
         body:
             v.item.note ??
             'Jadwal ${DateFormat('d MMM', 'id_ID').format(due)}.',
@@ -65,6 +69,9 @@ class AgendaReminderService {
   /// Sama alasannya dengan `RecurringReminderService.cancelFor`.
   Future<void> cancelFor(String itemId) =>
       _sender.cancel(_notificationId(itemId));
+
+  static String _withLedger(String title, String? ledgerName) =>
+      ledgerName == null ? title : '$title · $ledgerName';
 
   static int _notificationId(String itemId) =>
       Object.hash('agenda_reminder', itemId).abs() % 2147483647;

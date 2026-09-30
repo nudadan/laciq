@@ -95,12 +95,13 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   FakeSubscriptionStatus({bool premium = false, bool ultimate = false})
     : _premium = premium || ultimate,
       _ultimate = ultimate {
-    _controller = StreamController<bool>.broadcast(
-      onListen: () => _controller.add(_premium),
-    );
-    _ultimateController = StreamController<bool>.broadcast(
-      onListen: () => _ultimateController.add(_ultimate),
-    );
+    // Nilai awal dikirim lewat generator async* (lihat watchIsPremium), BUKAN
+    // onListen pada stream broadcast: Riverpod menjeda langganan saat rantai
+    // provider baru dibuat, dan event broadcast yang datang saat dijeda hilang,
+    // sehingga provider macet di loading. async* menahan nilai awalnya, sama
+    // seperti implementasi produksi (RevenueCatSubscriptionStatus).
+    _controller = StreamController<bool>.broadcast();
+    _ultimateController = StreamController<bool>.broadcast();
   }
 
   bool _premium;
@@ -141,10 +142,16 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   var restoreCalled = false;
 
   @override
-  Stream<bool> watchIsPremium() => _controller.stream;
+  Stream<bool> watchIsPremium() async* {
+    yield _premium;
+    yield* _controller.stream;
+  }
 
   @override
-  Stream<bool> watchIsUltimate() => _ultimateController.stream;
+  Stream<bool> watchIsUltimate() async* {
+    yield _ultimate;
+    yield* _ultimateController.stream;
+  }
 
   @override
   Future<String?> appUserId() async => 'test-user';

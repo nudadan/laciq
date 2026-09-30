@@ -82,6 +82,7 @@ class _DebtFormPageState extends ConsumerState<DebtFormPage> {
       } else {
         await db.addDebt(
           type: _type,
+          ledgerId: ref.read(activeLedgerIdProvider),
           counterpartyName: _nameCtrl.text,
           amount: amount,
           note: _noteCtrl.text,

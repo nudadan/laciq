@@ -60,8 +60,11 @@ class AccountsPage extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final message = await showDialog<String>(
       context: context,
-      builder: (_) =>
-          _AccountDialog(existing: account, db: ref.read(databaseProvider)),
+      builder: (_) => _AccountDialog(
+        existing: account,
+        db: ref.read(databaseProvider),
+        ledgerId: ref.read(activeLedgerIdProvider),
+      ),
     );
     if (message != null) notify(messenger, message);
   }
@@ -134,10 +137,15 @@ class _AccountCard extends StatelessWidget {
 /// Penyimpanan dilakukan di sini (bukan oleh pemanggil) agar kesalahan
 /// validasi, mis. nama kembar, tampil di dalam dialog tanpa membuang isiannya.
 class _AccountDialog extends StatefulWidget {
-  const _AccountDialog({required this.existing, required this.db});
+  const _AccountDialog({
+    required this.existing,
+    required this.db,
+    required this.ledgerId,
+  });
 
   final AccountBalance? existing;
   final AppDatabase db;
+  final String ledgerId;
 
   @override
   State<_AccountDialog> createState() => _AccountDialogState();
@@ -195,6 +203,7 @@ class _AccountDialogState extends State<_AccountDialog> {
               name: name,
               kind: _kind,
               initialBalance: balance,
+              ledgerId: widget.ledgerId,
             ),
             'Dompet ditambahkan',
           )

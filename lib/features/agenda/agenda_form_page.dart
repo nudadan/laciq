@@ -101,6 +101,7 @@ class _AgendaFormPageState extends ConsumerState<AgendaFormPage> {
       } else {
         await db.addAgenda(
           title: _titleCtrl.text,
+          ledgerId: ref.read(activeLedgerIdProvider),
           frequency: _frequency,
           startDate: _startDate,
           note: _noteCtrl.text,

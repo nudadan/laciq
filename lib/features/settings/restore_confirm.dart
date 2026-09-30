@@ -52,7 +52,7 @@ Future<bool> confirmAndRestore(
     final service = BackupService(ref.read(databaseProvider));
     await service.restore(data);
     // Aturan berulang di backup mungkin sudah punya kejadian yang jatuh tempo.
-    await ref.read(databaseProvider).generateDueRecurring();
+    await ref.read(recurringGeneratorProvider)();
     say('Data berhasil dipulihkan.');
     return true;
   } catch (e) {

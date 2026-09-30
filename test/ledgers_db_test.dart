@@ -50,43 +50,61 @@ void main() {
       expect(exp.every((c) => c.ledgerId == kMainLedgerId), isTrue);
     });
 
-    test('template Bisnis: kategori usaha + Kas Usaha, ID berawalan buku', () async {
-      final biz = await addBiz();
-      expect(biz, startsWith('ledger-'));
-      final exp = await db.watchCategories(TxType.expense, ledgerId: biz).first;
-      final inc = await db.watchCategories(TxType.income, ledgerId: biz).first;
-      expect(exp.length, 11);
-      expect(inc.length, 6);
-      expect(exp.map((c) => c.id), contains(bizExp(biz, 'stok')));
-      expect(exp.map((c) => c.id), contains(debtCategoryId(biz, DebtType.debt)));
-      expect(
-        inc.map((c) => c.id),
-        contains(debtCategoryId(biz, DebtType.receivable)),
-      );
-      final accounts = await db.watchAccountBalances(ledgerId: biz).first;
-      expect((accounts.single.id, accounts.single.name), (
-        bizAcc(biz),
-        'Kas Usaha',
-      ));
-    });
+    test(
+      'template Bisnis: kategori usaha + Kas Usaha, ID berawalan buku',
+      () async {
+        final biz = await addBiz();
+        expect(biz, startsWith('ledger-'));
+        final exp = await db
+            .watchCategories(TxType.expense, ledgerId: biz)
+            .first;
+        final inc = await db
+            .watchCategories(TxType.income, ledgerId: biz)
+            .first;
+        expect(exp.length, 11);
+        expect(inc.length, 6);
+        expect(exp.map((c) => c.id), contains(bizExp(biz, 'stok')));
+        expect(
+          exp.map((c) => c.id),
+          contains(debtCategoryId(biz, DebtType.debt)),
+        );
+        expect(
+          inc.map((c) => c.id),
+          contains(debtCategoryId(biz, DebtType.receivable)),
+        );
+        final accounts = await db.watchAccountBalances(ledgerId: biz).first;
+        expect(
+          (accounts.single.id, accounts.single.name),
+          (bizAcc(biz), 'Kas Usaha'),
+        );
+      },
+    );
 
-    test('template Kosong: hanya Lainnya + Utang/Piutang dan satu dompet', () async {
-      final blank = await db.addLedger(
-        name: 'Kosong',
-        icon: 'savings',
-        color: 1,
-        template: LedgerTemplate.blank,
-      );
-      expect(
-        (await db.watchCategories(TxType.expense, ledgerId: blank).first).length,
-        2,
-      );
-      expect(
-        (await db.watchCategories(TxType.income, ledgerId: blank).first).length,
-        2,
-      );
-      expect((await db.watchAccountBalances(ledgerId: blank).first).length, 1);
-    });
+    test(
+      'template Kosong: hanya Lainnya + Utang/Piutang dan satu dompet',
+      () async {
+        final blank = await db.addLedger(
+          name: 'Kosong',
+          icon: 'savings',
+          color: 1,
+          template: LedgerTemplate.blank,
+        );
+        expect(
+          (await db.watchCategories(TxType.expense, ledgerId: blank).first)
+              .length,
+          2,
+        );
+        expect(
+          (await db.watchCategories(TxType.income, ledgerId: blank).first)
+              .length,
+          2,
+        );
+        expect(
+          (await db.watchAccountBalances(ledgerId: blank).first).length,
+          1,
+        );
+      },
+    );
 
     test('debtCategoryId: Buku Utama memakai ID lama', () {
       expect(debtCategoryId(kMainLedgerId, DebtType.debt), 'cat-exp-utang');
@@ -94,33 +112,48 @@ void main() {
         debtCategoryId(kMainLedgerId, DebtType.receivable),
         'cat-inc-piutang',
       );
-      expect(debtCategoryId('ledger-x', DebtType.debt), 'ledger-x:cat-exp-utang');
-    });
-
-    test('nama buku: wajib, maks 40, unik tanpa peduli huruf besar/kecil', () async {
-      await addBiz(name: 'Toko');
-      await expectLater(addBiz(name: 'toko'), ledgerError(contains('Sudah ada')));
-      await expectLater(addBiz(name: '   '), ledgerError(contains('wajib')));
-      await expectLater(addBiz(name: 'x' * 41), ledgerError(contains('40')));
-    });
-
-    test('batas $kMaxLedgers buku aktif; yang diarsipkan tidak dihitung', () async {
-      final ids = <String>[];
-      for (var i = 1; i < kMaxLedgers; i++) {
-        ids.add(await addBiz(name: 'Buku $i'));
-      }
-      await expectLater(addBiz(name: 'Kelebihan'), ledgerError(contains('batas')));
-
-      await db.setLedgerArchived(ids.first, archived: true);
-      final extra = await addBiz(name: 'Kelebihan');
-      expect(extra, isNotEmpty);
-
-      // Memulihkan yang diarsipkan sekarang melewati batas.
-      await expectLater(
-        db.setLedgerArchived(ids.first, archived: false),
-        ledgerError(contains('batas')),
+      expect(
+        debtCategoryId('ledger-x', DebtType.debt),
+        'ledger-x:cat-exp-utang',
       );
     });
+
+    test(
+      'nama buku: wajib, maks 40, unik tanpa peduli huruf besar/kecil',
+      () async {
+        await addBiz(name: 'Toko');
+        await expectLater(
+          addBiz(name: 'toko'),
+          ledgerError(contains('Sudah ada')),
+        );
+        await expectLater(addBiz(name: '   '), ledgerError(contains('wajib')));
+        await expectLater(addBiz(name: 'x' * 41), ledgerError(contains('40')));
+      },
+    );
+
+    test(
+      'batas $kMaxLedgers buku aktif; yang diarsipkan tidak dihitung',
+      () async {
+        final ids = <String>[];
+        for (var i = 1; i < kMaxLedgers; i++) {
+          ids.add(await addBiz(name: 'Buku $i'));
+        }
+        await expectLater(
+          addBiz(name: 'Kelebihan'),
+          ledgerError(contains('batas')),
+        );
+
+        await db.setLedgerArchived(ids.first, archived: true);
+        final extra = await addBiz(name: 'Kelebihan');
+        expect(extra, isNotEmpty);
+
+        // Memulihkan yang diarsipkan sekarang melewati batas.
+        await expectLater(
+          db.setLedgerArchived(ids.first, archived: false),
+          ledgerError(contains('batas')),
+        );
+      },
+    );
 
     test('Buku Utama tidak bisa diarsipkan atau dihapus', () async {
       await expectLater(
@@ -133,17 +166,20 @@ void main() {
       );
     });
 
-    test('updateLedger mengubah nama/ikon/warna dan menjaga keunikan nama', () async {
-      final a = await addBiz(name: 'A');
-      await addBiz(name: 'B');
-      await db.updateLedger(id: a, name: 'A2', icon: 'home', color: 5);
-      final l = (await db.watchLedgers().first).firstWhere((x) => x.id == a);
-      expect((l.name, l.icon, l.color), ('A2', 'home', 5));
-      await expectLater(
-        db.updateLedger(id: a, name: 'b', icon: 'home', color: 5),
-        ledgerError(contains('Sudah ada')),
-      );
-    });
+    test(
+      'updateLedger mengubah nama/ikon/warna dan menjaga keunikan nama',
+      () async {
+        final a = await addBiz(name: 'A');
+        await addBiz(name: 'B');
+        await db.updateLedger(id: a, name: 'A2', icon: 'home', color: 5);
+        final l = (await db.watchLedgers().first).firstWhere((x) => x.id == a);
+        expect((l.name, l.icon, l.color), ('A2', 'home', 5));
+        await expectLater(
+          db.updateLedger(id: a, name: 'b', icon: 'home', color: 5),
+          ledgerError(contains('Sudah ada')),
+        );
+      },
+    );
 
     test('menulis ke buku yang diarsipkan atau tidak ada ditolak', () async {
       final biz = await addBiz();
@@ -202,43 +238,48 @@ void main() {
         700000,
       );
       expect(await db.watchTotals(may).first, (income: 500000, expense: 30000));
-      expect(
-        await db.watchTotals(may, ledgerId: biz).first,
-        (income: 900000, expense: 200000),
-      );
-      // null = semua buku.
-      expect(
-        (await db.watchAccountBalances(ledgerId: null).first).length,
-        2,
-      );
-    });
-
-    test('daftar transaksi, tren bulanan, dan pengeluaran per kategori terpisah', () async {
-      expect((await db.watchTransactions(may).first).length, 2);
-      expect((await db.watchTransactions(may, ledgerId: biz).first).length, 2);
-      expect((await db.getTransactions()).length, 4); // semua buku
-      expect((await db.getTransactions(ledgerId: biz)).length, 2);
-
-      final trend = await db.watchMonthlyTrend(may, months: 1).first;
-      expect((trend.single.income, trend.single.expense), (500000, 30000));
-      final trendBiz = await db
-          .watchMonthlyTrend(may, months: 1, ledgerId: biz)
-          .first;
-      expect((trendBiz.single.income, trendBiz.single.expense), (
-        900000,
-        200000,
+      expect(await db.watchTotals(may, ledgerId: biz).first, (
+        income: 900000,
+        expense: 200000,
       ));
-
-      final spend = await db.watchExpenseByCategory(may).first;
-      expect(spend.map((s) => s.categoryId), ['cat-exp-makan']);
-      final spendBiz = await db
-          .watchExpenseByCategory(may, ledgerId: biz)
-          .first;
-      expect(spendBiz.map((s) => s.categoryId), [bizExp(biz)]);
-
-      final catTrend = await db.watchCategoryMonthlyTrend(may, months: 1).first;
-      expect(catTrend.map((c) => c.categoryId), ['cat-exp-makan']);
+      // null = semua buku.
+      expect((await db.watchAccountBalances(ledgerId: null).first).length, 2);
     });
+
+    test(
+      'daftar transaksi, tren bulanan, dan pengeluaran per kategori terpisah',
+      () async {
+        expect((await db.watchTransactions(may).first).length, 2);
+        expect(
+          (await db.watchTransactions(may, ledgerId: biz).first).length,
+          2,
+        );
+        expect((await db.getTransactions()).length, 4); // semua buku
+        expect((await db.getTransactions(ledgerId: biz)).length, 2);
+
+        final trend = await db.watchMonthlyTrend(may, months: 1).first;
+        expect((trend.single.income, trend.single.expense), (500000, 30000));
+        final trendBiz = await db
+            .watchMonthlyTrend(may, months: 1, ledgerId: biz)
+            .first;
+        expect(
+          (trendBiz.single.income, trendBiz.single.expense),
+          (900000, 200000),
+        );
+
+        final spend = await db.watchExpenseByCategory(may).first;
+        expect(spend.map((s) => s.categoryId), ['cat-exp-makan']);
+        final spendBiz = await db
+            .watchExpenseByCategory(may, ledgerId: biz)
+            .first;
+        expect(spendBiz.map((s) => s.categoryId), [bizExp(biz)]);
+
+        final catTrend = await db
+            .watchCategoryMonthlyTrend(may, months: 1)
+            .first;
+        expect(catTrend.map((c) => c.categoryId), ['cat-exp-makan']);
+      },
+    );
 
     test('anggaran dan kemajuannya terpisah', () async {
       await db.setBudget(bizExp(biz), 1000000);
@@ -261,7 +302,12 @@ void main() {
     });
 
     test('target, agenda, utang, dan aturan berulang terpisah', () async {
-      await db.addGoal(name: 'G-main', targetAmount: 1000, icon: 'savings', color: 1);
+      await db.addGoal(
+        name: 'G-main',
+        targetAmount: 1000,
+        icon: 'savings',
+        color: 1,
+      );
       await db.addGoal(
         name: 'G-biz',
         targetAmount: 1000,
@@ -270,9 +316,10 @@ void main() {
         ledgerId: biz,
       );
       expect((await db.watchGoals().first).map((g) => g.goal.name), ['G-main']);
-      expect((await db.watchGoals(ledgerId: biz).first).map((g) => g.goal.name), [
-        'G-biz',
-      ]);
+      expect(
+        (await db.watchGoals(ledgerId: biz).first).map((g) => g.goal.name),
+        ['G-biz'],
+      );
       expect((await db.watchGoals(ledgerId: null).first).length, 2);
 
       await db.addAgenda(
@@ -436,56 +483,62 @@ void main() {
       );
     });
 
-    test('eksekusi agenda dan pembayaran utang harus di buku pemiliknya', () async {
-      final agenda = await db.addAgenda(
-        title: 'Pajak',
-        frequency: Frequency.monthly,
-        startDate: day,
-        ledgerId: biz,
-      );
-      await expectLater(
-        db.executeAgenda(
+    test(
+      'eksekusi agenda dan pembayaran utang harus di buku pemiliknya',
+      () async {
+        final agenda = await db.addAgenda(
+          title: 'Pajak',
+          frequency: Frequency.monthly,
+          startDate: day,
+          ledgerId: biz,
+        );
+        await expectLater(
+          db.executeAgenda(
+            agendaId: agenda,
+            amount: 1000,
+            accountId: 'acc-tunai',
+            categoryId: 'cat-exp-makan',
+            date: day,
+          ),
+          ledgerError(),
+        );
+        await db.executeAgenda(
           agendaId: agenda,
           amount: 1000,
-          accountId: 'acc-tunai',
-          categoryId: 'cat-exp-makan',
+          accountId: bizAcc(biz),
+          categoryId: bizExp(biz, 'pajak'),
           date: day,
-        ),
-        ledgerError(),
-      );
-      await db.executeAgenda(
-        agendaId: agenda,
-        amount: 1000,
-        accountId: bizAcc(biz),
-        categoryId: bizExp(biz, 'pajak'),
-        date: day,
-      );
+        );
 
-      final debt = await db.addDebt(
-        type: DebtType.debt,
-        counterpartyName: 'Supplier',
-        amount: 5000,
-        ledgerId: biz,
-      );
-      await expectLater(
-        db.recordDebtPayment(
+        final debt = await db.addDebt(
+          type: DebtType.debt,
+          counterpartyName: 'Supplier',
+          amount: 5000,
+          ledgerId: biz,
+        );
+        await expectLater(
+          db.recordDebtPayment(
+            debtId: debt,
+            amount: 1000,
+            accountId: 'acc-tunai',
+            categoryId: 'cat-exp-utang',
+            date: day,
+          ),
+          ledgerError(),
+        );
+        await db.recordDebtPayment(
           debtId: debt,
           amount: 1000,
-          accountId: 'acc-tunai',
-          categoryId: 'cat-exp-utang',
+          accountId: bizAcc(biz),
+          categoryId: debtCategoryId(biz, DebtType.debt),
           date: day,
-        ),
-        ledgerError(),
-      );
-      await db.recordDebtPayment(
-        debtId: debt,
-        amount: 1000,
-        accountId: bizAcc(biz),
-        categoryId: debtCategoryId(biz, DebtType.debt),
-        date: day,
-      );
-      expect((await db.watchDebts(ledgerId: biz).first).single.paidAmount, 1000);
-    });
+        );
+        expect(
+          (await db.watchDebts(ledgerId: biz).first).single.paidAmount,
+          1000,
+        );
+      },
+    );
 
     test('utang dengan dompet buku lain ditolak', () async {
       await expectLater(
@@ -571,27 +624,30 @@ void main() {
       expect((await db.getTransactions(ledgerId: kMainLedgerId)).length, 1);
     });
 
-    test('buku yang dijeda tidak menghasilkan transaksi dan disusul saat dibuka', () async {
-      final biz = await addBiz();
-      await db.addRecurringRule(
-        type: TxType.expense,
-        amount: 2000,
-        accountId: bizAcc(biz),
-        categoryId: bizExp(biz, 'sewa'),
-        frequency: Frequency.monthly,
-        startDate: DateTime(2026, 5, 1),
-      );
-      expect(
-        await db.generateDueRecurring(
-          now: DateTime(2026, 7, 2),
-          pausedLedgerIds: {biz},
-        ),
-        0,
-      );
-      expect(await db.getTransactions(ledgerId: biz), isEmpty);
-      // Dibuka lagi: Mei, Juni, Juli disusul.
-      expect(await db.generateDueRecurring(now: DateTime(2026, 7, 2)), 3);
-    });
+    test(
+      'buku yang dijeda tidak menghasilkan transaksi dan disusul saat dibuka',
+      () async {
+        final biz = await addBiz();
+        await db.addRecurringRule(
+          type: TxType.expense,
+          amount: 2000,
+          accountId: bizAcc(biz),
+          categoryId: bizExp(biz, 'sewa'),
+          frequency: Frequency.monthly,
+          startDate: DateTime(2026, 5, 1),
+        );
+        expect(
+          await db.generateDueRecurring(
+            now: DateTime(2026, 7, 2),
+            pausedLedgerIds: {biz},
+          ),
+          0,
+        );
+        expect(await db.getTransactions(ledgerId: biz), isEmpty);
+        // Dibuka lagi: Mei, Juni, Juli disusul.
+        expect(await db.generateDueRecurring(now: DateTime(2026, 7, 2)), 3);
+      },
+    );
 
     test('deleteLedger menghapus seluruh isi buku itu saja', () async {
       final biz = await addBiz();
@@ -656,12 +712,18 @@ void main() {
       expect(await db.watchDebts(ledgerId: biz).first, isEmpty);
       expect(await db.watchAgendaReminders(ledgerId: biz).first, isEmpty);
       expect(await db.watchRecurringRules(ledgerId: biz).first, isEmpty);
-      expect(await db.watchCategories(TxType.expense, ledgerId: biz).first, isEmpty);
+      expect(
+        await db.watchCategories(TxType.expense, ledgerId: biz).first,
+        isEmpty,
+      );
       expect(await db.watchTransactions(may, ledgerId: biz).first, isEmpty);
       // Tag global tetap ada; Buku Utama utuh.
       expect((await db.watchTags().first).length, 1);
       expect((await db.getTransactions()).single.tx.amount, 7000);
-      await expectLater(db.deleteLedger(biz), ledgerError(contains('tidak ditemukan')));
+      await expectLater(
+        db.deleteLedger(biz),
+        ledgerError(contains('tidak ditemukan')),
+      );
     });
 
     test('eraseAllData mengembalikan ke satu Buku Utama seed', () async {
@@ -675,9 +737,10 @@ void main() {
       );
       await db.eraseAllData();
       expect((await db.watchLedgers().first).map((l) => l.id), [kMainLedgerId]);
-      expect((await db.watchAccountBalances(ledgerId: null).first).map((a) => a.id), [
-        'acc-tunai',
-      ]);
+      expect(
+        (await db.watchAccountBalances(ledgerId: null).first).map((a) => a.id),
+        ['acc-tunai'],
+      );
       expect(await db.getTransactions(), isEmpty);
     });
   });
@@ -709,71 +772,81 @@ void main() {
       return BackupService(db).export();
     }
 
-    test('format v${BackupService.formatVersion}: dua buku bolak-balik utuh', () async {
-      final json = await exportTwoLedgers();
-      expect(jsonDecode(json)['version'], BackupService.formatVersion);
+    test(
+      'format v${BackupService.formatVersion}: dua buku bolak-balik utuh',
+      () async {
+        final json = await exportTwoLedgers();
+        expect(jsonDecode(json)['version'], BackupService.formatVersion);
 
-      final data = BackupService.parse(json);
-      expect(data.ledgers.length, 2);
+        final data = BackupService.parse(json);
+        expect(data.ledgers.length, 2);
 
-      final fresh = AppDatabase(NativeDatabase.memory());
-      addTearDown(fresh.close);
-      await BackupService(fresh).restore(data);
+        final fresh = AppDatabase(NativeDatabase.memory());
+        addTearDown(fresh.close);
+        await BackupService(fresh).restore(data);
 
-      final ledgers = await fresh.watchLedgers().first;
-      expect(ledgers.length, 2);
-      final bizId = ledgers.firstWhere((l) => l.id != kMainLedgerId).id;
-      expect(await fresh.watchTotals(may).first, (income: 0, expense: 12000));
-      expect(
-        await fresh.watchTotals(may, ledgerId: bizId).first,
-        (income: 34000, expense: 0),
-      );
-      expect((await fresh.watchGoals(ledgerId: bizId).first).length, 1);
-      // Pemulihan menghasilkan backup yang identik.
-      expect(
-        (jsonDecode(await BackupService(fresh).export()) as Map)['accounts'],
-        (jsonDecode(json) as Map)['accounts'],
-      );
-    });
+        final ledgers = await fresh.watchLedgers().first;
+        expect(ledgers.length, 2);
+        final bizId = ledgers.firstWhere((l) => l.id != kMainLedgerId).id;
+        expect(await fresh.watchTotals(may).first, (income: 0, expense: 12000));
+        expect(await fresh.watchTotals(may, ledgerId: bizId).first, (
+          income: 34000,
+          expense: 0,
+        ));
+        expect((await fresh.watchGoals(ledgerId: bizId).first).length, 1);
+        // Pemulihan menghasilkan backup yang identik.
+        expect(
+          (jsonDecode(await BackupService(fresh).export()) as Map)['accounts'],
+          (jsonDecode(json) as Map)['accounts'],
+        );
+      },
+    );
 
-    test('backup lama (v6, tanpa ledgers/ledgerId) masuk ke Buku Utama', () async {
-      await db.addTransaction(
-        type: TxType.expense,
-        amount: 12000,
-        accountId: 'acc-tunai',
-        categoryId: 'cat-exp-makan',
-        date: day,
-      );
-      final map = jsonDecode(await BackupService(db).export())
-          as Map<String, dynamic>;
-      map['version'] = 6;
-      map.remove('ledgers');
-      for (final key in [
-        'accounts',
-        'categories',
-        'savingsGoals',
-        'agendaReminders',
-        'debts',
-      ]) {
-        for (final row in map[key] as List) {
-          (row as Map).remove('ledgerId');
+    test(
+      'backup lama (v6, tanpa ledgers/ledgerId) masuk ke Buku Utama',
+      () async {
+        await db.addTransaction(
+          type: TxType.expense,
+          amount: 12000,
+          accountId: 'acc-tunai',
+          categoryId: 'cat-exp-makan',
+          date: day,
+        );
+        final map = jsonDecode(
+          await BackupService(db).export(),
+        ) as Map<String, dynamic>;
+        map['version'] = 6;
+        map.remove('ledgers');
+        for (final key in [
+          'accounts',
+          'categories',
+          'savingsGoals',
+          'agendaReminders',
+          'debts',
+        ]) {
+          for (final row in map[key] as List) {
+            (row as Map).remove('ledgerId');
+          }
         }
-      }
 
-      final data = BackupService.parse(jsonEncode(map));
-      expect(data.ledgers.map((l) => l.id), [kMainLedgerId]);
-      expect(data.accounts.every((a) => a.ledgerId == kMainLedgerId), isTrue);
-      expect(data.categories.every((c) => c.ledgerId == kMainLedgerId), isTrue);
+        final data = BackupService.parse(jsonEncode(map));
+        expect(data.ledgers.map((l) => l.id), [kMainLedgerId]);
+        expect(data.accounts.every((a) => a.ledgerId == kMainLedgerId), isTrue);
+        expect(
+          data.categories.every((c) => c.ledgerId == kMainLedgerId),
+          isTrue,
+        );
 
-      final fresh = AppDatabase(NativeDatabase.memory());
-      addTearDown(fresh.close);
-      await BackupService(fresh).restore(data);
-      expect(await fresh.watchTotals(may).first, (income: 0, expense: 12000));
-    });
+        final fresh = AppDatabase(NativeDatabase.memory());
+        addTearDown(fresh.close);
+        await BackupService(fresh).restore(data);
+        expect(await fresh.watchTotals(may).first, (income: 0, expense: 12000));
+      },
+    );
 
     test('backup lebih baru dari aplikasi tetap ditolak', () async {
-      final map = jsonDecode(await BackupService(db).export())
-          as Map<String, dynamic>;
+      final map =
+          jsonDecode(await BackupService(db).export()) as Map<String, dynamic>;
       map['version'] = BackupService.formatVersion + 1;
       expect(
         () => BackupService.parse(jsonEncode(map)),
@@ -783,17 +856,16 @@ void main() {
 
     test('integritas: transaksi lintas buku, referensi buku hilang, tanpa Buku Utama', () async {
       final json = await exportTwoLedgers();
-      Map<String, dynamic> fresh() =>
-          jsonDecode(json) as Map<String, dynamic>;
+      Map<String, dynamic> fresh() => jsonDecode(json) as Map<String, dynamic>;
 
       // Transaksi memakai dompet Buku Utama tetapi kategori buku Bisnis.
       final cross = fresh();
       final tx = (cross['transactions'] as List).firstWhere(
         (t) => (t as Map)['type'] == 1,
       ) as Map;
-      tx['categoryId'] = (cross['categories'] as List)
-          .cast<Map>()
-          .firstWhere((c) => c['ledgerId'] != kMainLedgerId && c['type'] == 1)['id'];
+      tx['categoryId'] = (cross['categories'] as List).cast<Map>().firstWhere(
+        (c) => c['ledgerId'] != kMainLedgerId && c['type'] == 1,
+      )['id'];
       expect(
         () => BackupService.parse(jsonEncode(cross)),
         throwsA(isA<BackupException>()),
@@ -801,7 +873,8 @@ void main() {
 
       // Dompet menunjuk buku yang tidak ada.
       final dangling = fresh();
-      ((dangling['accounts'] as List).first as Map)['ledgerId'] = 'ledger-hantu';
+      ((dangling['accounts'] as List).first as Map)['ledgerId'] =
+          'ledger-hantu';
       expect(
         () => BackupService.parse(jsonEncode(dangling)),
         throwsA(isA<BackupException>()),
@@ -809,7 +882,9 @@ void main() {
 
       // Buku Utama hilang dari daftar.
       final noMain = fresh();
-      (noMain['ledgers'] as List).removeWhere((l) => (l as Map)['id'] == kMainLedgerId);
+      (noMain['ledgers'] as List).removeWhere(
+        (l) => (l as Map)['id'] == kMainLedgerId,
+      );
       expect(
         () => BackupService.parse(jsonEncode(noMain)),
         throwsA(isA<BackupException>()),
@@ -817,7 +892,9 @@ void main() {
 
       // ID buku ganda.
       final dup = fresh();
-      (dup['ledgers'] as List).add(Map.of((dup['ledgers'] as List).first as Map));
+      (dup['ledgers'] as List).add(
+        Map.of((dup['ledgers'] as List).first as Map),
+      );
       expect(
         () => BackupService.parse(jsonEncode(dup)),
         throwsA(isA<BackupException>()),

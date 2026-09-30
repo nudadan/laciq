@@ -65,6 +65,7 @@ class _GoalFormPageState extends ConsumerState<GoalFormPage> {
       if (existing == null) {
         await db.addGoal(
           name: _nameCtrl.text,
+          ledgerId: ref.read(activeLedgerIdProvider),
           targetAmount: target,
           icon: _icon,
           color: _color,

@@ -182,12 +182,7 @@ class BackupService {
           optional: true,
           withLedger: true,
         ),
-        debts: read(
-          'debts',
-          Debt.fromJson,
-          optional: true,
-          withLedger: true,
-        ),
+        debts: read('debts', Debt.fromJson, optional: true, withLedger: true),
       );
       _checkIntegrity(data);
       return data;

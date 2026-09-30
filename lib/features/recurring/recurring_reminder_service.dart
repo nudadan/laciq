@@ -14,7 +14,12 @@ class RecurringReminderService {
   final NotificationSender _sender;
   static const _hour = 8;
 
-  Future<void> reschedule(List<RuleView> rules) async {
+  /// [ledgerNames] (id buku -> nama) diisi hanya bila ada lebih dari satu buku
+  /// aktif; nama buku lalu ditambahkan ke judul notifikasi.
+  Future<void> reschedule(
+    List<RuleView> rules, {
+    Map<String, String> ledgerNames = const {},
+  }) async {
     await _sender.init();
     final now = DateTime.now();
     for (final v in rules) {
@@ -36,7 +41,9 @@ class RecurringReminderService {
       }
       await _sender.schedule(
         id: id,
-        title: 'Pengingat transaksi berulang',
+        title: ledgerNames[v.account.ledgerId] == null
+            ? 'Pengingat transaksi berulang'
+            : 'Pengingat transaksi berulang · ${ledgerNames[v.account.ledgerId]}',
         body:
             '${v.category?.name ?? v.account.name}: ${rupiah(v.rule.amount)} '
             'pada ${DateFormat('d MMM', 'id_ID').format(due)}.',

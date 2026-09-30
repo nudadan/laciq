@@ -13,6 +13,7 @@ import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/recurrence.dart';
 import '../ai/ai_extraction_service.dart';
+import '../ledgers/ledgers_page.dart' show RecordingInLedgerBanner;
 import '../security/lock_providers.dart' show keyValueStoreProvider;
 import '../subscription/subscription_page.dart';
 import 'receipt_scanner.dart' show ScannedReceipt;
@@ -143,9 +144,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       // Kategori "Utang"/"Piutang" (lihat AppDatabase._seed) diprapilih
       // supaya pembayaran mudah dilacak terpisah, tapi tetap bisa diganti
       // pengguna ke kategori lain sebelum simpan.
-      _categoryId = debt.type == DebtType.debt
-          ? 'cat-exp-utang'
-          : 'cat-inc-piutang';
+      _categoryId = debtCategoryId(debt.ledgerId, debt.type);
     } else {
       _type = TxType.expense;
       _date = DateTime.now();
@@ -439,7 +438,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
             reminderDaysBefore: _reminderDaysBefore,
           );
           // Kejadian yang sudah jatuh tempo (mis. mulai hari ini) langsung dicatat.
-          await db.generateDueRecurring();
+          await ref.read(recurringGeneratorProvider)();
           message = 'Transaksi berulang dibuat';
         case _Mode.create:
           final txId = await db.addTransaction(
@@ -540,6 +539,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            const RecordingInLedgerBanner(),
             if (mode == _Mode.editTx && widget.editingTx!.recurringId != null)
               const _InfoBanner(
                 'Transaksi ini dibuat otomatis dari transaksi berulang. '
