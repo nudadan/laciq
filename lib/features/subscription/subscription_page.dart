@@ -167,6 +167,11 @@ class _TierCard extends StatelessWidget {
       'Proyeksi kebutuhan anggaran bulanan dari Agenda & transaksi berulang',
     ),
     (Icons.handshake_rounded, 'Pencatatan Utang & Piutang beserta cicilannya'),
+    (
+      Icons.receipt_long_rounded,
+      'Scan struk: nominal, toko, dan tanggal terisi otomatis, foto struk '
+          'tersimpan',
+    ),
   ];
 
   static const _ultimateBenefits = [
