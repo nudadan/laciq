@@ -64,6 +64,13 @@ abstract interface class SubscriptionStatus {
   Future<void> restorePurchases();
 }
 
+/// SDK RevenueCat menampilkan dialog "Wrong API Key" lalu MENUTUP aplikasi bila
+/// kunci Test Store (`test_...`) dipakai di build rilis. Jadi di rilis, kunci
+/// `test_` tidak boleh dikonfigurasi; app tetap jalan dengan premium = false
+/// sampai kunci `goog_...` sungguhan dipasang.
+bool shouldConfigureRevenueCat(String apiKey, {required bool isRelease}) =>
+    !(isRelease && apiKey.startsWith('test_'));
+
 class RevenueCatSubscriptionStatus implements SubscriptionStatus {
   static bool _configured = false;
 
@@ -76,6 +83,16 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
   /// blokir pemakaian).
   static Future<void> configureOnce() async {
     if (_configured) return;
+    if (!shouldConfigureRevenueCat(
+      kRevenueCatApiKey,
+      isRelease: kReleaseMode,
+    )) {
+      debugPrint(
+        'RevenueCat dilewati: kunci Test Store tidak boleh dipakai di build '
+        'rilis (SDK menutup aplikasi). Status premium tetap false.',
+      );
+      return;
+    }
     try {
       await Purchases.configure(PurchasesConfiguration(kRevenueCatApiKey));
       _configured = true;
