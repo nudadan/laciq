@@ -50,3 +50,12 @@ app.*.map.json
 # Artefak rilis (besar, dibuat ulang lewat flutter build appbundle)
 *.aab
 *.apk
+
+# Rahasia: kunci service account Google (RevenueCat). JANGAN PERNAH di-commit.
+docs/Service-Accounts/
+*service-account*.json
+*-509508-*.json
+
+# Aset toko yang memuat data pribadi (screenshot dari HP); ikon/feature graphic boleh diatur terpisah
+store-assets/_raw/
+store-assets/screenshots/
