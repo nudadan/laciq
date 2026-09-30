@@ -12,6 +12,7 @@ import 'generated_migrations/schema_v5.dart' as v5;
 import 'generated_migrations/schema_v6.dart' as v6;
 import 'generated_migrations/schema_v7.dart' as v7;
 import 'generated_migrations/schema_v8.dart' as v8;
+import 'generated_migrations/schema_v9.dart' as v9;
 
 /// Data pengguna nyata di setiap versi lama harus selamat dari semua migrasi.
 void main() {
@@ -19,9 +20,9 @@ void main() {
   late SchemaVerifier verifier;
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  const latest = 9;
+  const latest = 10;
 
-  for (final from in [1, 2, 3, 4, 5, 6, 7, 8]) {
+  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
     test(
       'skema hasil migrasi v$from -> v$latest identik dengan skema v$latest baru',
       () async {
@@ -421,6 +422,76 @@ void main() {
       final piutang = incomeCats.firstWhere((c) => c.id == 'cat-inc-piutang');
       expect(piutang.name, 'Piutang');
 
+      await db.close();
+    },
+  );
+
+  test(
+    'data pengguna v9 utuh di Buku Utama setelah migrasi ke v$latest; buku baru terpisah',
+    () async {
+      final schema = await verifier.schemaAt(9);
+      final old = v9.DatabaseAtV9(schema.newConnection());
+      await old.customStatement(
+        "INSERT INTO accounts (id, name, kind, initial_balance, archived, updated_at) "
+        "VALUES ('a1', 'BCA', 1, 1000000, 0, 1700000000)",
+      );
+      await old.customStatement(
+        "INSERT INTO categories (id, name, type, icon, color, sort_order, archived, updated_at) "
+        "VALUES ('c1', 'Makan', 1, 'food', 4293848814, 0, 0, 1700000000)",
+      );
+      await old.customStatement(
+        "INSERT INTO transactions (id, type, amount, account_id, category_id, "
+        "transfer_to_account_id, date, note, created_at, updated_at, deleted_at) "
+        "VALUES ('t1', 1, 50000, 'a1', 'c1', NULL, 1700000000, 'kopi', 1700000000, 1700000000, NULL)",
+      );
+      await old.customStatement(
+        "INSERT INTO savings_goals (id, name, target_amount, color, created_at, updated_at) "
+        "VALUES ('g1', 'Dana darurat', 5000000, 1, 1700000000, 1700000000)",
+      );
+      await old.customStatement(
+        "INSERT INTO agenda_reminders (id, title, frequency, start_date, created_at, updated_at) "
+        "VALUES ('ag1', 'Servis AC', 1, 1767225600, 1700000000, 1700000000)",
+      );
+      await old.customStatement(
+        "INSERT INTO debts (id, type, counterparty_name, amount, created_at, updated_at) "
+        "VALUES ('d1', 0, 'Budi', 100000, 1700000000, 1700000000)",
+      );
+      await old.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, latest);
+
+      // Buku Utama disisipkan, semua data lama masuk ke sana.
+      final ledgers = await db.watchLedgers().first;
+      expect(ledgers.map((l) => l.id), [kMainLedgerId]);
+      expect(ledgers.single.archived, isFalse);
+      expect(
+        (await db.watchAccountBalances().first).single.balance,
+        1000000 - 50000,
+      );
+      expect((await db.getTransactions()).single.tx.id, 't1');
+      expect((await db.watchGoals().first).single.goal.ledgerId, kMainLedgerId);
+      expect(
+        (await db.watchAgendaReminders().first).single.ledgerId,
+        kMainLedgerId,
+      );
+      expect((await db.watchDebts().first).single.ledgerId, kMainLedgerId);
+      final oldCat = (await db.watchCategories(TxType.expense).first)
+          .firstWhere((c) => c.id == 'c1');
+      expect(oldCat.ledgerId, kMainLedgerId);
+
+      // Buku baru terpisah dari Buku Utama.
+      final biz = await db.addLedger(
+        name: 'Toko',
+        icon: 'business',
+        color: 1,
+        template: LedgerTemplate.business,
+      );
+      expect((await db.watchAccountBalances(ledgerId: biz).first).length, 1);
+      expect(
+        (await db.watchAccountBalances().first).single.balance,
+        1000000 - 50000,
+      );
       await db.close();
     },
   );

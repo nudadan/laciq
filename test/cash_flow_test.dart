@@ -18,6 +18,7 @@ void main() {
   }) => AgendaReminder(
     id: 'a',
     title: 'Agenda',
+    ledgerId: kMainLedgerId,
     frequency: frequency,
     startDate: startDate,
     nextIndex: nextIndex,
@@ -60,6 +61,7 @@ void main() {
       id: 'acc',
       name: 'Tunai',
       kind: AccountKind.cash,
+      ledgerId: kMainLedgerId,
       initialBalance: 0,
       archived: false,
       updatedAt: DateTime(2026),

@@ -226,6 +226,7 @@ void main() {
               id: 'a1',
               name: 'Baru',
               kind: AccountKind.cash,
+              ledgerId: kMainLedgerId,
               initialBalance: 0,
               archived: false,
               updatedAt: now,

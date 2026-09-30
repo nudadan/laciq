@@ -9,6 +9,7 @@ Account _account() => Account(
   id: 'a1',
   name: 'Tunai',
   kind: AccountKind.cash,
+  ledgerId: kMainLedgerId,
   initialBalance: 0,
   archived: false,
   updatedAt: DateTime(2026),

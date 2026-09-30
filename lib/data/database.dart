@@ -18,12 +18,52 @@ enum ContributionKind { deposit, withdrawal }
 
 enum DebtType { debt, receivable }
 
+/// Isi awal sebuah buku kas baru (lihat docs/RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md §5).
+enum LedgerTemplate { personal, business, blank }
+
+/// Buku kas bawaan. Tidak bisa dihapus atau diarsipkan; semua data yang dibuat
+/// sebelum fitur multi buku kas (skema < 10) otomatis masuk ke sini.
+///
+/// Kolom `ledgerId` memakai literal `'ledger-main'` sebagai default, bukan
+/// konstanta ini: berkas skema tergenerasi untuk tes migrasi menyalin
+/// ekspresi default apa adanya dan tidak bisa mengimpor konstanta ini. Kalau
+/// nilai ini pernah diubah, ubah juga semua default tersebut.
+const kMainLedgerId = 'ledger-main';
+
+/// Batas jumlah buku kas aktif (termasuk Buku Utama; yang diarsipkan tidak dihitung).
+const kMaxLedgers = 5;
+
+/// Buku kas: wadah pembukuan terpisah (mis. pribadi vs bisnis) untuk pengguna
+/// Ultimate. Dompet, kategori, target, agenda, dan utang/piutang menunjuk ke
+/// sini lewat `ledgerId`; transaksi, aturan berulang, anggaran, dan setoran
+/// target mengikuti induknya (dompet/kategori/target) tanpa kolom sendiri.
+class Ledgers extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text().withLength(min: 1, max: 40)();
+  TextColumn get icon => text().withDefault(const Constant('savings'))();
+  IntColumn get color => integer()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get archived => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 class Accounts extends Table {
   TextColumn get id => text()();
   TextColumn get name => text().withLength(min: 1, max: 60)();
   IntColumn get kind => intEnum<AccountKind>()();
   IntColumn get initialBalance => integer().withDefault(const Constant(0))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
+
+  /// Buku kas pemilik dompet ini. Sengaja tanpa foreign key ke [Ledgers]:
+  /// SQLite menolak `ALTER TABLE ADD COLUMN ... REFERENCES` berdefault
+  /// non-NULL saat foreign key aktif, jadi kolom ini tidak bisa ditambahkan
+  /// lewat migrasi kalau diberi referensi. Integritasnya dijaga di kode
+  /// (lihat `AppDatabase._ledgerOfAccounts`) dan `BackupService`.
+  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override
@@ -38,6 +78,10 @@ class Categories extends Table {
   IntColumn get color => integer()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
+
+  /// Buku kas pemilik kategori ini (tanpa foreign key, lihat [Accounts.ledgerId]).
+  /// Sub-kategori selalu satu buku dengan induknya.
+  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
 
   /// Kategori induk (satu tingkat saja: sub-kategori tidak boleh punya
   /// sub-kategori lagi). Null = kategori tingkat atas.
@@ -176,6 +220,9 @@ class AgendaReminders extends Table {
   IntColumn get estimatedAmount =>
       // ignore: recursive_getters
       integer().nullable().check(estimatedAmount.isBiggerThanValue(0))();
+
+  /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
+  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -209,6 +256,9 @@ class Debts extends Table {
   /// saat itu juga. Tanpa foreign key: dompet boleh dihapus/diarsipkan tanpa
   /// menyentuh baris ini (pola sama kolom nullable lain di app ini).
   TextColumn get accountId => text().nullable()();
+
+  /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
+  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -239,6 +289,9 @@ class SavingsGoals extends Table {
   TextColumn get icon => text().withDefault(const Constant('savings'))();
   IntColumn get color => integer()();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
+
+  /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
+  TextColumn get ledgerId => text().withDefault(const Constant('ledger-main'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -471,8 +524,94 @@ class TagException implements Exception {
 
 const _uuid = Uuid();
 
+const _mainLedgerName = 'Buku Utama';
+const _mainLedgerColor = 0xFF1E88E5;
+
+/// Kesalahan validasi buku kas dengan pesan yang siap ditampilkan.
+class LedgerException implements Exception {
+  const LedgerException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+/// ID baris seed (kategori/dompet bawaan) di sebuah buku. Buku Utama
+/// mempertahankan ID lama (`cat-exp-makan`, `acc-tunai`, ...) supaya data dan
+/// kode lama tetap berlaku; buku lain diberi awalan buku agar ID unik global.
+String ledgerSeedId(String ledgerId, String base) =>
+    ledgerId == kMainLedgerId ? base : '$ledgerId:$base';
+
+/// ID kategori bawaan untuk pembayaran utang/piutang di sebuah buku
+/// (dipakai `recordDebtPayment` dan form pembayaran).
+String debtCategoryId(String ledgerId, DebtType type) => ledgerSeedId(
+  ledgerId,
+  type == DebtType.debt ? 'cat-exp-utang' : 'cat-inc-piutang',
+);
+
+/// Baris seed kategori: (kunci, nama, ikon, warna).
+typedef _SeedCategory = (String, String, String, int);
+
+const _personalExpense = <_SeedCategory>[
+  ('makan', 'Makanan & Minuman', 'food', 0xFFEF6C00),
+  ('transport', 'Transportasi', 'transport', 0xFF1E88E5),
+  ('belanja', 'Belanja', 'shopping', 0xFF8E24AA),
+  ('tagihan', 'Tagihan & Utilitas', 'bills', 0xFF00897B),
+  ('rumah', 'Tempat Tinggal', 'home', 0xFF6D4C41),
+  ('kesehatan', 'Kesehatan', 'health', 0xFFE53935),
+  ('pendidikan', 'Pendidikan', 'education', 0xFF3949AB),
+  ('hiburan', 'Hiburan', 'fun', 0xFFD81B60),
+  ('sedekah', 'Sedekah & Donasi', 'charity', 0xFF43A047),
+  ('cicilan', 'Cicilan', 'installment', 0xFF546E7A),
+  ('lain-keluar', 'Lainnya', 'other', 0xFF757575),
+  ('utang', 'Utang', 'debt', 0xFF795548),
+];
+
+const _personalIncome = <_SeedCategory>[
+  ('gaji', 'Gaji', 'salary', 0xFF2E7D32),
+  ('bonus', 'Bonus / THR', 'bonus', 0xFF00ACC1),
+  ('usaha', 'Usaha', 'business', 0xFFF9A825),
+  ('hadiah', 'Hadiah', 'gift', 0xFFAD1457),
+  ('lain-masuk', 'Lainnya', 'other', 0xFF757575),
+  ('piutang', 'Piutang', 'debt', 0xFF26A69A),
+];
+
+const _businessExpense = <_SeedCategory>[
+  ('stok', 'Pembelian Stok / Bahan Baku', 'shopping', 0xFF8E24AA),
+  ('gaji-karyawan', 'Gaji Karyawan', 'salary', 0xFF3949AB),
+  ('sewa', 'Sewa Tempat', 'home', 0xFF6D4C41),
+  ('utilitas', 'Listrik, Air & Internet', 'bills', 0xFF00897B),
+  ('ongkir', 'Ongkir & Transportasi', 'transport', 0xFF1E88E5),
+  ('pemasaran', 'Pemasaran & Iklan', 'phone', 0xFFEF6C00),
+  ('peralatan', 'Peralatan', 'electronics', 0xFF546E7A),
+  ('pajak', 'Pajak & Perizinan', 'tax', 0xFFE53935),
+  ('cicilan-usaha', 'Cicilan Usaha', 'installment', 0xFF5D4037),
+  ('lain-keluar', 'Lainnya', 'other', 0xFF757575),
+  ('utang', 'Utang', 'debt', 0xFF795548),
+];
+
+const _businessIncome = <_SeedCategory>[
+  ('penjualan', 'Penjualan', 'business', 0xFF2E7D32),
+  ('jasa', 'Jasa', 'bonus', 0xFF00ACC1),
+  ('modal', 'Modal Masuk', 'investment', 0xFFF9A825),
+  ('pendapatan-lain', 'Pendapatan Lain', 'gift', 0xFFAD1457),
+  ('lain-masuk', 'Lainnya', 'other', 0xFF757575),
+  ('piutang', 'Piutang', 'debt', 0xFF26A69A),
+];
+
+const _blankExpense = <_SeedCategory>[
+  ('lain-keluar', 'Lainnya', 'other', 0xFF757575),
+  ('utang', 'Utang', 'debt', 0xFF795548),
+];
+
+const _blankIncome = <_SeedCategory>[
+  ('lain-masuk', 'Lainnya', 'other', 0xFF757575),
+  ('piutang', 'Piutang', 'debt', 0xFF26A69A),
+];
+
 @DriftDatabase(
   tables: [
+    Ledgers,
     Accounts,
     Categories,
     Transactions,
@@ -491,7 +630,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'dompet_pintar'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -574,6 +713,36 @@ class AppDatabase extends _$AppDatabase {
           mode: InsertMode.insertOrIgnore,
         );
       }
+      if (from < 10) {
+        // Multi buku kas. Tabel `ledgers` dibuat dulu dan Buku Utama disisipkan,
+        // lalu kolom `ledgerId` (default Buku Utama) ditambahkan sehingga semua
+        // data lama otomatis masuk ke sana.
+        //
+        // Gotcha yang sama dengan langkah v5/v6: tabel yang baru DIBUAT di
+        // langkah lebih awal dalam migrasi yang sama sudah memakai definisi
+        // TERKINI (sudah punya `ledgerId`), jadi addColumn kedua kalinya gagal
+        // "duplicate column". `accounts` dan `categories` ada sejak v1; sisanya
+        // hanya kalau sudah ada SEBELUM migrasi ini berjalan.
+        await m.createTable(ledgers);
+        final now = DateTime.now();
+        await into(ledgers).insert(
+          LedgersCompanion.insert(
+            id: kMainLedgerId,
+            name: _mainLedgerName,
+            color: _mainLedgerColor,
+            createdAt: now,
+            updatedAt: now,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+        await m.addColumn(accounts, accounts.ledgerId);
+        await m.addColumn(categories, categories.ledgerId);
+        if (from >= 3) await m.addColumn(savingsGoals, savingsGoals.ledgerId);
+        if (from >= 5) {
+          await m.addColumn(agendaReminders, agendaReminders.ledgerId);
+        }
+        if (from >= 8) await m.addColumn(debts, debts.ledgerId);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -585,60 +754,71 @@ class AppDatabase extends _$AppDatabase {
 
   // ---------------------------------------------------------------- seed
 
+  /// Kondisi "baru terpasang": Buku Utama dengan kategori pribadi + dompet Tunai.
   Future<void> _seed() async {
     final now = DateTime.now();
-    const expense = <(String, String, String, int)>[
-      ('makan', 'Makanan & Minuman', 'food', 0xFFEF6C00),
-      ('transport', 'Transportasi', 'transport', 0xFF1E88E5),
-      ('belanja', 'Belanja', 'shopping', 0xFF8E24AA),
-      ('tagihan', 'Tagihan & Utilitas', 'bills', 0xFF00897B),
-      ('rumah', 'Tempat Tinggal', 'home', 0xFF6D4C41),
-      ('kesehatan', 'Kesehatan', 'health', 0xFFE53935),
-      ('pendidikan', 'Pendidikan', 'education', 0xFF3949AB),
-      ('hiburan', 'Hiburan', 'fun', 0xFFD81B60),
-      ('sedekah', 'Sedekah & Donasi', 'charity', 0xFF43A047),
-      ('cicilan', 'Cicilan', 'installment', 0xFF546E7A),
-      ('lain-keluar', 'Lainnya', 'other', 0xFF757575),
-      ('utang', 'Utang', 'debt', 0xFF795548),
-    ];
-    const income = <(String, String, String, int)>[
-      ('gaji', 'Gaji', 'salary', 0xFF2E7D32),
-      ('bonus', 'Bonus / THR', 'bonus', 0xFF00ACC1),
-      ('usaha', 'Usaha', 'business', 0xFFF9A825),
-      ('hadiah', 'Hadiah', 'gift', 0xFFAD1457),
-      ('lain-masuk', 'Lainnya', 'other', 0xFF757575),
-      ('piutang', 'Piutang', 'debt', 0xFF26A69A),
-    ];
+    await into(ledgers).insert(
+      LedgersCompanion.insert(
+        id: kMainLedgerId,
+        name: _mainLedgerName,
+        color: _mainLedgerColor,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+    await _seedLedgerContent(
+      kMainLedgerId,
+      LedgerTemplate.personal,
+      now: now,
+    );
+  }
+
+  /// Mengisi kategori dan satu dompet awal untuk buku [ledgerId] sesuai
+  /// [template]. Semua template memuat kategori Utang/Piutang karena
+  /// [recordDebtPayment] bergantung padanya.
+  Future<void> _seedLedgerContent(
+    String ledgerId,
+    LedgerTemplate template, {
+    required DateTime now,
+  }) async {
+    final (expense, income, accountName) = switch (template) {
+      LedgerTemplate.personal => (_personalExpense, _personalIncome, 'Tunai'),
+      LedgerTemplate.business => (_businessExpense, _businessIncome, 'Kas Usaha'),
+      LedgerTemplate.blank => (_blankExpense, _blankIncome, 'Tunai'),
+    };
 
     await batch((b) {
       b.insertAll(categories, [
         for (final (i, c) in expense.indexed)
           CategoriesCompanion.insert(
-            id: 'cat-exp-${c.$1}',
+            id: ledgerSeedId(ledgerId, 'cat-exp-${c.$1}'),
             name: c.$2,
             type: TxType.expense,
             icon: Value(c.$3),
             color: c.$4,
             sortOrder: Value(i),
+            ledgerId: Value(ledgerId),
             updatedAt: now,
           ),
         for (final (i, c) in income.indexed)
           CategoriesCompanion.insert(
-            id: 'cat-inc-${c.$1}',
+            id: ledgerSeedId(ledgerId, 'cat-inc-${c.$1}'),
             name: c.$2,
             type: TxType.income,
             icon: Value(c.$3),
             color: c.$4,
             sortOrder: Value(i),
+            ledgerId: Value(ledgerId),
             updatedAt: now,
           ),
       ]);
       b.insert(
         accounts,
         AccountsCompanion.insert(
-          id: 'acc-tunai',
-          name: 'Tunai',
+          id: ledgerSeedId(ledgerId, 'acc-tunai'),
+          name: accountName,
           kind: AccountKind.cash,
+          ledgerId: Value(ledgerId),
           updatedAt: now,
         ),
       );
@@ -649,9 +829,16 @@ class AppDatabase extends _$AppDatabase {
 
   /// Saldo dompet. Yang diarsipkan disembunyikan (dan tidak ikut Total Saldo)
   /// kecuali [includeArchived]; bila ikut, ia berada di urutan paling bawah.
+  ///
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku.
   Stream<List<AccountBalance>> watchAccountBalances({
     bool includeArchived = false,
+    String? ledgerId = kMainLedgerId,
   }) {
+    final conditions = [
+      if (!includeArchived) 'a.archived = 0',
+      if (ledgerId != null) 'a.ledger_id = ?',
+    ];
     return customSelect(
       '''
       SELECT a.id, a.name, a.kind, a.archived, a.initial_balance,
@@ -663,9 +850,10 @@ class AppDatabase extends _$AppDatabase {
                     WHERE t.transfer_to_account_id = a.id AND t.type = 2
                       AND t.deleted_at IS NULL), 0) AS balance
       FROM accounts a
-      ${includeArchived ? '' : 'WHERE a.archived = 0'}
+      ${conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}'}
       ORDER BY a.archived, a.name COLLATE NOCASE
       ''',
+      variables: [if (ledgerId != null) Variable.withString(ledgerId)],
       readsFrom: {accounts, transactions},
     ).watch().map(
       (rows) => [
@@ -700,12 +888,22 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Nama harus unik (tanpa membedakan huruf besar/kecil), termasuk terhadap
-  /// dompet yang diarsipkan, agar tidak membingungkan saat dipulihkan.
-  Future<void> _ensureAccountNameFree(String name, {String? exceptId}) async {
-    final clash = (await select(accounts).get()).where(
-      (a) => a.id != exceptId && a.name.toLowerCase() == name.toLowerCase(),
-    );
+  /// Nama harus unik di dalam satu buku (tanpa membedakan huruf besar/kecil),
+  /// termasuk terhadap dompet yang diarsipkan, agar tidak membingungkan saat
+  /// dipulihkan.
+  Future<void> _ensureAccountNameFree(
+    String name,
+    String ledgerId, {
+    String? exceptId,
+  }) async {
+    final clash =
+        (await (select(accounts)..where((a) => a.ledgerId.equals(ledgerId)))
+                .get())
+            .where(
+              (a) =>
+                  a.id != exceptId &&
+                  a.name.toLowerCase() == name.toLowerCase(),
+            );
     if (clash.isNotEmpty) {
       throw AccountException(
         clash.first.archived
@@ -719,17 +917,20 @@ class AppDatabase extends _$AppDatabase {
     required String name,
     required AccountKind kind,
     int initialBalance = 0,
+    String ledgerId = kMainLedgerId,
   }) async {
     final clean = _cleanAccountName(name);
     _checkInitialBalance(initialBalance);
     await transaction(() async {
-      await _ensureAccountNameFree(clean);
+      await _requireLedger(ledgerId);
+      await _ensureAccountNameFree(clean, ledgerId);
       await into(accounts).insert(
         AccountsCompanion.insert(
           id: _uuid.v7(),
           name: clean,
           kind: kind,
           initialBalance: Value(initialBalance),
+          ledgerId: Value(ledgerId),
           updatedAt: DateTime.now(),
         ),
       );
@@ -747,7 +948,11 @@ class AppDatabase extends _$AppDatabase {
     final clean = _cleanAccountName(name);
     _checkInitialBalance(initialBalance);
     await transaction(() async {
-      await _ensureAccountNameFree(clean, exceptId: id);
+      final current = await (select(
+        accounts,
+      )..where((a) => a.id.equals(id))).getSingleOrNull();
+      if (current == null) throw StateError('Dompet $id tidak ditemukan.');
+      await _ensureAccountNameFree(clean, current.ledgerId, exceptId: id);
       final rows = await (update(accounts)..where((a) => a.id.equals(id)))
           .write(
             AccountsCompanion(
@@ -772,9 +977,13 @@ class AppDatabase extends _$AppDatabase {
       )..where((a) => a.id.equals(id))).getSingleOrNull();
       if (current == null) throw StateError('Dompet $id tidak ditemukan.');
       if (archived && !current.archived) {
-        final active = await (select(
-          accounts,
-        )..where((a) => a.archived.equals(false))).get();
+        final active =
+            await (select(accounts)..where(
+                  (a) =>
+                      a.archived.equals(false) &
+                      a.ledgerId.equals(current.ledgerId),
+                ))
+                .get();
         if (active.length <= 1) {
           throw const AccountException('Harus ada minimal satu dompet aktif.');
         }
@@ -807,9 +1016,12 @@ class AppDatabase extends _$AppDatabase {
   /// Kategori satu jenis. Yang diarsipkan disembunyikan kecuali
   /// [includeArchived] (untuk layar kelola dan untuk mengubah transaksi lama);
   /// bila ikut, ia berada di urutan paling bawah.
+  ///
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku.
   Stream<List<Category>> watchCategories(
     TxType type, {
     bool includeArchived = false,
+    String? ledgerId = kMainLedgerId,
   }) {
     return (select(categories)
           ..where(
@@ -817,7 +1029,10 @@ class AppDatabase extends _$AppDatabase {
                 c.type.equalsValue(type) &
                 (includeArchived
                     ? const Constant(true)
-                    : c.archived.equals(false)),
+                    : c.archived.equals(false)) &
+                (ledgerId == null
+                    ? const Constant(true)
+                    : c.ledgerId.equals(ledgerId)),
           )
           ..orderBy([
             (c) => OrderingTerm.asc(c.archived),
@@ -835,16 +1050,20 @@ class AppDatabase extends _$AppDatabase {
     return n;
   }
 
-  /// Nama harus unik per jenis (tanpa membedakan huruf besar/kecil), termasuk
-  /// terhadap kategori yang diarsipkan, agar tidak membingungkan saat dipulihkan.
+  /// Nama harus unik per jenis di dalam satu buku (tanpa membedakan huruf
+  /// besar/kecil), termasuk terhadap kategori yang diarsipkan, agar tidak
+  /// membingungkan saat dipulihkan.
   Future<void> _ensureNameFree(
     TxType type,
-    String name, {
+    String name,
+    String ledgerId, {
     String? exceptId,
   }) async {
-    final same = await (select(
-      categories,
-    )..where((c) => c.type.equalsValue(type))).get();
+    final same =
+        await (select(categories)..where(
+              (c) => c.type.equalsValue(type) & c.ledgerId.equals(ledgerId),
+            ))
+            .get();
     final clash = same.where(
       (c) => c.id != exceptId && c.name.toLowerCase() == name.toLowerCase(),
     );
@@ -861,7 +1080,8 @@ class AppDatabase extends _$AppDatabase {
   /// bukan sub-kategori itu sendiri (menegakkan sub-kategori satu tingkat).
   Future<void> _checkParent(
     TxType type,
-    String? parentId, {
+    String? parentId,
+    String ledgerId, {
     String? selfId,
   }) async {
     if (parentId == null) return;
@@ -875,6 +1095,11 @@ class AppDatabase extends _$AppDatabase {
     )..where((c) => c.id.equals(parentId))).getSingleOrNull();
     if (parent == null) {
       throw const CategoryException('Kategori induk tidak ditemukan.');
+    }
+    if (parent.ledgerId != ledgerId) {
+      throw const CategoryException(
+        'Kategori induk harus berada di buku kas yang sama.',
+      );
     }
     if (parent.type != type) {
       throw const CategoryException(
@@ -894,17 +1119,22 @@ class AppDatabase extends _$AppDatabase {
     required String icon,
     required int color,
     String? parentId,
+    String ledgerId = kMainLedgerId,
   }) async {
     if (type == TxType.transfer) {
       throw const CategoryException('Transfer tidak memakai kategori.');
     }
     final clean = _cleanCategoryName(name);
     return transaction(() async {
-      await _ensureNameFree(type, clean);
-      await _checkParent(type, parentId);
+      await _requireLedger(ledgerId);
+      await _ensureNameFree(type, clean, ledgerId);
+      await _checkParent(type, parentId, ledgerId);
       final last =
           await (select(categories)
-                ..where((c) => c.type.equalsValue(type))
+                ..where(
+                  (c) =>
+                      c.type.equalsValue(type) & c.ledgerId.equals(ledgerId),
+                )
                 ..orderBy([(c) => OrderingTerm.desc(c.sortOrder)])
                 ..limit(1))
               .getSingleOrNull();
@@ -918,6 +1148,7 @@ class AppDatabase extends _$AppDatabase {
           color: color,
           sortOrder: Value((last?.sortOrder ?? -1) + 1),
           parentId: Value(parentId),
+          ledgerId: Value(ledgerId),
           updatedAt: DateTime.now(),
         ),
       );
@@ -940,8 +1171,18 @@ class AppDatabase extends _$AppDatabase {
         categories,
       )..where((c) => c.id.equals(id))).getSingleOrNull();
       if (current == null) throw StateError('Kategori $id tidak ditemukan.');
-      await _ensureNameFree(current.type, clean, exceptId: id);
-      await _checkParent(current.type, parentId, selfId: id);
+      await _ensureNameFree(
+        current.type,
+        clean,
+        current.ledgerId,
+        exceptId: id,
+      );
+      await _checkParent(
+        current.type,
+        parentId,
+        current.ledgerId,
+        selfId: id,
+      );
       if (parentId != null) {
         final children = await (select(
           categories,
@@ -980,7 +1221,8 @@ class AppDatabase extends _$AppDatabase {
             await (select(categories)..where(
                   (c) =>
                       c.type.equalsValue(current.type) &
-                      c.archived.equals(false),
+                      c.archived.equals(false) &
+                      c.ledgerId.equals(current.ledgerId),
                 ))
                 .get();
         if (active.length <= 1) {
@@ -1057,6 +1299,11 @@ class AppDatabase extends _$AppDatabase {
           ? transferToAccountId != null && transferToAccountId != accountId
           : categoryId != null,
     );
+    await _checkSameLedger(
+      accountId: accountId,
+      categoryId: type == TxType.transfer ? null : categoryId,
+      transferToAccountId: type == TxType.transfer ? transferToAccountId : null,
+    );
     final now = DateTime.now();
     final trimmed = note?.trim();
     final id = _uuid.v7();
@@ -1103,6 +1350,11 @@ class AppDatabase extends _$AppDatabase {
     String? note,
   }) async {
     _checkTxFields(type, amount, accountId, categoryId, transferToAccountId);
+    await _checkSameLedger(
+      accountId: accountId,
+      categoryId: type == TxType.transfer ? null : categoryId,
+      transferToAccountId: type == TxType.transfer ? transferToAccountId : null,
+    );
     final trimmed = note?.trim();
     final rows = await (update(transactions)..where((t) => t.id.equals(id)))
         .write(
@@ -1155,6 +1407,11 @@ class AppDatabase extends _$AppDatabase {
     int reminderDaysBefore = 1,
   }) async {
     _checkTxFields(type, amount, accountId, categoryId, transferToAccountId);
+    await _checkSameLedger(
+      accountId: accountId,
+      categoryId: type == TxType.transfer ? null : categoryId,
+      transferToAccountId: type == TxType.transfer ? transferToAccountId : null,
+    );
     final now = DateTime.now();
     final id = _uuid.v7();
     final trimmed = note?.trim();
@@ -1197,6 +1454,11 @@ class AppDatabase extends _$AppDatabase {
     int reminderDaysBefore = 1,
   }) async {
     _checkTxFields(type, amount, accountId, categoryId, transferToAccountId);
+    await _checkSameLedger(
+      accountId: accountId,
+      categoryId: type == TxType.transfer ? null : categoryId,
+      transferToAccountId: type == TxType.transfer ? transferToAccountId : null,
+    );
     final trimmed = note?.trim();
     final rows = await (update(recurringRules)..where((r) => r.id.equals(id)))
         .write(
@@ -1252,23 +1514,36 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteRecurringRule(String id) =>
       (delete(recurringRules)..where((r) => r.id.equals(id))).go();
 
-  Stream<List<RuleView>> watchRecurringRules() {
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku
+  /// (dipakai penjadwal pengingat, yang bekerja lintas buku).
+  Stream<List<RuleView>> watchRecurringRules({
+    String? ledgerId = kMainLedgerId,
+  }) {
     final toAccount = alias(accounts, 'to_acc');
     final query =
         select(recurringRules).join([
-          innerJoin(accounts, accounts.id.equalsExp(recurringRules.accountId)),
-          leftOuterJoin(
-            categories,
-            categories.id.equalsExp(recurringRules.categoryId),
-          ),
-          leftOuterJoin(
-            toAccount,
-            toAccount.id.equalsExp(recurringRules.transferToAccountId),
-          ),
-        ])..orderBy([
-          OrderingTerm.desc(recurringRules.active),
-          OrderingTerm.asc(recurringRules.createdAt),
-        ]);
+            innerJoin(
+              accounts,
+              accounts.id.equalsExp(recurringRules.accountId),
+            ),
+            leftOuterJoin(
+              categories,
+              categories.id.equalsExp(recurringRules.categoryId),
+            ),
+            leftOuterJoin(
+              toAccount,
+              toAccount.id.equalsExp(recurringRules.transferToAccountId),
+            ),
+          ])
+          ..where(
+            ledgerId == null
+                ? const Constant(true)
+                : accounts.ledgerId.equals(ledgerId),
+          )
+          ..orderBy([
+            OrderingTerm.desc(recurringRules.active),
+            OrderingTerm.asc(recurringRules.createdAt),
+          ]);
     return query.watch().map(
       (rows) => [
         for (final r in rows)
@@ -1290,15 +1565,34 @@ class AppDatabase extends _$AppDatabase {
   /// jadi kejadian yang sama tidak pernah tercatat dua kali. Transaksi hasil
   /// generate yang dihapus pengguna juga tidak dibuat ulang, karena indeks aturan
   /// sudah maju.
-  Future<int> generateDueRecurring({DateTime? now, int maxPerRule = 1000}) {
+  ///
+  /// Berlaku untuk SEMUA buku kas, bukan hanya yang sedang aktif. Buku di
+  /// [pausedLedgerIds] (mis. buku Ultimate yang terkunci) dijeda: aturannya tidak
+  /// menghasilkan transaksi diam-diam di buku yang tersembunyi, dan indeksnya
+  /// tidak maju, sehingga disusul saat buku terbuka kembali.
+  Future<int> generateDueRecurring({
+    DateTime? now,
+    int maxPerRule = 1000,
+    Set<String> pausedLedgerIds = const {},
+  }) {
     return transaction(() async {
       final today = dateOnly(now ?? DateTime.now());
       var created = 0;
       final rules = await (select(
         recurringRules,
       )..where((r) => r.active.equals(true))).get();
+      final pausedAccountIds = pausedLedgerIds.isEmpty
+          ? const <String>{}
+          : {
+              for (final a
+                  in await (select(
+                    accounts,
+                  )..where((a) => a.ledgerId.isIn(pausedLedgerIds))).get())
+                a.id,
+            };
 
       for (final rule in rules) {
+        if (pausedAccountIds.contains(rule.accountId)) continue;
         var index = rule.nextIndex;
         for (var n = 0; n < maxPerRule; n++) {
           final due = occurrenceAt(rule.startDate, rule.frequency, index);
@@ -1357,6 +1651,7 @@ class AppDatabase extends _$AppDatabase {
     DateTime? endDate,
     int reminderDaysBefore = 1,
     int? estimatedAmount,
+    String ledgerId = kMainLedgerId,
   }) async {
     final now = DateTime.now();
     final id = _uuid.v7();
@@ -1367,10 +1662,12 @@ class AppDatabase extends _$AppDatabase {
     if (estimatedAmount != null && estimatedAmount <= 0) {
       throw const AccountException('Estimasi biaya harus lebih dari 0.');
     }
+    await _requireLedger(ledgerId);
     final trimmedNote = note?.trim();
     await into(agendaReminders).insert(
       AgendaRemindersCompanion.insert(
         id: id,
+        ledgerId: Value(ledgerId),
         title: trimmedTitle,
         note: Value(
           trimmedNote == null || trimmedNote.isEmpty ? null : trimmedNote,
@@ -1441,6 +1738,11 @@ class AppDatabase extends _$AppDatabase {
       final item = await (select(
         agendaReminders,
       )..where((a) => a.id.equals(agendaId))).getSingle();
+      await _checkSameLedger(
+        accountId: accountId,
+        categoryId: categoryId,
+        ledgerId: item.ledgerId,
+      );
       final now = DateTime.now();
       final trimmed = note?.trim();
       final txId = _uuid.v7();
@@ -1503,11 +1805,20 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteAgenda(String id) =>
       (delete(agendaReminders)..where((a) => a.id.equals(id))).go();
 
-  Stream<List<AgendaReminder>> watchAgendaReminders() {
-    return (select(agendaReminders)..orderBy([
-          (a) => OrderingTerm.desc(a.active),
-          (a) => OrderingTerm.asc(a.createdAt),
-        ]))
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku.
+  Stream<List<AgendaReminder>> watchAgendaReminders({
+    String? ledgerId = kMainLedgerId,
+  }) {
+    return (select(agendaReminders)
+          ..where(
+            (a) => ledgerId == null
+                ? const Constant(true)
+                : a.ledgerId.equals(ledgerId),
+          )
+          ..orderBy([
+            (a) => OrderingTerm.desc(a.active),
+            (a) => OrderingTerm.asc(a.createdAt),
+          ]))
         .watch();
   }
 
@@ -1555,7 +1866,12 @@ class AppDatabase extends _$AppDatabase {
     JoinedSelectStatement<HasResultSet, dynamic> query,
     TxView Function(TypedResult) map,
   })
-  _txQuery({DateTime? from, DateTime? to, bool newestFirst = true}) {
+  _txQuery({
+    DateTime? from,
+    DateTime? to,
+    bool newestFirst = true,
+    String? ledgerId,
+  }) {
     final toAccount = alias(accounts, 'to_acc');
     final query =
         select(transactions).join([
@@ -1571,6 +1887,9 @@ class AppDatabase extends _$AppDatabase {
           ])
           ..where(
             transactions.deletedAt.isNull() &
+                (ledgerId == null
+                    ? const Constant(true)
+                    : accounts.ledgerId.equals(ledgerId)) &
                 (from == null
                     ? const Constant(true)
                     : transactions.date.isBiggerOrEqualValue(from)) &
@@ -1595,14 +1914,32 @@ class AppDatabase extends _$AppDatabase {
     return (query: query, map: map);
   }
 
-  Stream<List<TxView>> watchTransactions(DateTime month) {
-    final q = _txQuery(from: monthStart(month), to: monthEnd(month));
+  /// Transaksi satu bulan pada buku [ledgerId] (bawaan: Buku Utama).
+  Stream<List<TxView>> watchTransactions(
+    DateTime month, {
+    String ledgerId = kMainLedgerId,
+  }) {
+    final q = _txQuery(
+      from: monthStart(month),
+      to: monthEnd(month),
+      ledgerId: ledgerId,
+    );
     return q.query.watch().map((rows) => rows.map(q.map).toList());
   }
 
-  /// Untuk ekspor: urut dari yang terlama. Tanpa argumen = seluruh riwayat.
-  Future<List<TxView>> getTransactions({DateTime? from, DateTime? to}) async {
-    final q = _txQuery(from: from, to: to, newestFirst: false);
+  /// Untuk ekspor: urut dari yang terlama. Tanpa argumen = seluruh riwayat dari
+  /// SEMUA buku kas; isi [ledgerId] untuk satu buku saja.
+  Future<List<TxView>> getTransactions({
+    DateTime? from,
+    DateTime? to,
+    String? ledgerId,
+  }) async {
+    final q = _txQuery(
+      from: from,
+      to: to,
+      newestFirst: false,
+      ledgerId: ledgerId,
+    );
     return (await q.query.get()).map(q.map).toList();
   }
 
@@ -1615,6 +1952,7 @@ class AppDatabase extends _$AppDatabase {
     String? note,
     DateTime? dueDate,
     String? accountId,
+    String ledgerId = kMainLedgerId,
   }) async {
     final trimmedName = counterpartyName.trim();
     if (trimmedName.isEmpty) {
@@ -1623,12 +1961,17 @@ class AppDatabase extends _$AppDatabase {
     if (amount <= 0) {
       throw const AccountException('Nominal harus lebih dari 0.');
     }
+    await _requireLedger(ledgerId);
+    if (accountId != null) {
+      await _checkSameLedger(accountId: accountId, ledgerId: ledgerId);
+    }
     final now = DateTime.now();
     final id = _uuid.v7();
     final trimmedNote = note?.trim();
     await into(debts).insert(
       DebtsCompanion.insert(
         id: id,
+        ledgerId: Value(ledgerId),
         type: type,
         counterpartyName: trimmedName,
         amount: amount,
@@ -1681,11 +2024,18 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteDebt(String id) =>
       (delete(debts)..where((d) => d.id.equals(id))).go();
 
-  Stream<List<Debt>> watchDebts() {
-    return (select(debts)..orderBy([
-          (d) => OrderingTerm.asc(d.paidAmount),
-          (d) => OrderingTerm.asc(d.createdAt),
-        ]))
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku.
+  Stream<List<Debt>> watchDebts({String? ledgerId = kMainLedgerId}) {
+    return (select(debts)
+          ..where(
+            (d) => ledgerId == null
+                ? const Constant(true)
+                : d.ledgerId.equals(ledgerId),
+          )
+          ..orderBy([
+            (d) => OrderingTerm.asc(d.paidAmount),
+            (d) => OrderingTerm.asc(d.createdAt),
+          ]))
         .watch();
   }
 
@@ -1708,6 +2058,11 @@ class AppDatabase extends _$AppDatabase {
       final item = await (select(
         debts,
       )..where((d) => d.id.equals(debtId))).getSingle();
+      await _checkSameLedger(
+        accountId: accountId,
+        categoryId: categoryId,
+        ledgerId: item.ledgerId,
+      );
       final now = DateTime.now();
       final trimmed = note?.trim();
       final txId = _uuid.v7();
@@ -1737,20 +2092,28 @@ class AppDatabase extends _$AppDatabase {
 
   // ------------------------------------------------------------- reports
 
-  Stream<MonthTotals> watchTotals(DateTime month) {
+  /// Total pemasukan/pengeluaran satu bulan pada buku [ledgerId] (bawaan: Buku
+  /// Utama). Transaksi milik buku lewat dompetnya (`accounts.ledger_id`).
+  Stream<MonthTotals> watchTotals(
+    DateTime month, {
+    String ledgerId = kMainLedgerId,
+  }) {
     return customSelect(
       '''
       SELECT
-        COALESCE(SUM(CASE WHEN type = 0 THEN amount END), 0) AS income,
-        COALESCE(SUM(CASE WHEN type = 1 THEN amount END), 0) AS expense
-      FROM transactions
-      WHERE deleted_at IS NULL AND date >= ? AND date < ?
+        COALESCE(SUM(CASE WHEN t.type = 0 THEN t.amount END), 0) AS income,
+        COALESCE(SUM(CASE WHEN t.type = 1 THEN t.amount END), 0) AS expense
+      FROM transactions t
+      JOIN accounts a ON a.id = t.account_id
+      WHERE t.deleted_at IS NULL AND a.ledger_id = ?
+        AND t.date >= ? AND t.date < ?
       ''',
       variables: [
+        Variable.withString(ledgerId),
         Variable.withDateTime(monthStart(month)),
         Variable.withDateTime(monthEnd(month)),
       ],
-      readsFrom: {transactions},
+      readsFrom: {transactions, accounts},
     ).watchSingle().map(
       (r) => (income: r.read<int>('income'), expense: r.read<int>('expense')),
     );
@@ -1770,18 +2133,23 @@ class AppDatabase extends _$AppDatabase {
   Stream<List<MonthlyTotal>> watchMonthlyTrend(
     DateTime endMonth, {
     int months = 6,
+    String ledgerId = kMainLedgerId,
   }) {
     final start = DateTime(endMonth.year, endMonth.month - months + 1);
     return customSelect(
       '''
-      SELECT type, amount, date FROM transactions
-      WHERE deleted_at IS NULL AND type IN (0, 1) AND date >= ? AND date < ?
+      SELECT t.type AS type, t.amount AS amount, t.date AS date
+      FROM transactions t
+      JOIN accounts a ON a.id = t.account_id
+      WHERE t.deleted_at IS NULL AND t.type IN (0, 1) AND a.ledger_id = ?
+        AND t.date >= ? AND t.date < ?
       ''',
       variables: [
+        Variable.withString(ledgerId),
         Variable.withDateTime(monthStart(start)),
         Variable.withDateTime(monthEnd(endMonth)),
       ],
-      readsFrom: {transactions},
+      readsFrom: {transactions, accounts},
     ).watch().map((rows) {
       final byYm = <String, ({int income, int expense})>{};
       for (final r in rows) {
@@ -1807,18 +2175,23 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  Stream<List<CategorySpend>> watchExpenseByCategory(DateTime month) {
+  Stream<List<CategorySpend>> watchExpenseByCategory(
+    DateTime month, {
+    String ledgerId = kMainLedgerId,
+  }) {
     return customSelect(
       '''
       SELECT c.id AS id, c.name AS name, c.icon AS icon, c.color AS color,
              SUM(t.amount) AS total
       FROM transactions t
       JOIN categories c ON c.id = t.category_id
-      WHERE t.deleted_at IS NULL AND t.type = 1 AND t.date >= ? AND t.date < ?
+      WHERE t.deleted_at IS NULL AND t.type = 1 AND c.ledger_id = ?
+        AND t.date >= ? AND t.date < ?
       GROUP BY c.id
       ORDER BY total DESC
       ''',
       variables: [
+        Variable.withString(ledgerId),
         Variable.withDateTime(monthStart(month)),
         Variable.withDateTime(monthEnd(month)),
       ],
@@ -1843,6 +2216,7 @@ class AppDatabase extends _$AppDatabase {
   Stream<List<CategoryMonthlyTotal>> watchCategoryMonthlyTrend(
     DateTime endMonth, {
     int months = 6,
+    String ledgerId = kMainLedgerId,
   }) {
     final start = DateTime(endMonth.year, endMonth.month - months + 1);
     return customSelect(
@@ -1851,9 +2225,11 @@ class AppDatabase extends _$AppDatabase {
              t.amount AS amount, t.date AS date
       FROM transactions t
       JOIN categories c ON c.id = t.category_id
-      WHERE t.deleted_at IS NULL AND t.type = 1 AND t.date >= ? AND t.date < ?
+      WHERE t.deleted_at IS NULL AND t.type = 1 AND c.ledger_id = ?
+        AND t.date >= ? AND t.date < ?
       ''',
       variables: [
+        Variable.withString(ledgerId),
         Variable.withDateTime(monthStart(start)),
         Variable.withDateTime(monthEnd(endMonth)),
       ],
@@ -1908,10 +2284,14 @@ class AppDatabase extends _$AppDatabase {
   ''';
 
   /// Target aktif lebih dulu (urut waktu dibuat), yang diarsipkan di bawah.
-  Stream<List<GoalView>> watchGoals() {
+  ///
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku.
+  Stream<List<GoalView>> watchGoals({String? ledgerId = kMainLedgerId}) {
     return customSelect(
       'SELECT g.*, $_savedSql AS saved FROM savings_goals g '
+      '${ledgerId == null ? '' : 'WHERE g.ledger_id = ? '}'
       'ORDER BY g.archived, g.created_at, g.id',
+      variables: [if (ledgerId != null) Variable.withString(ledgerId)],
       readsFrom: {savingsGoals, goalContributions},
     ).watch().map(
       (rows) => [
@@ -1936,14 +2316,17 @@ class AppDatabase extends _$AppDatabase {
     required String icon,
     required int color,
     DateTime? deadline,
+    String ledgerId = kMainLedgerId,
   }) async {
     final clean = _cleanGoalName(name);
     _checkTarget(targetAmount);
+    await _requireLedger(ledgerId);
     final now = DateTime.now();
     final id = _uuid.v7();
     await into(savingsGoals).insert(
       SavingsGoalsCompanion.insert(
         id: id,
+        ledgerId: Value(ledgerId),
         name: clean,
         targetAmount: targetAmount,
         deadline: Value(deadline == null ? null : dateOnly(deadline)),
@@ -2089,7 +2472,13 @@ class AppDatabase extends _$AppDatabase {
   /// Hanya kategori tingkat atas: pemakaian sub-kategori otomatis masuk ke
   /// anggaran induknya (satu tingkat saja, jadi cukup subquery langsung tanpa
   /// CTE rekursif). Sub-kategori sendiri tidak punya baris anggaran terpisah.
-  Stream<List<BudgetProgress>> watchBudgetProgress(DateTime month) {
+  ///
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku
+  /// (dipakai notifikasi anggaran, yang bekerja lintas buku).
+  Stream<List<BudgetProgress>> watchBudgetProgress(
+    DateTime month, {
+    String? ledgerId = kMainLedgerId,
+  }) {
     return customSelect(
       '''
       SELECT c.id AS id, b.amount AS budget,
@@ -2102,11 +2491,13 @@ class AppDatabase extends _$AppDatabase {
       FROM categories c
       LEFT JOIN budgets b ON b.category_id = c.id
       WHERE c.type = 1 AND c.archived = 0 AND c.parent_id IS NULL
-      ORDER BY c.sort_order
+        ${ledgerId == null ? '' : 'AND c.ledger_id = ?'}
+      ORDER BY c.ledger_id, c.sort_order
       ''',
       variables: [
         Variable.withDateTime(monthStart(month)),
         Variable.withDateTime(monthEnd(month)),
+        if (ledgerId != null) Variable.withString(ledgerId),
       ],
       readsFrom: {transactions, categories, budgets},
     ).watch().asyncMap((rows) async {
@@ -2223,6 +2614,269 @@ class AppDatabase extends _$AppDatabase {
         });
       });
 
+  // ------------------------------------------------------------ buku kas
+
+  /// Semua buku (yang diarsipkan di urutan bawah). Buku Utama selalu ada.
+  Stream<List<Ledger>> watchLedgers() {
+    return (select(ledgers)..orderBy([
+          (l) => OrderingTerm.asc(l.archived),
+          (l) => OrderingTerm.asc(l.sortOrder),
+          (l) => OrderingTerm.asc(l.createdAt),
+        ]))
+        .watch();
+  }
+
+  /// Total saldo dompet aktif per buku (id buku -> saldo), untuk pengalih buku.
+  Stream<Map<String, int>> watchLedgerBalances() {
+    return customSelect(
+      '''
+      SELECT a.ledger_id AS ledger_id,
+        SUM(a.initial_balance
+          + COALESCE((SELECT SUM(CASE t.type WHEN 0 THEN t.amount ELSE -t.amount END)
+                      FROM transactions t
+                      WHERE t.account_id = a.id AND t.deleted_at IS NULL), 0)
+          + COALESCE((SELECT SUM(t.amount) FROM transactions t
+                      WHERE t.transfer_to_account_id = a.id AND t.type = 2
+                        AND t.deleted_at IS NULL), 0)) AS total
+      FROM accounts a
+      WHERE a.archived = 0
+      GROUP BY a.ledger_id
+      ''',
+      readsFrom: {accounts, transactions},
+    ).watch().map(
+      (rows) => {
+        for (final r in rows) r.read<String>('ledger_id'): r.read<int>('total'),
+      },
+    );
+  }
+
+  static String _cleanLedgerName(String name) {
+    final n = name.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (n.isEmpty) throw const LedgerException('Nama buku kas wajib diisi.');
+    if (n.length > 40) {
+      throw const LedgerException('Nama buku kas maksimal 40 karakter.');
+    }
+    return n;
+  }
+
+  Future<void> _ensureLedgerNameFree(String name, {String? exceptId}) async {
+    final clash = (await select(ledgers).get()).where(
+      (l) => l.id != exceptId && l.name.toLowerCase() == name.toLowerCase(),
+    );
+    if (clash.isNotEmpty) {
+      throw LedgerException(
+        clash.first.archived
+            ? 'Sudah ada buku "$name" yang diarsipkan. Pulihkan saja buku itu.'
+            : 'Sudah ada buku "$name".',
+      );
+    }
+  }
+
+  /// Membuat buku baru dan mengisinya sesuai [template]. Buku yang diarsipkan
+  /// tidak dihitung terhadap batas [kMaxLedgers].
+  Future<String> addLedger({
+    required String name,
+    required String icon,
+    required int color,
+    LedgerTemplate template = LedgerTemplate.personal,
+  }) async {
+    final clean = _cleanLedgerName(name);
+    return transaction(() async {
+      final all = await select(ledgers).get();
+      if (all.where((l) => !l.archived).length >= kMaxLedgers) {
+        throw const LedgerException(
+          'Jumlah buku kas sudah mencapai batas ($kMaxLedgers). '
+          'Arsipkan buku yang tidak dipakai dulu.',
+        );
+      }
+      await _ensureLedgerNameFree(clean);
+      final now = DateTime.now();
+      final id = 'ledger-${_uuid.v7()}';
+      await into(ledgers).insert(
+        LedgersCompanion.insert(
+          id: id,
+          name: clean,
+          icon: Value(icon),
+          color: color,
+          sortOrder: Value(
+            all.fold<int>(0, (m, l) => l.sortOrder > m ? l.sortOrder : m) + 1,
+          ),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      await _seedLedgerContent(id, template, now: now);
+      return id;
+    });
+  }
+
+  Future<void> updateLedger({
+    required String id,
+    required String name,
+    required String icon,
+    required int color,
+  }) async {
+    final clean = _cleanLedgerName(name);
+    await transaction(() async {
+      await _ensureLedgerNameFree(clean, exceptId: id);
+      final rows = await (update(ledgers)..where((l) => l.id.equals(id))).write(
+        LedgersCompanion(
+          name: Value(clean),
+          icon: Value(icon),
+          color: Value(color),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+      if (rows == 0) throw const LedgerException('Buku kas tidak ditemukan.');
+    });
+  }
+
+  /// Mengarsipkan menyembunyikan buku dari pengalih; datanya tetap ada dan
+  /// aturan berulangnya dijeda (lihat [generateDueRecurring]). Buku Utama tidak
+  /// bisa diarsipkan.
+  Future<void> setLedgerArchived(String id, {required bool archived}) async {
+    if (id == kMainLedgerId) {
+      throw const LedgerException('Buku Utama tidak bisa diarsipkan.');
+    }
+    await transaction(() async {
+      if (!archived) {
+        final active = (await select(ledgers).get()).where((l) => !l.archived);
+        if (active.length >= kMaxLedgers) {
+          throw const LedgerException(
+            'Jumlah buku kas sudah mencapai batas ($kMaxLedgers).',
+          );
+        }
+      }
+      final rows = await (update(ledgers)..where((l) => l.id.equals(id))).write(
+        LedgersCompanion(
+          archived: Value(archived),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+      if (rows == 0) throw const LedgerException('Buku kas tidak ditemukan.');
+    });
+  }
+
+  /// Jumlah isi sebuah buku, untuk dialog konfirmasi hapus.
+  Future<({int transactions, int accounts})> ledgerUsage(String id) async {
+    final accountRows = await (select(
+      accounts,
+    )..where((a) => a.ledgerId.equals(id))).get();
+    if (accountRows.isEmpty) return (transactions: 0, accounts: 0);
+    final txCount =
+        await (selectOnly(transactions)
+              ..addColumns([transactions.id.count()])
+              ..where(
+                transactions.accountId.isIn([for (final a in accountRows) a.id]) &
+                    transactions.deletedAt.isNull(),
+              ))
+            .map((r) => r.read(transactions.id.count()) ?? 0)
+            .getSingle();
+    return (transactions: txCount, accounts: accountRows.length);
+  }
+
+  /// Menghapus PERMANEN sebuah buku beserta seluruh isinya (dompet, kategori,
+  /// transaksi, aturan berulang, anggaran, target, agenda, utang/piutang).
+  /// Buku Utama tidak bisa dihapus. TIDAK BISA dibatalkan — pemanggil wajib
+  /// meminta konfirmasi eksplisit.
+  Future<void> deleteLedger(String id) async {
+    if (id == kMainLedgerId) {
+      throw const LedgerException('Buku Utama tidak bisa dihapus.');
+    }
+    await transaction(() async {
+      final exists = await (select(
+        ledgers,
+      )..where((l) => l.id.equals(id))).getSingleOrNull();
+      if (exists == null) throw const LedgerException('Buku kas tidak ditemukan.');
+
+      // `categories.parent_id` menunjuk ke dirinya sendiri; urutan hapus dan
+      // defer_foreign_keys sama alasannya dengan eraseAllData/restore.
+      await customStatement('PRAGMA defer_foreign_keys = ON');
+      final accountIds = [
+        for (final a in await (select(
+          accounts,
+        )..where((a) => a.ledgerId.equals(id))).get())
+          a.id,
+      ];
+      final categoryIds = [
+        for (final c in await (select(
+          categories,
+        )..where((c) => c.ledgerId.equals(id))).get())
+          c.id,
+      ];
+      final goalIds = [
+        for (final g in await (select(
+          savingsGoals,
+        )..where((g) => g.ledgerId.equals(id))).get())
+          g.id,
+      ];
+      final txIds = [
+        for (final t in await (select(
+          transactions,
+        )..where((t) => t.accountId.isIn(accountIds))).get())
+          t.id,
+      ];
+      await (delete(transactionTags)..where((t) => t.transactionId.isIn(txIds)))
+          .go();
+      await (delete(transactions)..where((t) => t.id.isIn(txIds))).go();
+      await (delete(
+        recurringRules,
+      )..where((r) => r.accountId.isIn(accountIds))).go();
+      await (delete(budgets)..where((b) => b.categoryId.isIn(categoryIds))).go();
+      await (delete(
+        goalContributions,
+      )..where((c) => c.goalId.isIn(goalIds))).go();
+      await (delete(savingsGoals)..where((g) => g.ledgerId.equals(id))).go();
+      await (delete(agendaReminders)..where((a) => a.ledgerId.equals(id))).go();
+      await (delete(debts)..where((d) => d.ledgerId.equals(id))).go();
+      await (delete(categories)..where((c) => c.ledgerId.equals(id))).go();
+      await (delete(accounts)..where((a) => a.ledgerId.equals(id))).go();
+      await (delete(ledgers)..where((l) => l.id.equals(id))).go();
+    });
+  }
+
+  /// Buku [id] harus ada dan tidak diarsipkan (untuk menulis ke dalamnya).
+  Future<Ledger> _requireLedger(String id) async {
+    final l = await (select(
+      ledgers,
+    )..where((x) => x.id.equals(id))).getSingleOrNull();
+    if (l == null) throw const LedgerException('Buku kas tidak ditemukan.');
+    if (l.archived) {
+      throw LedgerException(
+        'Buku "${l.name}" diarsipkan. Pulihkan dulu untuk mengubah isinya.',
+      );
+    }
+    return l;
+  }
+
+  /// Menegakkan aturan "satu buku": dompet asal, dompet tujuan, kategori, dan
+  /// (bila diberikan) [ledgerId] harus berada di buku yang sama.
+  Future<void> _checkSameLedger({
+    required String accountId,
+    String? categoryId,
+    String? transferToAccountId,
+    String? ledgerId,
+  }) async {
+    final ids = <String>{?ledgerId};
+    final accountIds = {accountId, ?transferToAccountId};
+    for (final a in await (select(
+      accounts,
+    )..where((a) => a.id.isIn(accountIds))).get()) {
+      ids.add(a.ledgerId);
+    }
+    if (categoryId != null) {
+      final c = await (select(
+        categories,
+      )..where((c) => c.id.equals(categoryId))).getSingleOrNull();
+      if (c != null) ids.add(c.ledgerId);
+    }
+    if (ids.length > 1) {
+      throw const LedgerException(
+        'Dompet dan kategori harus berasal dari buku kas yang sama.',
+      );
+    }
+  }
+
   // ------------------------------------------------------------ hapus data
 
   /// Menghapus SELURUH data secara permanen dan mengembalikan ke kondisi
@@ -2245,6 +2899,7 @@ class AppDatabase extends _$AppDatabase {
     await delete(debts).go();
     await delete(categories).go();
     await delete(accounts).go();
+    await delete(ledgers).go();
     await _seed();
   });
 }

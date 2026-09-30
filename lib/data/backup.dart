@@ -14,6 +14,7 @@ class BackupException implements Exception {
 class BackupData {
   const BackupData({
     required this.exportedAt,
+    this.ledgers = const [],
     required this.accounts,
     required this.categories,
     required this.transactions,
@@ -28,6 +29,11 @@ class BackupData {
   });
 
   final DateTime? exportedAt;
+
+  /// Buku kas. Backup lama (format < 7) tidak punya daftar ini; `parse` mengisinya
+  /// dengan Buku Utama. Kosong hanya bila `BackupData` dibuat langsung (mis. tes),
+  /// dan `restore` menambahkan Buku Utama bawaan.
+  final List<Ledger> ledgers;
   final List<Account> accounts;
   final List<Category> categories;
   final List<TxEntry> transactions;
@@ -59,11 +65,13 @@ class BackupService {
   /// v2 menambah `recurringRules`, v3 menambah `savingsGoals` dan
   /// `goalContributions`, v4 menambah `parentId` di kategori (sub-kategori)
   /// serta `tags`/`transactionTags`, v5 menambah `agendaReminders`, v6
-  /// menambah `debts` (utang/piutang). Backup versi lama tetap bisa
-  /// dipulihkan.
-  static const formatVersion = 6;
+  /// menambah `debts` (utang/piutang), v7 menambah `ledgers` (multi buku kas)
+  /// dan `ledgerId` di dompet/kategori/target/agenda/utang. Backup versi lama
+  /// tetap bisa dipulihkan: semua isinya masuk ke Buku Utama.
+  static const formatVersion = 7;
 
   Future<String> export() async {
+    final ledgersList = await _db.select(_db.ledgers).get();
     final accounts = await _db.select(_db.accounts).get();
     final categories = await _db.select(_db.categories).get();
     final transactions = await _db.select(_db.transactions).get();
@@ -79,6 +87,7 @@ class BackupService {
       'format': formatName,
       'version': formatVersion,
       'exportedAt': DateTime.now().toUtc().toIso8601String(),
+      'ledgers': [for (final e in ledgersList) e.toJson()],
       'accounts': [for (final e in accounts) e.toJson()],
       'categories': [for (final e in categories) e.toJson()],
       'transactions': [for (final e in transactions) e.toJson()],
@@ -119,20 +128,30 @@ class BackupService {
 
     try {
       // [optional]: kunci yang tidak ada di backup versi lama dianggap kosong.
+      // [withLedger]: backup format < 7 tidak punya `ledgerId`; barisnya masuk
+      // ke Buku Utama.
       List<T> read<T>(
         String key,
         T Function(Map<String, dynamic>) from, {
         bool optional = false,
+        bool withLedger = false,
       }) => [
         for (final e
             in (root[key] ?? (optional ? const [] : null)) as List<dynamic>)
-          from(e as Map<String, dynamic>),
+          from({
+            if (withLedger) 'ledgerId': kMainLedgerId,
+            ...(e as Map<String, dynamic>),
+          }),
       ];
 
+      final ledgersRead = read('ledgers', Ledger.fromJson, optional: true);
       final data = BackupData(
         exportedAt: DateTime.tryParse('${root['exportedAt']}')?.toLocal(),
-        accounts: read('accounts', Account.fromJson),
-        categories: read('categories', Category.fromJson),
+        ledgers: ledgersRead.isEmpty
+            ? [_defaultMainLedger(DateTime.now())]
+            : ledgersRead,
+        accounts: read('accounts', Account.fromJson, withLedger: true),
+        categories: read('categories', Category.fromJson, withLedger: true),
         transactions: read('transactions', TxEntry.fromJson),
         budgets: read('budgets', Budget.fromJson),
         recurringRules: read(
@@ -144,6 +163,7 @@ class BackupService {
           'savingsGoals',
           SavingsGoal.fromJson,
           optional: true,
+          withLedger: true,
         ),
         goalContributions: read(
           'goalContributions',
@@ -160,8 +180,14 @@ class BackupService {
           'agendaReminders',
           AgendaReminder.fromJson,
           optional: true,
+          withLedger: true,
         ),
-        debts: read('debts', Debt.fromJson, optional: true),
+        debts: read(
+          'debts',
+          Debt.fromJson,
+          optional: true,
+          withLedger: true,
+        ),
       );
       _checkIntegrity(data);
       return data;
@@ -172,6 +198,22 @@ class BackupService {
       throw const BackupException('Isi backup rusak atau tidak lengkap.');
     }
   }
+
+  /// Buku Utama bawaan, untuk backup lama dan untuk `restore` bila daftar buku kosong.
+  static Ledger _defaultMainLedger(DateTime now) => Ledger(
+    id: kMainLedgerId,
+    name: 'Buku Utama',
+    icon: 'savings',
+    color: 0xFF1E88E5,
+    sortOrder: 0,
+    archived: false,
+    createdAt: now,
+    updatedAt: now,
+  );
+
+  /// Semua yang non-null harus berada di buku yang sama dengan [base].
+  static bool _sameLedger(String base, String? a, String? b) =>
+      (a == null || a == base) && (b == null || b == base);
 
   static BackupException _inconsistent(String detail) =>
       BackupException('Isi backup rusak atau tidak konsisten ($detail).');
@@ -211,6 +253,24 @@ class BackupService {
 
   static void _checkIntegrity(BackupData d) {
     const corrupt = BackupException('Isi backup rusak atau tidak konsisten.');
+    // Buku kas: ID unik, Buku Utama wajib ada dan tidak diarsipkan, dan setiap
+    // `ledgerId` merujuk buku yang ada (kolomnya tanpa foreign key).
+    final ledgerIds = {for (final l in d.ledgers) l.id};
+    if (ledgerIds.length != d.ledgers.length ||
+        !d.ledgers.any((l) => l.id == kMainLedgerId && !l.archived)) {
+      throw corrupt;
+    }
+    final accountLedger = {for (final a in d.accounts) a.id: a.ledgerId};
+    final categoryLedger = {for (final c in d.categories) c.id: c.ledgerId};
+    for (final id in [
+      ...accountLedger.values,
+      ...categoryLedger.values,
+      for (final g in d.savingsGoals) g.ledgerId,
+      for (final a in d.agendaReminders) a.ledgerId,
+      for (final debt in d.debts) debt.ledgerId,
+    ]) {
+      if (!ledgerIds.contains(id)) throw corrupt;
+    }
     final accountIds = {for (final a in d.accounts) a.id};
     final categoryIds = {for (final c in d.categories) c.id};
     if (accountIds.length != d.accounts.length ||
@@ -228,6 +288,13 @@ class BackupService {
               !accountIds.contains(t.transferToAccountId))) {
         throw corrupt;
       }
+      if (!_sameLedger(
+        accountLedger[t.accountId]!,
+        categoryLedger[t.categoryId],
+        accountLedger[t.transferToAccountId],
+      )) {
+        throw _inconsistent('transaksi lintas buku kas');
+      }
     }
     for (final b in d.budgets) {
       if (b.amount <= 0 || !categoryIds.contains(b.categoryId)) throw corrupt;
@@ -239,7 +306,11 @@ class BackupService {
       if (parentId == null) continue;
       if (parentId == c.id || !categoryIds.contains(parentId)) throw corrupt;
       final parent = d.categories.firstWhere((p) => p.id == parentId);
-      if (parent.type != c.type || parent.parentId != null) throw corrupt;
+      if (parent.type != c.type ||
+          parent.parentId != null ||
+          parent.ledgerId != c.ledgerId) {
+        throw corrupt;
+      }
     }
     final tagIds = {for (final t in d.tags) t.id};
     if (tagIds.length != d.tags.length) throw corrupt; // ID ganda
@@ -278,17 +349,22 @@ class BackupService {
       );
     }
     // Aplikasi selalu menyisakan minimal satu dompet dan satu kategori aktif per
-    // jenis. Tanpa itu, setelah restore tidak ada yang bisa dipilih di form.
-    if (!d.accounts.any((a) => !a.archived)) {
-      throw const BackupException(
-        'Backup harus memuat minimal satu dompet aktif.',
-      );
-    }
-    for (final type in [TxType.income, TxType.expense]) {
-      if (!d.categories.any((c) => c.type == type && !c.archived)) {
+    // jenis di setiap buku yang aktif. Tanpa itu, setelah restore tidak ada yang
+    // bisa dipilih di form.
+    for (final ledger in d.ledgers.where((l) => !l.archived)) {
+      if (!d.accounts.any((a) => a.ledgerId == ledger.id && !a.archived)) {
         throw const BackupException(
-          'Backup harus memuat minimal satu kategori aktif untuk tiap jenis.',
+          'Backup harus memuat minimal satu dompet aktif.',
         );
+      }
+      for (final type in [TxType.income, TxType.expense]) {
+        if (!d.categories.any(
+          (c) => c.ledgerId == ledger.id && c.type == type && !c.archived,
+        )) {
+          throw const BackupException(
+            'Backup harus memuat minimal satu kategori aktif untuk tiap jenis.',
+          );
+        }
       }
     }
     if ({for (final r in d.recurringRules) r.id}.length !=
@@ -303,6 +379,13 @@ class BackupService {
           (r.transferToAccountId != null &&
               !accountIds.contains(r.transferToAccountId))) {
         throw corrupt;
+      }
+      if (!_sameLedger(
+        accountLedger[r.accountId]!,
+        categoryLedger[r.categoryId],
+        accountLedger[r.transferToAccountId],
+      )) {
+        throw _inconsistent('aturan berulang lintas buku kas');
       }
     }
     final goalIds = {for (final g in d.savingsGoals) g.id};
@@ -370,8 +453,15 @@ class BackupService {
       await _db.delete(_db.debts).go();
       await _db.delete(_db.categories).go();
       await _db.delete(_db.accounts).go();
+      await _db.delete(_db.ledgers).go();
 
+      final ledgerRows = data.ledgers.any((l) => l.id == kMainLedgerId)
+          ? data.ledgers
+          : [_defaultMainLedger(DateTime.now()), ...data.ledgers];
       await _db.batch((b) {
+        b.insertAll(_db.ledgers, [
+          for (final e in ledgerRows) e.toCompanion(false),
+        ]);
         b.insertAll(_db.accounts, [
           for (final e in data.accounts) e.toCompanion(false),
         ]);

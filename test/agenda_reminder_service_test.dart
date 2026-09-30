@@ -16,6 +16,7 @@ AgendaReminder _agenda({
 }) => AgendaReminder(
   id: id,
   title: 'Servis AC',
+  ledgerId: kMainLedgerId,
   note: note,
   frequency: Frequency.monthly,
   startDate: startDate ?? DateTime(2026, 1, 10),
