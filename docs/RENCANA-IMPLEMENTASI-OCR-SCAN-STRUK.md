@@ -247,6 +247,12 @@ sudah didokumentasikan sebagai batasan yang diketahui, bukan regresi baru.
 
 ## 3. Fitur Ultimate — ekstraksi pintar via AI
 
+> **Pembaruan 2026-09-30:** penyedia model AI diputuskan beralih dari Claude Haiku 4.5 ke **Google Gemini** (paid
+> tier; model dipilih lewat uji 10 struk). Bagian di bawah ini mencatat desain dan kode awal dengan Claude dan tidak
+> ditulis ulang; rencana peralihan, alasan, dan perbandingan biaya ada di
+> [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md §3 B0](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md). Angka biaya di §3.4
+> (Haiku 4.5, ≈ Rp29/scan) berlaku untuk desain awal saja.
+
 Bangun DI ATAS fitur Premium (§2) yang sama — teks OCR yang sudah diekstrak dikirim ke backend untuk diproses
 LLM, tidak ada alur capture/OCR terpisah.
 

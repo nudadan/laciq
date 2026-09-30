@@ -51,9 +51,10 @@ Produk yang sudah aktif di Play Console dan RevenueCat: hanya **Premium**. Ultim
 
 | Fitur | Gratis | Premium | Ultimate | Status implementasi |
 |---|---|---|---|---|
-| Ekstraksi struk dengan AI: nama toko dan kategori terisi otomatis (kuota 60 scan/bulan) | ❌ | ❌ | ✅ | 🔴 Kode klien dan Worker selesai (Claude Haiku 4.5; tes 416 + 9 lulus). **Belum bisa dipakai**: lihat bagian 6 |
+| Ekstraksi struk dengan AI: nama toko dan kategori terisi otomatis (kuota 60 scan/bulan) | ❌ | ❌ | ✅ | 🔴 Kode klien dan Worker selesai (saat ini memanggil Claude Haiku 4.5; tes 416 + 9 lulus). Penyedia diputuskan beralih ke **Google Gemini** (2026-09-30), model dipilih lewat uji 10 struk; lihat [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md §3 B0](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md). **Belum bisa dipakai**: lihat bagian 6 |
+| **Multi buku kas**: pembukuan terpisah (mis. pribadi vs bisnis), masing-masing punya dompet, kategori, anggaran, transaksi berulang, agenda, utang/piutang, dan target sendiri; sampai 5 buku, pengalih buku di aplikasi | ❌ (satu Buku Utama) | ❌ (satu Buku Utama) | ✅ | ⬜ Belum dibuat. Rencana lengkap di [RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md](RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md); perubahan skema v9 → v10 dan backup v6 → v7 |
 
-Cara kerja bila aktif: hasil OCR on-device diisi dulu oleh heuristik, lalu Ultimate meminta AI (Cloudflare Worker) menyempurnakan nama toko dan kategori. Tanpa `AI_EXTRACTION_URL`, fitur mati diam-diam dan scan tetap jalan dengan heuristik.
+Cara kerja ekstraksi AI bila aktif: hasil OCR on-device diisi dulu oleh heuristik, lalu Ultimate meminta AI (Cloudflare Worker) menyempurnakan nama toko dan kategori. Tanpa `AI_EXTRACTION_URL`, fitur mati diam-diam dan scan tetap jalan dengan heuristik.
 
 ## 5. Ringkasan cakupan
 
@@ -61,7 +62,7 @@ Cara kerja bila aktif: hasil OCR on-device diisi dulu oleh heuristik, lalu Ultim
 |---|---|---|
 | Gratis | 13 inti + 3 dengan batas | Ya |
 | Premium | Semua Gratis + 7 fitur Premium penuh, tanpa iklan, batas dibuka | Ya (produk aktif, RevenueCat valid; uji beli di HP belum dilakukan) |
-| Ultimate | Semua Premium + 1 fitur AI | Belum |
+| Ultimate | Semua Premium + 2 fitur khusus (ekstraksi AI, multi buku kas) | Belum (AI: kode selesai, belum di-deploy; multi buku kas: baru rencana) |
 
 ## 6. Yang menghalangi Ultimate (semua belum dikerjakan)
 
@@ -73,8 +74,36 @@ Cara kerja bila aktif: hasil OCR on-device diisi dulu oleh heuristik, lalu Ultim
 | Entitlement RevenueCat `ultimate`; produk Ultimate dikaitkan ke `ultimate` **dan** `premium` (lihat `revenuecat_config.dart`) | ⬜ |
 | Paket Ultimate ditambahkan ke offering `dompetku` (kartu Ultimate baru muncul di halaman langganan bila paketnya ada) | ⬜ |
 | Uji nyata dengan akun Ultimate | ⬜ |
-| Kebijakan privasi: aliran AI (Cloudflare → Anthropic) sudah ditulis, tetapi Data Safety Play perlu disesuaikan saat Ultimate rilis | 🟡 |
+| Kebijakan privasi: aliran AI sudah ditulis dengan penyedia **Anthropic**; harus diubah menjadi **Google (Gemini API berbayar)** saat Worker di-deploy (jangan diubah lebih awal, versi online harus sesuai kenyataan), lalu Data Safety Play disesuaikan | 🟡 |
+| Penyedia AI: uji 10 struk (heuristik, 3.1 Flash-Lite, 3.8 Flash, Haiku 4.5), pilih model termurah yang lolos; wajib Gemini **paid tier** dengan project Google Cloud terpisah | ⬜ |
 | Bagian Ultimate di deskripsi listing Play sengaja dihapus; tambahkan lagi saat Ultimate rilis | ⬜ |
+
+## 6b. Temuan audit Ultimate (2026-09-30)
+
+Audit dokumen rancangan (`RANCANGAN-AWAL.md`, `RENCANA-IMPLEMENTASI-OCR-SCAN-STRUK.md`) terhadap kode. Rencana perbaikan tiap temuan ada di [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md); kolom terakhir merujuk ke butirnya.
+
+### Celah yang belum tercatat di rencana mana pun
+
+| ID | Temuan | Bukti di kode | Dampak | Rencana |
+|---|---|---|---|---|
+| T1 | Pelanggan Premium tidak punya jalan untuk upgrade ke Ultimate. Tile Pengaturan untuk pengguna Premium hanya "Premium aktif" + tombol "Kelola" (Play Store); `SubscriptionPage` hanya terbuka lewat gate fitur atau tile "Upgrade ke Premium" yang hanya tampil bagi yang belum Premium | `settings_page.dart:442-451` | Kartu Ultimate hanya terlihat oleh pengguna gratis; Ultimate tidak bisa dijual ke basis Premium | A3 |
+| T2 | Pembelian Ultimate saat Premium aktif tidak memakai informasi penggantian produk. Premium dan Ultimate adalah dua langganan Play berbeda, jadi tanpa penggantian pengguna membayar dua langganan sekaligus | `subscription_status.dart:206` (`PurchaseParams.package(native)` polos) | Risiko tagihan ganda, keluhan, dan refund | A2 |
+| T3 | Tidak ada penanda Ultimate di UI: pelanggan Ultimate tetap melihat "DompetKu Premium aktif"; judul halaman langganan selalu "DompetKu Premium" | `settings_page.dart:445`, `subscription_page.dart:61` | Pengguna tidak yakin paketnya benar | A3 |
+| T4 | Sisa kuota tidak ditampilkan. Worker mengembalikan `remaining` tetapi klien mengabaikannya; pengguna baru tahu kuota habis saat menerima 429 | `handler.ts:112`, `ai_extraction_service.dart` | Pengalaman buruk di ujung bulan | A4 |
+| T5 | Tidak ada ajakan upgrade ke Ultimate di alur Scan struk, padahal itu titik paling relevan bagi pelanggan Premium | `transaction_form_page.dart` (hanya `isUltimateProvider` di `_enhanceWithAi`) | Konversi Premium → Ultimate rendah | A5 |
+| T6 | Verifikasi Worker memakai `appUserId` anonim RevenueCat tanpa bukti kepemilikan; penghitung kuota di KV tidak atomik; setiap permintaan (termasuk dari non-Ultimate) memicu panggilan ke RevenueCat | `handler.ts:83-105`, `index.ts` | Risiko rendah: ID sulit ditebak dan ada batas 60/bulan, tetapi bukan autentikasi sungguhan dan biaya AI bisa dikuras bila ID bocor | C |
+
+### Kesenjangan rancangan awal vs implementasi
+
+| Rancangan | Implementasi | Rencana |
+|---|---|---|
+| AI mengekstrak merchant, **total, item**, kategori (`RANCANGAN-AWAL.md` §2 "Fitur AI") | Hanya **nama toko dan kategori** (`Extraction` di `handler.ts`). Total dan tanggal tetap dari heuristik | B |
+| — | Kelemahan yang sudah tercatat (total salah pada struk SPBU 2-kolom) tidak dibantu AI, sehingga nilai jual Ultimate terbatas pada kenyamanan mengisi toko dan kategori | B |
+| Harga Ultimate Rp12.500/Rp125.000 | Ditetapkan 2026-09-29 tetapi rencana meminta dicek ulang sebelum diajukan ke Play | D (butir keputusan) |
+
+### Fitur rancangan yang belum ada (di luar Ultimate)
+
+Semuanya ❌ dan tanpa desain: sinkronisasi multi-device dan mode berdua/keluarga, laporan bulanan otomatis dan insight, multi-mata uang (di luar cakupan Android-Indonesia), widget home screen dan quick-add, input dari notifikasi bank, asisten AI berbasis chat, ekspor PDF/Excel, opsi lifetime dan uji coba gratis 7 hari, enkripsi database (SQLCipher). Kandidat isi Ultimate berikutnya yang paling dekat dengan gagasan awal: **insight otomatis** dan **asisten chat AI** (belum dijadwalkan).
 
 ## 7. Catatan konsistensi
 
