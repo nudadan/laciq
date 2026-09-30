@@ -1,0 +1,66 @@
+{
+  "note": "Struk SINTETIS (dibuat tangan, bukan data pengguna) agar aman dikirim ke penyedia AI mana pun, termasuk free tier. Tambahkan struk nyata milik sendiri dengan nama/nomor kartu/alamat yang sudah disamarkan.",
+  "categories": [
+    { "id": "cat-exp-makan", "name": "Makanan & Minuman" },
+    { "id": "cat-exp-transport", "name": "Transportasi" },
+    { "id": "cat-exp-belanja", "name": "Belanja" },
+    { "id": "cat-exp-tagihan", "name": "Tagihan & Utilitas" },
+    { "id": "cat-exp-rumah", "name": "Tempat Tinggal" },
+    { "id": "cat-exp-kesehatan", "name": "Kesehatan" },
+    { "id": "cat-exp-pendidikan", "name": "Pendidikan" },
+    { "id": "cat-exp-hiburan", "name": "Hiburan" },
+    { "id": "cat-exp-lain-keluar", "name": "Lainnya" }
+  ],
+  "receipts": [
+    {
+      "name": "minimarket satu kolom",
+      "rawText": "PT.INDOMARCO PRISMATAMA\nJL. MERDEKA NO 10 JAKARTA\nNPWP 01.234.567.8-090.000\n28.09.26 14:03 KASIR 02\nSUSU UHT 1L        1  18.500\nROTI TAWAR         1  14.200\nAIR MINERAL 600ML  2   7.400\nTOTAL BELANJA      40.100\nTUNAI              50.000\nKEMBALI             9.900\nTERIMA KASIH",
+      "expected": { "merchant": "Indomaret", "categoryId": "cat-exp-belanja", "total": 40100, "date": "2026-09-28" }
+    },
+    {
+      "name": "minimarket tunai dan kembalian",
+      "rawText": "ALFAMART\nCabang 1234 - Bekasi\n27/09/2026 19:41\nMIE INSTAN 5x   14.500\nTELUR 1KG      31.000\nSUBTOTAL       45.500\nDISKON         (2.000)\nTOTAL          43.500\nTUNAI          50.000\nKEMBALI         6.500",
+      "expected": { "merchant": "Alfamart", "categoryId": "cat-exp-belanja", "total": 43500, "date": "2026-09-27" }
+    },
+    {
+      "name": "restoran dengan service dan pajak",
+      "rawText": "RM SEDERHANA BAROKAH\nJl. Raya Bogor 45\nSabtu, 26 September 2026 12:15\nNasi Rendang        2   64.000\nEs Teh Manis        2   14.000\nAyam Bakar          1   38.000\nSUBTOTAL               116.000\nSERVICE 5%               5.800\nPB1 10%                 12.180\nTOTAL                  133.980\nDEBIT BCA              133.980",
+      "expected": { "merchant": "Sederhana", "categoryId": "cat-exp-makan", "total": 133980, "date": "2026-09-26" }
+    },
+    {
+      "name": "SPBU dua kolom (kasus yang gagal di heuristik)",
+      "rawText": "PERTAMINA\nSPBU 34.12345\nJL. SOEKARNO HATTA\nShift: 1  No. Trans: 5398872\n28/09/2026 08:22\nProduk : PERTALITE\nHarga/Liter (Rp) : 10.000\nSubsidi Pemerintah : 5.892\nVolume (L) : 24,485\nTotal Penjualan (Rp)\nDibayar Konsumen : 244.850\nCASH : 250.000\nKembali : 5.150",
+      "expected": { "merchant": "Pertamina", "categoryId": "cat-exp-transport", "total": 244850, "date": "2026-09-28" }
+    },
+    {
+      "name": "apotek dengan qty dan harga",
+      "rawText": "APOTEK SEHAT SENTOSA\nTelp 021-555-0101\n25-Sep-2026 10:05\nParacetamol 500mg  2 x 6.500   13.000\nVitamin C          1 x 28.000  28.000\nMasker             1 x 12.000  12.000\nJUMLAH             53.000\nBAYAR (QRIS)       53.000",
+      "expected": { "merchant": "Apotek Sehat Sentosa", "categoryId": "cat-exp-kesehatan", "total": 53000, "date": "2026-09-25" }
+    },
+    {
+      "name": "ojek online dengan diskon",
+      "rawText": "GoRide\nPerjalanan selesai\n24 Sep 2026, 07:48\nTarif perjalanan   Rp 32.000\nBiaya layanan      Rp 2.000\nDiskon promo      -Rp 8.000\nTotal bayar       Rp 26.000\nDibayar dengan GoPay",
+      "expected": { "merchant": "Gojek", "categoryId": "cat-exp-transport", "total": 26000, "date": "2026-09-24" }
+    },
+    {
+      "name": "token listrik",
+      "rawText": "PLN\nSTRUK PEMBELIAN LISTRIK PRABAYAR\nTGL 23/09/2026 21:10\nNO METER 12345678901\nRP BAYAR     102.500\nADMIN BANK     2.500\nMATERAI            0\nPPN                0\nPPJ            7.250\nRP STROOM     92.750\nJML KWH        62,3\nTOTAL BAYAR  102.500",
+      "expected": { "merchant": "PLN", "categoryId": "cat-exp-tagihan", "total": 102500, "date": "2026-09-23" }
+    },
+    {
+      "name": "warung makan sederhana",
+      "rawText": "WARUNG BU TINI\nnasi ayam   25000\nes teh       5000\ngorengan     6000\nTOTAL       36000\n29/9/2026",
+      "expected": { "merchant": "Warung Bu Tini", "categoryId": "cat-exp-makan", "total": 36000, "date": "2026-09-29" }
+    },
+    {
+      "name": "belanja online dengan ongkir dan diskon",
+      "rawText": "INVOICE\nTokoBuku Nusantara\nTanggal Pembelian: 22 September 2026\nBuku Pemrograman Dart     Rp 185.000\nBuku Flutter Praktis      Rp 165.000\nSubtotal Harga Barang     Rp 350.000\nOngkos Kirim              Rp 18.000\nDiskon Ongkir            -Rp 18.000\nVoucher Toko             -Rp 35.000\nTotal Belanja             Rp 315.000\nMetode: Transfer BCA",
+      "expected": { "merchant": "TokoBuku Nusantara", "categoryId": "cat-exp-pendidikan", "total": 315000, "date": "2026-09-22" }
+    },
+    {
+      "name": "bioskop",
+      "rawText": "CINEMA XXI - MALL CENTRAL\nTGL: 20/09/2026  JAM: 19:30\nFILM: PETUALANGAN LAUT\nSTUDIO 3   KURSI F7 F8\n2 TIKET x 50.000     100.000\nBIAYA ONLINE            6.000\nTOTAL                 106.000\nGOPAY                 106.000",
+      "expected": { "merchant": "Cinema XXI", "categoryId": "cat-exp-hiburan", "total": 106000, "date": "2026-09-20" }
+    }
+  ]
+}

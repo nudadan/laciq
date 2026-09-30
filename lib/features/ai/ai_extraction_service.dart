@@ -13,17 +13,31 @@ class AiCategoryOption {
 }
 
 class AiReceiptExtraction {
-  const AiReceiptExtraction({this.merchant, this.categoryId, this.remaining});
+  const AiReceiptExtraction({
+    this.merchant,
+    this.categoryId,
+    this.total,
+    this.date,
+    this.remaining,
+  });
   final String? merchant;
   final String? categoryId;
+
+  /// Total yang dibayar (Rupiah bulat), sudah divalidasi server; null bila tidak yakin.
+  final int? total;
+
+  /// Tanggal transaksi (hanya tanggal); null bila tidak yakin.
+  final DateTime? date;
 
   /// Sisa kuota scan AI bulan ini menurut server; null bila tidak dikirim.
   final int? remaining;
 }
 
-/// Kuota scan AI bulan ini habis (server membalas 429).
+/// Kuota scan AI habis (server membalas 429): bulanan, atau batas harian bila
+/// [daily] true.
 class AiQuotaExceeded implements Exception {
-  const AiQuotaExceeded();
+  const AiQuotaExceeded({this.daily = false});
+  final bool daily;
 }
 
 /// Ekstraksi pintar (fitur Ultimate): teks OCR → nama toko + kategori. Semua
@@ -77,7 +91,14 @@ class HttpAiExtractionService implements AiExtractionService {
             }),
           )
           .timeout(_timeout);
-      if (response.statusCode == 429) throw const AiQuotaExceeded();
+      if (response.statusCode == 429) {
+        // 429 juga dipakai pembatas laju per IP ("rate_limited"): itu bukan
+        // kuota pengguna, jadi diam saja (heuristik tetap dipakai). Kode lain
+        // atau tanpa kode dianggap kuota bulanan (server versi lama).
+        final code = _errorCode(response.bodyBytes);
+        if (code == 'rate_limited') return null;
+        throw AiQuotaExceeded(daily: code == 'daily_limit_exceeded');
+      }
       if (response.statusCode != 200) return null;
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       if (json is! Map<String, dynamic>) return null;
@@ -89,8 +110,11 @@ class HttpAiExtractionService implements AiExtractionService {
       }
       final categoryId = json['categoryId'];
       final remaining = json['remaining'];
+      final total = json['total'];
       return AiReceiptExtraction(
         remaining: remaining is int ? remaining : null,
+        total: total is int && total > 0 ? total : null,
+        date: _parseDate(json['date']),
         merchant: merchant.isEmpty ? null : merchant,
         categoryId:
             categoryId is String && categories.any((c) => c.id == categoryId)
@@ -103,4 +127,25 @@ class HttpAiExtractionService implements AiExtractionService {
       return null;
     }
   }
+}
+
+String? _errorCode(List<int> body) {
+  try {
+    final json = jsonDecode(utf8.decode(body));
+    if (json is Map<String, dynamic> && json['error'] is String) {
+      return json['error'] as String;
+    }
+  } catch (_) {}
+  return null;
+}
+
+/// `YYYY-MM-DD` yang benar-benar ada di kalender; selain itu null. Server sudah
+/// memvalidasi, ini sabuk pengaman kedua.
+DateTime? _parseDate(Object? value) {
+  if (value is! String) return null;
+  final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value);
+  if (m == null) return null;
+  final (y, mo, d) = (int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!));
+  final date = DateTime(y, mo, d);
+  return date.year == y && date.month == mo && date.day == d ? date : null;
 }

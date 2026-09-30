@@ -6,17 +6,26 @@ export interface CategoryOption {
 export interface Extraction {
   merchant: string | null;
   categoryId: string | null;
+  /** Total yang benar-benar dibayar, Rupiah bulat. */
+  total: number | null;
+  /** Tanggal transaksi, `YYYY-MM-DD`. */
+  date: string | null;
 }
 
 export interface Deps {
   /** Apakah pengguna ini punya entitlement Ultimate aktif (dicek ke RevenueCat). */
   hasUltimate(appUserId: string): Promise<boolean>;
-  /** Jumlah pemakaian bulan ini untuk kunci tertentu. */
+  /** Jumlah pemakaian untuk kunci tertentu. */
   getUsage(key: string): Promise<number>;
-  setUsage(key: string, count: number): Promise<void>;
+  /** Menyimpan jumlah pemakaian; kunci kedaluwarsa sendiri setelah [ttlSeconds]. */
+  setUsage(key: string, count: number, ttlSeconds: number): Promise<void>;
   extract(rawText: string, categories: CategoryOption[]): Promise<Extraction>;
   now(): Date;
   monthlyLimit: number;
+  /** Batas per hari (UTC) per pengguna; 0/kosong = tanpa batas harian. */
+  dailyLimit?: number;
+  /** Pembatas laju per IP (opsional, mis. Cloudflare Rate Limiting). true = boleh. */
+  allowIp?(ip: string): Promise<boolean>;
 }
 
 const MAX_BODY_BYTES = 20_000;
@@ -25,6 +34,12 @@ const MAX_CATEGORIES = 80;
 const MAX_ID_CHARS = 64;
 const MAX_NAME_CHARS = 80;
 const USER_ID_PATTERN = /^[\w$:.\-]{8,128}$/;
+
+/** Batas wajar satu struk (Rupiah). Di atas ini hampir pasti salah baca. */
+export const MAX_TOTAL = 1_000_000_000;
+const MONTH_TTL_SECONDS = 35 * 24 * 3600;
+const DAY_TTL_SECONDS = 2 * 24 * 3600;
+const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -63,10 +78,54 @@ export function usageKey(appUserId: string, now: Date): string {
   return `usage:${appUserId}:${month}`;
 }
 
+export function dailyUsageKey(appUserId: string, now: Date): string {
+  const day = now.toISOString().slice(0, 10);
+  return `usage-day:${appUserId}:${day}`;
+}
+
+/** Total harus bilangan bulat positif yang wajar; selain itu `null`. */
+export function sanitizeTotal(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  const n = Math.round(value);
+  if (n !== value) return null; // pecahan: hampir pasti salah baca
+  return n >= 1 && n <= MAX_TOTAL ? n : null;
+}
+
+/**
+ * Tanggal harus `YYYY-MM-DD` yang benar-benar ada di kalender dan wajar untuk
+ * sebuah struk: tidak lebih dari 5 tahun ke belakang dan tidak lebih dari
+ * sehari ke depan (selisih zona waktu). Selain itu `null`.
+ */
+export function sanitizeDate(value: unknown, now: Date): string | null {
+  if (typeof value !== "string") return null;
+  const m = DATE_PATTERN.exec(value);
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const t = Date.UTC(y, mo - 1, d);
+  const check = new Date(t);
+  if (
+    check.getUTCFullYear() !== y ||
+    check.getUTCMonth() !== mo - 1 ||
+    check.getUTCDate() !== d
+  ) {
+    return null; // mis. 2026-02-31
+  }
+  const dayMs = 24 * 3600 * 1000;
+  if (t < now.getTime() - 5 * 365 * dayMs) return null;
+  if (t > now.getTime() + dayMs) return null;
+  return value;
+}
+
 export async function handleExtract(req: Request, deps: Deps): Promise<Response> {
   const url = new URL(req.url);
   if (url.pathname !== "/extract") return json({ error: "not_found" }, 404);
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
+  // Pembatas per IP paling awal: sebelum membaca body atau memanggil layanan luar.
+  const ip = req.headers.get("cf-connecting-ip");
+  if (deps.allowIp && ip && !(await deps.allowIp(ip))) {
+    return json({ error: "rate_limited" }, 429);
+  }
 
   const text = await req.text();
   if (text.length > MAX_BODY_BYTES) return json({ error: "payload_too_large" }, 413);
@@ -88,10 +147,16 @@ export async function handleExtract(req: Request, deps: Deps): Promise<Response>
   }
   if (!ultimate) return json({ error: "not_ultimate" }, 403);
 
-  const key = usageKey(body.appUserId, deps.now());
-  const used = await deps.getUsage(key);
+  const now = deps.now();
+  const monthKey = usageKey(body.appUserId, now);
+  const used = await deps.getUsage(monthKey);
   if (used >= deps.monthlyLimit) {
     return json({ error: "quota_exceeded", limit: deps.monthlyLimit }, 429);
+  }
+  const dayKey = dailyUsageKey(body.appUserId, now);
+  const usedToday = deps.dailyLimit ? await deps.getUsage(dayKey) : 0;
+  if (deps.dailyLimit && usedToday >= deps.dailyLimit) {
+    return json({ error: "daily_limit_exceeded", limit: deps.dailyLimit }, 429);
   }
 
   let result: Extraction;
@@ -102,12 +167,20 @@ export async function handleExtract(req: Request, deps: Deps): Promise<Response>
   }
   // Hanya dihitung bila ekstraksi berhasil; pengguna tidak dirugikan oleh
   // kegagalan di sisi kita.
-  await deps.setUsage(key, used + 1);
+  await deps.setUsage(monthKey, used + 1, MONTH_TTL_SECONDS);
+  if (deps.dailyLimit) await deps.setUsage(dayKey, usedToday + 1, DAY_TTL_SECONDS);
 
-  // Jangan percaya keluaran model: kategori harus salah satu yang dikirim app.
+  // Jangan percaya keluaran model: kategori harus salah satu yang dikirim app,
+  // total dan tanggal harus wajar.
   const categoryId = body.categories.some((c) => c.id === result.categoryId)
     ? result.categoryId
     : null;
   const merchant = result.merchant?.trim().slice(0, 60) || null;
-  return json({ merchant, categoryId, remaining: deps.monthlyLimit - used - 1 });
+  return json({
+    merchant,
+    categoryId,
+    total: sanitizeTotal(result.total),
+    date: sanitizeDate(result.date, now),
+    remaining: deps.monthlyLimit - used - 1,
+  });
 }

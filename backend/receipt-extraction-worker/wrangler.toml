@@ -5,12 +5,36 @@ compatibility_date = "2026-09-29"
 [vars]
 ULTIMATE_ENTITLEMENT = "ultimate"
 MONTHLY_LIMIT = "60"
+# Batas per hari per pengguna (0 = tanpa batas harian). Membatasi kerugian bila
+# satu ID pengguna bocor.
+DAILY_LIMIT = "15"
+
+# Penyedia dan model AI. Penyedia: "gemini" (bawaan) atau "anthropic".
+# ID model SENGAJA di sini, bukan di kode, supaya ganti model tidak perlu rilis.
+# Pilih model lewat evaluasi (eval/), lihat docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md B3.
+AI_PROVIDER = "gemini"
+AI_MODEL = "gemini-3.1-flash-lite"
+# Opsional: thinkingConfig mentah untuk Gemini (JSON). Kosongkan sampai
+# diverifikasi dengan satu permintaan nyata (B0.1). Contoh seri 3:
+#   AI_THINKING_CONFIG = '{"thinkingLevel":"minimal"}'
+# Token berpikir ditagih sebagai token keluaran.
+# AI_THINKING_CONFIG = ""
 
 # Buat dulu: `npx wrangler kv namespace create RATE_LIMIT`, lalu tempel id-nya di sini.
+# Dipakai untuk penghitung pemakaian DAN cache entitlement (kunci berawalan "ent:").
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 id = "GANTI_DENGAN_ID_KV_NAMESPACE"
 
+# Opsional: pembatas laju per IP (Cloudflare Rate Limiting). Tanpa binding ini
+# pembatasan IP dilewati. Sintaks: lihat dokumentasi Cloudflare "Rate Limiting"
+# untuk Workers, lalu aktifkan blok berikut.
+# [[ratelimits]]
+# name = "IP_LIMITER"
+# namespace_id = "1001"
+# simple = { limit = 30, period = 60 }
+
 # Rahasia (jangan ditaruh di file ini):
-#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put GEMINI_API_KEY          # kunci PAID TIER, project Google Cloud khusus
+#   npx wrangler secret put ANTHROPIC_API_KEY       # hanya bila AI_PROVIDER = "anthropic"
 #   npx wrangler secret put REVENUECAT_SECRET_KEY

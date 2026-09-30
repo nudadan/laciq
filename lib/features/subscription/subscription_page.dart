@@ -194,8 +194,8 @@ class _TierCard extends StatelessWidget {
     ),
     (
       Icons.auto_awesome_rounded,
-      'Ekstraksi struk dengan AI: nama toko & kategori terisi otomatis '
-          '(60 scan/bulan)',
+      'Ekstraksi struk dengan AI: nama toko, kategori, total, dan tanggal '
+          'terisi otomatis (60 scan/bulan)',
     ),
   ];
 

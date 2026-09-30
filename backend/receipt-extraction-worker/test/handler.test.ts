@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { handleExtract, usageKey, type Deps } from "../src/handler.ts";
+import {
+  MAX_TOTAL,
+  dailyUsageKey,
+  handleExtract,
+  sanitizeDate,
+  sanitizeTotal,
+  usageKey,
+  type Deps,
+} from "../src/handler.ts";
 
 const USER = "$RCAnonymousID:0123456789abcdef0123456789abcdef";
 const CATS = [
@@ -17,7 +25,7 @@ function makeDeps(over: Partial<Deps> = {}) {
     setUsage: async (k, n) => void usage.set(k, n),
     extract: async (rawText, categories) => {
       calls.push({ rawText, categories });
-      return { merchant: "Indomaret", categoryId: "cat-exp-makan" };
+      return { merchant: "Indomaret", categoryId: "cat-exp-makan", total: 23500, date: "2026-09-28" };
     },
     now: () => new Date("2026-09-29T10:00:00Z"),
     monthlyLimit: 3,
@@ -43,6 +51,8 @@ describe("handleExtract", () => {
     assert.deepEqual(await res.json(), {
       merchant: "Indomaret",
       categoryId: "cat-exp-makan",
+      total: 23500,
+      date: "2026-09-28",
       remaining: 2,
     });
     assert.equal(usage.get(usageKey(USER, deps.now())), 1);
@@ -92,7 +102,12 @@ describe("handleExtract", () => {
 
   it("membuang categoryId hasil model yang bukan dari daftar", async () => {
     const { deps } = makeDeps({
-      extract: async () => ({ merchant: "  Toko X  ", categoryId: "cat-karangan" }),
+      extract: async () => ({
+        merchant: "  Toko X  ",
+        categoryId: "cat-karangan",
+        total: null,
+        date: null,
+      }),
     });
     const body = (await (await handleExtract(post(valid), deps)).json()) as Record<string, unknown>;
     assert.equal(body.categoryId, null);
@@ -125,5 +140,124 @@ describe("handleExtract", () => {
     const { deps } = makeDeps();
     assert.equal((await handleExtract(post(valid, "/lain"), deps)).status, 404);
     assert.equal((await handleExtract(post(null, "/extract", "GET"), deps)).status, 405);
+  });
+  describe("total dan tanggal dari model", () => {
+    const now = new Date("2026-09-29T10:00:00Z");
+    const ask = async (over: { total?: unknown; date?: unknown }) => {
+      const { deps } = makeDeps({
+        extract: async () =>
+          ({ merchant: "X", categoryId: "cat-exp-makan", total: null, date: null, ...over }) as never,
+      });
+      return (await (await handleExtract(post(valid), deps)).json()) as {
+        total: number | null;
+        date: string | null;
+      };
+    };
+
+    it("total wajar diteruskan; tidak wajar dibuang", async () => {
+      assert.equal((await ask({ total: 244850 })).total, 244850);
+      for (const bad of [0, -5, 12.5, 2_000_000_000, Number.NaN, "244850", null, undefined]) {
+        assert.equal((await ask({ total: bad })).total, null, String(bad));
+      }
+    });
+
+    it("tanggal wajar diteruskan; tidak ada di kalender atau di luar rentang dibuang", async () => {
+      assert.equal((await ask({ date: "2026-09-28" })).date, "2026-09-28");
+      assert.equal((await ask({ date: "2026-09-30" })).date, "2026-09-30"); // besok (selisih zona) masih boleh
+      for (const bad of ["2026-02-31", "28/09/2026", "2026-9-8", "2019-01-01", "2026-10-15", 20260928, null]) {
+        assert.equal((await ask({ date: bad })).date, null, String(bad));
+      }
+    });
+
+    it("sanitizeTotal dan sanitizeDate langsung", () => {
+      assert.equal(sanitizeTotal(1), 1);
+      assert.equal(sanitizeTotal(MAX_TOTAL), MAX_TOTAL);
+      assert.equal(sanitizeTotal(MAX_TOTAL + 1), null);
+      assert.equal(sanitizeDate("2024-02-29", now), "2024-02-29"); // kabisat
+      assert.equal(sanitizeDate("2025-02-29", now), null);
+    });
+  });
+
+  describe("batas harian", () => {
+    it("429 daily_limit_exceeded setelah batas harian, hari berikutnya bebas lagi", async () => {
+      const { deps, usage } = makeDeps({ dailyLimit: 2, monthlyLimit: 100 });
+      for (let i = 0; i < 2; i++) {
+        assert.equal((await handleExtract(post(valid), deps)).status, 200);
+      }
+      const blocked = await handleExtract(post(valid), deps);
+      assert.equal(blocked.status, 429);
+      assert.deepEqual(await blocked.json(), { error: "daily_limit_exceeded", limit: 2 });
+      assert.equal(usage.get(dailyUsageKey(USER, deps.now())), 2);
+
+      const tomorrow = { ...deps, now: () => new Date("2026-09-30T00:00:01Z") };
+      assert.equal((await handleExtract(post(valid), tomorrow)).status, 200);
+    });
+
+    it("batas bulanan tetap berlaku dan diperiksa lebih dulu", async () => {
+      const { deps } = makeDeps({ dailyLimit: 10, monthlyLimit: 1 });
+      assert.equal((await handleExtract(post(valid), deps)).status, 200);
+      const blocked = await handleExtract(post(valid), deps);
+      assert.equal(blocked.status, 429);
+      assert.equal(((await blocked.json()) as { error: string }).error, "quota_exceeded");
+    });
+
+    it("tanpa dailyLimit tidak ada kunci harian", async () => {
+      const { deps, usage } = makeDeps();
+      await handleExtract(post(valid), deps);
+      assert.equal([...usage.keys()].some((k) => k.startsWith("usage-day:")), false);
+    });
+
+    it("kunci harian kedaluwarsa dalam 2 hari, kunci bulanan 35 hari", async () => {
+      const ttls = new Map<string, number>();
+      const { deps } = makeDeps({
+        dailyLimit: 5,
+        setUsage: async (k, _n, ttl) => void ttls.set(k, ttl),
+      });
+      await handleExtract(post(valid), deps);
+      assert.equal(ttls.get(usageKey(USER, deps.now())), 35 * 24 * 3600);
+      assert.equal(ttls.get(dailyUsageKey(USER, deps.now())), 2 * 24 * 3600);
+    });
+  });
+
+  describe("pembatas per IP", () => {
+    const withIp = (ip: string) =>
+      new Request("https://w.example/extract", {
+        method: "POST",
+        headers: { "cf-connecting-ip": ip },
+        body: JSON.stringify(valid),
+      });
+
+    it("IP ditolak -> 429 rate_limited tanpa menyentuh RevenueCat atau model", async () => {
+      let entitlementCalls = 0;
+      const { deps, calls } = makeDeps({
+        allowIp: async () => false,
+        hasUltimate: async () => {
+          entitlementCalls++;
+          return true;
+        },
+      });
+      const res = await handleExtract(withIp("203.0.113.9"), deps);
+      assert.equal(res.status, 429);
+      assert.equal(((await res.json()) as { error: string }).error, "rate_limited");
+      assert.equal(entitlementCalls, 0);
+      assert.equal(calls.length, 0);
+    });
+
+    it("IP diizinkan diteruskan; tanpa header IP atau tanpa pembatas dilewati", async () => {
+      const seen: string[] = [];
+      const { deps } = makeDeps({
+        allowIp: async (ip) => {
+          seen.push(ip);
+          return true;
+        },
+      });
+      assert.equal((await handleExtract(withIp("203.0.113.9"), deps)).status, 200);
+      assert.deepEqual(seen, ["203.0.113.9"]);
+      assert.equal((await handleExtract(post(valid), deps)).status, 200); // tanpa header
+      assert.deepEqual(seen, ["203.0.113.9"]);
+
+      const { deps: noLimiter } = makeDeps();
+      assert.equal((await handleExtract(withIp("203.0.113.9"), noLimiter)).status, 200);
+    });
   });
 });

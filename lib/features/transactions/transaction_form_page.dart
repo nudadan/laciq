@@ -253,8 +253,8 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
         title: const Text('Isi otomatis dengan AI?'),
         content: const Text(
           'Teks hasil scan struk (bukan fotonya) akan dikirim ke server AI '
-          'kami untuk mengenali nama toko dan kategori. Tidak disimpan di '
-          'server.',
+          'kami untuk mengenali nama toko, kategori, total, dan tanggal. Tidak '
+          'disimpan di server.',
         ),
         actions: [
           TextButton(
@@ -300,6 +300,8 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     final typeAtStart = _type;
     final noteAtStart = _noteCtrl.text;
     final categoryAtStart = _categoryId;
+    final amountAtStart = _amountCtrl.text;
+    final dateAtStart = _date;
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _aiBusy = true);
     AiReceiptExtraction? result;
@@ -307,11 +309,13 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       result = await ref
           .read(aiExtractionServiceProvider)
           .extract(rawText: rawText, categories: options);
-    } on AiQuotaExceeded {
+    } on AiQuotaExceeded catch (e) {
       if (mounted) {
         notify(
           messenger,
-          'Kuota scan AI bulan ini habis. Hasil scan biasa tetap dipakai.',
+          e.daily
+              ? 'Batas scan AI hari ini tercapai. Hasil scan biasa tetap dipakai.'
+              : 'Kuota scan AI bulan ini habis. Hasil scan biasa tetap dipakai.',
         );
       }
     } finally {
@@ -334,6 +338,15 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       if (categoryId != null && _categoryId == categoryAtStart) {
         _categoryId = categoryId;
       }
+      // Total dan tanggal dari AI menimpa hasil heuristik (itu tujuannya: heuristik
+      // bisa salah pada struk berlayout kompleks), tapi TIDAK bila pengguna sudah
+      // mengubahnya sendiri selama menunggu.
+      final total = extraction.total;
+      if (total != null && _amountCtrl.text == amountAtStart) {
+        _amountCtrl.text = groupedNumber(total);
+      }
+      final date = extraction.date;
+      if (date != null && _date == dateAtStart) _date = date;
     });
   }
 
