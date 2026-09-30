@@ -26,26 +26,29 @@ class MorePage extends ConsumerWidget {
     final premium = ref.watch(isPremiumProvider).value ?? false;
     final ultimate = ref.watch(isUltimateProvider).value ?? false;
     final ledgerCount = ref.watch(ledgersProvider).value?.length ?? 1;
+    // Jangan menawarkan Buku Kas bila Ultimate belum dijual dan belum ada buku tambahan.
+    final ultimateOnSale = ref.watch(ultimateAvailableProvider).value ?? false;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, kBottomPad),
       children: [
         _MoreGroup([
-          _MoreTile(
-            icon: Icons.menu_book_rounded,
-            title: 'Buku Kas',
-            subtitle: ultimate
-                ? 'Pisahkan pembukuan pribadi dan bisnis · $ledgerCount buku'
-                : ledgerCount > 1
-                ? '${ledgerCount - 1} buku terkunci · Fitur Ultimate'
-                : 'Fitur Ultimate',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => ultimate || ledgerCount > 1
-                    ? const LedgersPage()
-                    : const SubscriptionPage(),
+          if (ultimate || ledgerCount > 1 || ultimateOnSale)
+            _MoreTile(
+              icon: Icons.menu_book_rounded,
+              title: 'Buku Kas',
+              subtitle: ultimate
+                  ? 'Pisahkan pembukuan pribadi dan bisnis · $ledgerCount buku'
+                  : ledgerCount > 1
+                  ? '${ledgerCount - 1} buku terkunci · Fitur Ultimate'
+                  : 'Fitur Ultimate',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ultimate || ledgerCount > 1
+                      ? const LedgersPage()
+                      : const SubscriptionPage(),
+                ),
               ),
             ),
-          ),
           _MoreTile(
             icon: Icons.category_rounded,
             title: 'Kategori',

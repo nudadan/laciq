@@ -9,6 +9,7 @@ import '../features/cloud_backup/cloud_backup_reminder_service.dart';
 import '../features/cloud_backup/cloud_backup_service.dart';
 import '../features/recurring/recurring_reminder_service.dart';
 import '../features/security/lock_providers.dart' show keyValueStoreProvider;
+import '../features/subscription/subscription_plans.dart';
 import '../features/subscription/subscription_status.dart';
 import '../features/transactions/receipt_scanner.dart';
 import '../features/trends/trend_settings.dart';
@@ -270,6 +271,27 @@ final isPremiumProvider = StreamProvider<bool>(
 final isUltimateProvider = StreamProvider<bool>(
   (ref) => ref.watch(subscriptionStatusProvider).watchIsUltimate(),
 );
+
+/// Tingkat langganan pengguna saat ini, diturunkan dari stream entitlement
+/// yang sudah ada (tanpa panggilan jaringan baru).
+final subscriptionTierProvider = Provider<ActiveTier>(
+  (ref) => ActiveTier.of(
+    premium: ref.watch(isPremiumProvider).value ?? false,
+    ultimate: ref.watch(isUltimateProvider).value ?? false,
+  ),
+);
+
+/// Apakah paket Ultimate benar-benar ada di offering toko. Ajakan upgrade ke
+/// Ultimate hanya ditampilkan bila true: jangan menawarkan produk yang belum
+/// bisa dibeli. Gagal memuat (mis. offline) dianggap false.
+final ultimateAvailableProvider = FutureProvider<bool>((ref) async {
+  try {
+    final packages = await ref.read(subscriptionStatusProvider).fetchPackages();
+    return packages.any((p) => p.tier == SubscriptionTier.ultimate);
+  } catch (_) {
+    return false;
+  }
+});
 
 /// Ekstraksi AI struk (fitur Ultimate) — lihat backend/receipt-extraction-worker/.
 final aiExtractionServiceProvider = Provider<AiExtractionService>(

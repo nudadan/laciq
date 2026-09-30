@@ -8,7 +8,10 @@ import 'subscription_plans.dart';
 import 'subscription_status.dart';
 
 class SubscriptionPage extends ConsumerStatefulWidget {
-  const SubscriptionPage({super.key});
+  const SubscriptionPage({super.key, this.upgradeOnly = false});
+
+  /// Hanya menampilkan Ultimate (untuk pelanggan Premium yang ingin upgrade).
+  final bool upgradeOnly;
 
   @override
   ConsumerState<SubscriptionPage> createState() => _SubscriptionPageState();
@@ -58,13 +61,19 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('DompetKu Premium')),
+      appBar: AppBar(
+        title: Text(
+          widget.upgradeOnly ? 'Upgrade ke Ultimate' : 'DompetKu Premium',
+        ),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              'Hilangkan iklan dan dukung pengembangan DompetKu.',
+              widget.upgradeOnly
+                  ? 'Buka ekstraksi struk dengan AI dan pembukuan terpisah.'
+                  : 'Hilangkan iklan dan dukung pengembangan DompetKu.',
               style: textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
@@ -97,7 +106,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 return Column(
                   children: [
                     for (final tier in SubscriptionTier.values)
-                      if (packages.any((p) => p.tier == tier))
+                      if ((!widget.upgradeOnly ||
+                              tier == SubscriptionTier.ultimate) &&
+                          packages.any((p) => p.tier == tier))
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: _TierCard(
@@ -176,6 +187,11 @@ class _TierCard extends StatelessWidget {
 
   static const _ultimateBenefits = [
     (Icons.workspace_premium_rounded, 'Semua fitur Premium'),
+    (
+      Icons.menu_book_rounded,
+      'Multi buku kas: pisahkan pembukuan pribadi dan bisnis '
+          '(sampai 5 buku, masing-masing dompet, kategori, dan anggaran sendiri)',
+    ),
     (
       Icons.auto_awesome_rounded,
       'Ekstraksi struk dengan AI: nama toko & kategori terisi otomatis '

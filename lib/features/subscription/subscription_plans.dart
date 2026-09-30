@@ -32,3 +32,29 @@ int yearlySavingsPercent({required int monthly, required int yearly}) {
   if (full <= 0 || yearly >= full) return 0;
   return ((full - yearly) / full * 100).round();
 }
+
+/// Tingkat langganan pengguna saat ini (bukan tingkat yang dijual, lihat
+/// [SubscriptionTier]). Ultimate juga memegang entitlement `premium`
+/// (lihat revenuecat_config.dart), jadi urutannya diperiksa dari yang tertinggi.
+enum ActiveTier {
+  free,
+  premium,
+  ultimate;
+
+  static ActiveTier of({required bool premium, required bool ultimate}) =>
+      ultimate
+      ? ActiveTier.ultimate
+      : premium
+      ? ActiveTier.premium
+      : ActiveTier.free;
+}
+
+/// Apakah membeli paket [target] harus MENGGANTIKAN langganan yang sedang
+/// aktif. Premium dan Ultimate adalah dua langganan Play yang berbeda; tanpa
+/// penggantian, pelanggan Premium yang membeli Ultimate ditagih dua langganan
+/// sekaligus. Beralih ke tingkat yang sama atau lebih rendah tidak lewat
+/// aplikasi (arahkan ke Kelola di Play Store).
+bool shouldReplaceProduct({
+  required ActiveTier active,
+  required SubscriptionTier target,
+}) => active == ActiveTier.premium && target == SubscriptionTier.ultimate;

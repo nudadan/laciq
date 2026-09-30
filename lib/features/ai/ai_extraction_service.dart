@@ -13,9 +13,12 @@ class AiCategoryOption {
 }
 
 class AiReceiptExtraction {
-  const AiReceiptExtraction({this.merchant, this.categoryId});
+  const AiReceiptExtraction({this.merchant, this.categoryId, this.remaining});
   final String? merchant;
   final String? categoryId;
+
+  /// Sisa kuota scan AI bulan ini menurut server; null bila tidak dikirim.
+  final int? remaining;
 }
 
 /// Kuota scan AI bulan ini habis (server membalas 429).
@@ -85,7 +88,9 @@ class HttpAiExtractionService implements AiExtractionService {
         merchant = merchant.substring(0, _maxMerchantChars);
       }
       final categoryId = json['categoryId'];
+      final remaining = json['remaining'];
       return AiReceiptExtraction(
+        remaining: remaining is int ? remaining : null,
         merchant: merchant.isEmpty ? null : merchant,
         categoryId:
             categoryId is String && categories.any((c) => c.id == categoryId)

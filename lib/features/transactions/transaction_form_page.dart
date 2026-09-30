@@ -16,6 +16,7 @@ import '../ai/ai_extraction_service.dart';
 import '../ledgers/ledgers_page.dart' show RecordingInLedgerBanner;
 import '../security/lock_providers.dart' show keyValueStoreProvider;
 import '../subscription/subscription_page.dart';
+import '../subscription/subscription_plans.dart' show ActiveTier;
 import 'receipt_scanner.dart' show ScannedReceipt;
 
 enum _Mode { create, editTx, editRule, executeAgenda, payDebt }
@@ -318,6 +319,12 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     }
     if (!mounted || result == null || _type != typeAtStart) return;
     final extraction = result;
+    // Beri tahu sebelum kuota habis, bukan setelah kena 429. Tidak setiap kali,
+    // supaya tidak berisik: hanya di 10 scan terakhir.
+    final left = extraction.remaining;
+    if (left != null && left <= 10) {
+      notify(messenger, 'Sisa scan AI bulan ini: $left');
+    }
     setState(() {
       final merchant = extraction.merchant;
       if (merchant != null && _noteCtrl.text == noteAtStart) {
@@ -580,6 +587,13 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                       ),
                 onTap: _scanReceipt,
               ),
+              // Pelanggan Premium yang baru scan struk: tawarkan Ultimate (isi
+              // toko & kategori otomatis dengan AI). Hanya bila paket Ultimate
+              // benar-benar dijual.
+              if (_receiptPath != null &&
+                  ref.watch(subscriptionTierProvider) == ActiveTier.premium &&
+                  (ref.watch(ultimateAvailableProvider).value ?? false))
+                const _UltimateUpsell(),
               const SizedBox(height: 16),
             ],
             if (mode != _Mode.executeAgenda && mode != _Mode.payDebt)
@@ -952,3 +966,88 @@ class _ReminderPicker extends ConsumerWidget {
     );
   }
 }
+
+/// Ajakan halus ke Ultimate di bawah tile Scan Struk untuk pelanggan Premium.
+/// Aturan agar tidak mengganggu: paling banyak sekali per sesi aplikasi, dan
+/// berhenti tampil setelah ditutup [_maxDismissals] kali (tersimpan).
+class _UltimateUpsell extends ConsumerStatefulWidget {
+  const _UltimateUpsell();
+
+  @override
+  ConsumerState<_UltimateUpsell> createState() => _UltimateUpsellState();
+}
+
+class _UltimateUpsellState extends ConsumerState<_UltimateUpsell> {
+  static const _dismissKey = 'ultimate_upsell_dismissals';
+  static const _maxDismissals = 2;
+  static var _shownThisSession = false;
+
+  var _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _decide();
+  }
+
+  Future<void> _decide() async {
+    if (_shownThisSession) return;
+    final dismissed =
+        int.tryParse(
+          await ref.read(keyValueStoreProvider).read(_dismissKey) ?? '',
+        ) ??
+        0;
+    if (dismissed >= _maxDismissals || !mounted) return;
+    _shownThisSession = true;
+    setState(() => _visible = true);
+  }
+
+  Future<void> _dismiss() async {
+    setState(() => _visible = false);
+    final store = ref.read(keyValueStoreProvider);
+    final dismissed = int.tryParse(await store.read(_dismissKey) ?? '') ?? 0;
+    await store.write(_dismissKey, '${dismissed + 1}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_visible) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: scheme.tertiary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.tertiary.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.auto_awesome_rounded, size: 18, color: scheme.tertiary),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text('Isi toko & kategori otomatis dengan AI — Ultimate'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const SubscriptionPage(upgradeOnly: true),
+              ),
+            ),
+            child: const Text('Lihat'),
+          ),
+          IconButton(
+            tooltip: 'Tutup',
+            icon: const Icon(Icons.close_rounded, size: 18),
+            onPressed: _dismiss,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Untuk tes: melupakan bahwa ajakan Ultimate sudah tampil di sesi ini.
+@visibleForTesting
+void resetUltimateUpsellSession() =>
+    _UltimateUpsellState._shownThisSession = false;

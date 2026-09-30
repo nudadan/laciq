@@ -59,6 +59,11 @@ abstract interface class SubscriptionStatus {
   /// ID pengguna RevenueCat (anonim), dipakai backend untuk memverifikasi
   /// hak akses Ultimate. Null bila SDK belum siap.
   Future<String?> appUserId();
+
+  /// ID produk langganan yang sedang aktif (mis. `dompetku_premium`), atau null
+  /// bila tidak ada atau SDK belum siap. Dipakai untuk menggantikan langganan
+  /// Premium saat upgrade ke Ultimate.
+  Future<String?> activeSubscriptionProductId();
   Future<List<SubscriptionPackage>> fetchPackages();
   Future<void> purchase(SubscriptionPackage package);
   Future<void> restorePurchases();
@@ -203,7 +208,10 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
       throw const SubscriptionException('Paket tidak valid untuk dibeli.');
     }
     try {
-      await Purchases.purchase(PurchaseParams.package(native));
+      final change = await _productChangeFor(package);
+      await Purchases.purchase(
+        PurchaseParams.package(native, productChangeInfo: change),
+      );
     } on PlatformException catch (e) {
       if (PurchasesErrorHelper.getErrorCode(e) ==
           PurchasesErrorCode.purchaseCancelledError) {
@@ -211,6 +219,51 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
       }
       throw const SubscriptionException('Pembelian gagal. Coba lagi nanti.');
     }
+  }
+
+  /// Membaca langganan yang sedang aktif dari RevenueCat: tingkatnya dan ID
+  /// produk yang dipegang entitlement `premium`. Null bila SDK belum siap
+  /// atau gagal dibaca (pembelian lanjut tanpa penggantian).
+  Future<({ActiveTier tier, String? productId})?> _activeSubscription() async {
+    if (!_configured) return null;
+    try {
+      final active = (await Purchases.getCustomerInfo()).entitlements.active;
+      final premium = active[kPremiumEntitlementId];
+      return (
+        tier: ActiveTier.of(
+          premium: premium != null,
+          ultimate: active.containsKey(kUltimateEntitlementId),
+        ),
+        productId: premium?.productIdentifier,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<String?> activeSubscriptionProductId() async =>
+      (await _activeSubscription())?.productId;
+
+  /// Bila pengguna Premium membeli Ultimate, langganan Premium digantikan
+  /// (dibayar selisih untuk sisa siklus) supaya tidak ada dua langganan.
+  /// ID produk lama yang benar untuk Google Play (ID langganan atau
+  /// `langganan:base-plan`) HARUS diverifikasi di perangkat; hasilnya dicatat
+  /// di docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md §8.
+  Future<StoreProductChangeInfo?> _productChangeFor(
+    SubscriptionPackage package,
+  ) async {
+    final current = await _activeSubscription();
+    final oldId = current?.productId;
+    if (current == null ||
+        oldId == null ||
+        !shouldReplaceProduct(active: current.tier, target: package.tier)) {
+      return null;
+    }
+    return StoreProductChangeInfo(
+      oldId,
+      replacementMode: StoreReplacementMode.chargeProratedPrice,
+    );
   }
 
   @override

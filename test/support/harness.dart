@@ -157,6 +157,13 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   Future<String?> appUserId() async => 'test-user';
 
   @override
+  Future<String?> activeSubscriptionProductId() async => _ultimate
+      ? 'ultimate_monthly'
+      : _premium
+      ? 'premium_monthly'
+      : null;
+
+  @override
   Future<List<SubscriptionPackage>> fetchPackages() async => packages;
 
   @override

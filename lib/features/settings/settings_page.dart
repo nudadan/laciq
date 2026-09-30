@@ -438,29 +438,63 @@ class _SubscriptionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premium = ref.watch(isPremiumProvider).value ?? false;
-    if (premium) {
-      return ListTile(
-        leading: const Icon(Icons.workspace_premium_rounded),
-        title: const Text('DompetKu Premium aktif'),
-        subtitle: const Text('Tanpa iklan'),
-        trailing: TextButton(
-          onPressed: () => launchUrl(_manageSubsUrl),
-          child: const Text('Kelola'),
-        ),
-      );
-    }
-    return ListTile(
-      leading: const Icon(Icons.star_rounded),
-      title: const Text('Upgrade ke Premium'),
-      subtitle: Text(
-        'Hilangkan iklan mulai ${rupiah(kReferencePrices[(SubscriptionTier.premium, SubscriptionPeriod.monthly)]!)}/bulan',
+    final tier = ref.watch(subscriptionTierProvider);
+    // Ajakan upgrade hanya bila paket Ultimate benar-benar ada di toko.
+    final ultimateOnSale = ref.watch(ultimateAvailableProvider).value ?? false;
+    void openPage({bool upgradeOnly = false}) => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SubscriptionPage(upgradeOnly: upgradeOnly),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const SubscriptionPage())),
     );
+
+    switch (tier) {
+      case ActiveTier.ultimate:
+        return ListTile(
+          leading: const Icon(Icons.workspace_premium_rounded),
+          title: const Text('DompetKu Ultimate aktif'),
+          subtitle: const Text(
+            'Tanpa iklan · Ekstraksi struk AI · Multi buku kas',
+          ),
+          trailing: TextButton(
+            onPressed: () => launchUrl(_manageSubsUrl),
+            child: const Text('Kelola'),
+          ),
+        );
+      case ActiveTier.premium:
+        return ListTile(
+          leading: const Icon(Icons.workspace_premium_rounded),
+          title: const Text('DompetKu Premium aktif'),
+          subtitle: Text(
+            ultimateOnSale
+                ? 'Tanpa iklan · Upgrade ke Ultimate untuk AI dan multi buku kas'
+                : 'Tanpa iklan',
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (ultimateOnSale)
+                TextButton(
+                  onPressed: () => openPage(upgradeOnly: true),
+                  child: const Text('Upgrade'),
+                ),
+              TextButton(
+                onPressed: () => launchUrl(_manageSubsUrl),
+                child: const Text('Kelola'),
+              ),
+            ],
+          ),
+        );
+      case ActiveTier.free:
+        return ListTile(
+          leading: const Icon(Icons.star_rounded),
+          title: const Text('Upgrade ke Premium'),
+          subtitle: Text(
+            'Hilangkan iklan mulai ${rupiah(kReferencePrices[(SubscriptionTier.premium, SubscriptionPeriod.monthly)]!)}/bulan',
+          ),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: openPage,
+        );
+    }
   }
 }
 
