@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kebijakan Privasi DompetKu</title>
+<meta name="description" content="Kebijakan privasi aplikasi DompetKu oleh hardan-ti.">
+<style>
+  :root { --bg:#fff; --fg:#1d2433; --muted:#5b6478; --line:#e3e6ee; --accent:#0b6b5c; --card:#f5f7fa; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12161f; --fg:#e7eaf1; --muted:#98a1b5; --line:#2a3142; --accent:#4cc7b1; --card:#1a2030; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0 0 4px; }
+  h2 { font-size:1.25rem; margin:2.2em 0 .5em; padding-top:.4em; border-top:1px solid var(--line); }
+  h3 { font-size:1.05rem; margin:1.4em 0 .3em; }
+  p, li { margin:.5em 0; }
+  ul { padding-left:1.3em; }
+  a { color:var(--accent); }
+  .meta { color:var(--muted); margin:0 0 1.5em; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:1em 0; }
+  table { width:100%; border-collapse:collapse; margin:1em 0; font-size:.95rem; }
+  th, td { text-align:left; vertical-align:top; padding:8px 10px; border:1px solid var(--line); }
+  th { background:var(--card); }
+  .scroll { overflow-x:auto; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Kebijakan Privasi DompetKu</h1>
+<p class="meta">Berlaku sejak 30 September 2026 · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
+
+<p>DompetKu adalah aplikasi pencatat keuangan pribadi untuk Android (nama paket <code>com.hardanti.lacipintar</code>), dikembangkan oleh <strong>hardan-ti</strong> ("kami"). Dokumen ini menjelaskan data apa yang diproses aplikasi, ke mana data itu pergi, dan pilihan yang Anda miliki.</p>
+
+<div class="box">
+  <strong>Ringkasnya:</strong>
+  <ul>
+    <li>Data keuangan Anda (transaksi, dompet, anggaran, dan lainnya) disimpan <strong>di HP Anda</strong>. Kami tidak punya server yang menampung data itu dan tidak dapat melihatnya.</li>
+    <li>Data hanya keluar dari HP jika Anda memakai fitur tertentu: iklan (paket gratis), langganan, Backup Cloud ke Google Drive Anda sendiri, atau Ekstraksi Struk dengan AI (paket Ultimate).</li>
+    <li>Kami tidak menjual data Anda dan tidak memakai layanan analitik atau pelaporan crash pihak ketiga.</li>
+  </ul>
+</div>
+
+<h2>1. Data yang disimpan di perangkat Anda</h2>
+<p>Semua data berikut dibuat oleh Anda dan disimpan dalam penyimpanan pribadi aplikasi di HP Anda:</p>
+<ul>
+  <li>Transaksi (nominal, tanggal, catatan, kategori, tag), dompet/akun, kategori, anggaran, target tabungan, transaksi berulang, agenda pengingat, serta utang dan piutang (termasuk nama pihak yang Anda isi).</li>
+  <li>Foto struk yang Anda ambil atau pilih saat memakai Scan Struk.</li>
+  <li>Pengaturan aplikasi: tema, status onboarding, PIN (disimpan sebagai hash di penyimpanan aman Android), dan preferensi lain.</li>
+</ul>
+<p>Data ini tidak dikirim ke kami. Cadangan otomatis Android untuk aplikasi ini dimatikan. Basis data lokal dilindungi oleh sandbox aplikasi Android dan kunci PIN/sidik jari di aplikasi; basis data itu sendiri tidak dienkripsi terpisah, jadi keamanannya juga bergantung pada kunci layar dan keamanan HP Anda.</p>
+
+<h2>2. Izin perangkat</h2>
+<div class="scroll"><table>
+  <tr><th>Izin</th><th>Untuk apa</th></tr>
+  <tr><td>Kamera</td><td>Memotret struk pada fitur Scan Struk. Teks struk dibaca di perangkat dengan ML Kit (pengenalan teks Google) tanpa mengirim foto ke mana pun.</td></tr>
+  <tr><td>Biometrik</td><td>Membuka kunci aplikasi dengan sidik jari/wajah. Pencocokan dilakukan sepenuhnya oleh sistem Android; aplikasi tidak menerima atau menyimpan data biometrik Anda.</td></tr>
+  <tr><td>Notifikasi</td><td>Pengingat lokal (agenda, transaksi berulang, pengingat backup). Dijadwalkan di HP, tidak lewat server.</td></tr>
+  <tr><td>Internet</td><td>Diperlukan untuk iklan, langganan, Backup Cloud, dan Ekstraksi Struk dengan AI. Pencatatan keuangan dasar tetap berjalan tanpa internet.</td></tr>
+  <tr><td>ID Iklan</td><td>Dipakai oleh layanan iklan Google pada paket gratis (lihat bagian 3).</td></tr>
+</table></div>
+
+<h2>3. Iklan (paket gratis)</h2>
+<p>Paket gratis menampilkan iklan banner dari <strong>Google AdMob</strong>. Untuk menayangkan iklan, Google dapat mengumpulkan dan memakai ID iklan perangkat, alamat IP, informasi perangkat, dan data interaksi iklan sesuai <a href="https://policies.google.com/technologies/ads">kebijakan iklan Google</a>. Kami tidak memberikan data keuangan Anda kepada Google atau pengiklan.</p>
+<p>Anda dapat mengatur atau mereset ID iklan, atau menonaktifkan personalisasi iklan, di pengaturan Android (Google &gt; Iklan). Berlangganan Premium atau Ultimate menghilangkan iklan.</p>
+
+<h2>4. Langganan dan pembayaran</h2>
+<p>Pembayaran langganan diproses oleh <strong>Google Play</strong>. Kami tidak menerima nomor kartu atau data pembayaran Anda. Status langganan dikelola lewat <strong>RevenueCat</strong>, yang menerima informasi pembelian dari Google Play dan sebuah ID pengguna anonim yang dibuat aplikasi, untuk memastikan fitur berbayar aktif. Kami tidak mengaitkan ID tersebut dengan nama atau email Anda. Anda dapat mengelola atau membatalkan langganan lewat Google Play (Pembayaran &amp; langganan).</p>
+
+<h2>5. Backup Cloud (Premium)</h2>
+<p>Fitur ini bersifat opsional dan hanya aktif jika Anda masuk dengan akun Google di dalam aplikasi.</p>
+<ul>
+  <li>Aplikasi meminta akses <strong>hanya ke folder data aplikasi</strong> di Google Drive Anda (<code>drive.appdata</code>), folder tersembunyi yang tidak dapat dilihat atau diubah aplikasi lain, dan tidak dapat melihat file Drive Anda yang lain.</li>
+  <li>Data cadangan (dan foto struk jika ada) dienkripsi dengan AES di HP Anda sebelum diunggah. Kunci enkripsi disimpan di folder data aplikasi yang sama pada Drive Anda, sehingga cadangan dapat dipulihkan di HP baru dengan akun yang sama. Perlu dipahami bahwa ini bukan enkripsi ujung ke ujung yang terlepas dari akun Google Anda.</li>
+  <li>Cadangan disimpan di akun Google Anda dan tunduk pada <a href="https://policies.google.com/privacy">Kebijakan Privasi Google</a>. Kami tidak menerima salinannya.</li>
+  <li>Alamat email akun yang masuk ditampilkan di layar Backup Cloud dan tidak dikirim ke kami.</li>
+</ul>
+
+<h2>6. Ekstraksi Struk dengan AI (Ultimate)</h2>
+<p>Fitur ini opsional dan hanya untuk pelanggan Ultimate. Aplikasi meminta persetujuan Anda satu kali sebelum fitur pertama kali dipakai. Anda dapat menolak; hasil Scan Struk biasa tetap dipakai.</p>
+<p>Setelah Anda memindai struk, aplikasi mengirim data berikut ke server kami:</p>
+<ul>
+  <li><strong>Teks hasil pembacaan struk</strong> (maksimal 4.000 karakter). Foto struk <strong>tidak</strong> dikirim.</li>
+  <li>Daftar nama kategori Anda pada jenis transaksi yang sedang dicatat.</li>
+  <li>ID pengguna anonim RevenueCat, untuk memverifikasi langganan Ultimate dan menghitung kuota 60 scan per bulan.</li>
+</ul>
+<p>Server tersebut berjalan di <strong>Cloudflare Workers</strong>. Server memverifikasi langganan ke RevenueCat, lalu meneruskan teks struk dan daftar kategori ke <strong>Anthropic</strong> (model Claude) untuk menebak nama toko dan kategori. Hasilnya dikembalikan ke aplikasi Anda.</p>
+<ul>
+  <li>Kami <strong>tidak menyimpan</strong> teks struk dan tidak mencatatnya di log. Yang kami simpan hanya penghitung pemakaian per bulan yang terkait ID anonim, dan otomatis kedaluwarsa dalam sekitar 35 hari.</li>
+  <li>Cloudflare dan Anthropic memproses data sebagai penyedia layanan menurut kebijakan masing-masing (<a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, <a href="https://www.anthropic.com/legal/privacy">Anthropic</a>). Cloudflare dapat mencatat data teknis koneksi seperti alamat IP.</li>
+  <li>Teks struk dapat memuat nama toko, daftar barang, atau informasi lain yang tercetak di struk. Hindari memindai struk yang memuat data pribadi sensitif jika Anda tidak ingin data itu diproses.</li>
+</ul>
+
+<h2>7. Berbagi dan ekspor oleh Anda</h2>
+<p>Fitur ekspor CSV dan backup file membuat berkas yang Anda bagikan sendiri lewat menu berbagi Android. Setelah Anda mengirimnya ke aplikasi atau orang lain, berkas itu berada di luar kendali kami.</p>
+
+<h2>8. Data yang tidak kami kumpulkan</h2>
+<ul>
+  <li>Tidak ada akun DompetKu, jadi tidak ada nama, email, atau nomor telepon yang kami kumpulkan.</li>
+  <li>Tidak ada analitik pemakaian atau pelaporan crash pihak ketiga.</li>
+  <li>Tidak ada lokasi, kontak, SMS, atau galeri foto yang dibaca di luar foto yang Anda pilih sendiri untuk scan struk.</li>
+  <li>Kami tidak menjual atau menyewakan data Anda.</li>
+</ul>
+
+<h2>9. Penyimpanan dan penghapusan data</h2>
+<ul>
+  <li><strong>Di HP:</strong> menu Pengaturan &gt; <em>Hapus semua data</em> menghapus permanen seluruh data keuangan, foto struk, PIN, dan pengaturan sehingga aplikasi kembali seperti baru dipasang. Menghapus (uninstall) aplikasi juga menghapus data lokal.</li>
+  <li><strong>Backup Cloud:</strong> hapus lewat pengaturan Google Drive (Kelola aplikasi &gt; DompetKu &gt; Hapus data tersembunyi), atau cabut akses aplikasi dari akun Google Anda. Menghapus data di HP tidak otomatis menghapus cadangan di Drive.</li>
+  <li><strong>Langganan:</strong> batalkan lewat Google Play. Menghapus aplikasi tidak membatalkan langganan.</li>
+  <li><strong>Data di server kami:</strong> hanya penghitung kuota AI yang kedaluwarsa otomatis. Untuk penghapusan lebih awal, hubungi kami dengan menyebutkan ID pengguna anonim Anda.</li>
+</ul>
+
+<h2>10. Hak Anda</h2>
+<p>Sesuai Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi, Anda berhak mengakses, memperbaiki, menghapus, dan menarik persetujuan atas pemrosesan data pribadi Anda. Karena hampir seluruh data berada di HP dan akun Google Anda sendiri, sebagian besar hak ini dapat Anda jalankan langsung lewat aplikasi (bagian 9). Untuk permintaan lain, hubungi <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a>. Anda juga dapat menarik persetujuan fitur AI dengan menghapus data aplikasi atau berhenti memakai fitur tersebut.</p>
+
+<h2>11. Anak-anak</h2>
+<p>DompetKu tidak ditujukan untuk anak-anak dan kami tidak dengan sengaja mengumpulkan data dari anak-anak.</p>
+
+<h2>12. Perubahan kebijakan</h2>
+<p>Kebijakan ini dapat diperbarui, misalnya saat ada fitur baru yang mengubah cara data diproses. Tanggal berlaku di bagian atas akan diperbarui, dan perubahan yang berarti akan diumumkan lewat pembaruan aplikasi.</p>
+
+<h2>13. Kontak</h2>
+<p>hardan-ti<br>Email: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
+
+</main>
+</body>
+</html>

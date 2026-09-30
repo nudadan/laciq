@@ -1,0 +1,16 @@
+name = "dompetku-receipt-extraction"
+main = "src/index.ts"
+compatibility_date = "2026-09-29"
+
+[vars]
+ULTIMATE_ENTITLEMENT = "ultimate"
+MONTHLY_LIMIT = "60"
+
+# Buat dulu: `npx wrangler kv namespace create RATE_LIMIT`, lalu tempel id-nya di sini.
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "GANTI_DENGAN_ID_KV_NAMESPACE"
+
+# Rahasia (jangan ditaruh di file ini):
+#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put REVENUECAT_SECRET_KEY
