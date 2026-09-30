@@ -51,9 +51,22 @@ void main() {
     'premium dengan agenda + transaksi berulang bulan ini: total dan '
     'rincian per sumber benar',
     (tester, h) async {
-      expect(find.text(rupiah(800000)), findsOneWidget); // total
-      expect(find.text(rupiah(300000)), findsOneWidget); // dari Agenda
-      expect(find.text(rupiah(500000)), findsOneWidget); // dari berulang
+      // Aturan berulang di-seed mulai BESOK (hari ini langsung dikonsumsi
+      // jadi transaksi nyata). Di hari terakhir bulan, besok sudah bulan
+      // depan dan di luar proyeksi bulan berjalan, jadi kontribusinya Rp0
+      // (perilaku aplikasi yang benar, bukan bug) — ekspektasi mengikuti itu.
+      final now = DateTime.now();
+      final recurringInMonth =
+          now.add(const Duration(days: 1)).month == now.month;
+      if (recurringInMonth) {
+        expect(find.text(rupiah(800000)), findsOneWidget); // total
+        expect(find.text(rupiah(300000)), findsOneWidget); // dari Agenda
+        expect(find.text(rupiah(500000)), findsOneWidget); // dari berulang
+      } else {
+        expect(find.text(rupiah(300000)), findsNWidgets(2)); // total + Agenda
+        expect(find.text(rupiah(0)), findsWidgets); // dari berulang
+        expect(find.text(rupiah(800000)), findsNothing);
+      }
     },
     seed: (db) async {
       await db.addAgenda(
