@@ -56,7 +56,7 @@ FITUR PREMIUM (BERLANGGANAN)
 FITUR ULTIMATE (BERLANGGANAN)
 • Semua fitur Premium
 • Multi buku kas: pisahkan pembukuan pribadi dan bisnis, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri (sampai 5 buku)
-• Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis (60 scan per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke server AI kami untuk diproses, dan tidak disimpan
+• Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis (300 scan per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke server AI kami untuk diproses, dan tidak disimpan
 
 Paket gratis menampilkan iklan banner dan sudah mencakup pencatatan, dompet, anggaran, target tabungan, serta sebagian fitur Agenda dan Analisa Tren. Langganan dapat dibatalkan kapan saja lewat Google Play.
 
