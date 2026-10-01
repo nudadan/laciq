@@ -31,7 +31,7 @@
 <main>
 
 <h1>Kebijakan Privasi DompetKu</h1>
-<p class="meta">Berlaku sejak 30 September 2026 · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
+<p class="meta">Berlaku sejak 1 Oktober 2026 · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
 
 <p>DompetKu adalah aplikasi pencatat keuangan pribadi untuk Android (nama paket <code>com.hardanti.lacipintar</code>), dikembangkan oleh <strong>hardan-ti</strong> ("kami"). Dokumen ini menjelaskan data apa yang diproses aplikasi, ke mana data itu pergi, dan pilihan yang Anda miliki.</p>
 
@@ -47,7 +47,7 @@
 <h2>1. Data yang disimpan di perangkat Anda</h2>
 <p>Semua data berikut dibuat oleh Anda dan disimpan dalam penyimpanan pribadi aplikasi di HP Anda:</p>
 <ul>
-  <li>Transaksi (nominal, tanggal, catatan, kategori, tag), dompet/akun, kategori, anggaran, target tabungan, transaksi berulang, agenda pengingat, serta utang dan piutang (termasuk nama pihak yang Anda isi).</li>
+  <li>Transaksi (nominal, tanggal, catatan, kategori, tag), dompet/akun, kategori, anggaran, target tabungan, transaksi berulang, agenda pengingat, serta utang dan piutang (termasuk nama pihak yang Anda isi). Pada paket Ultimate, data itu dapat dipisah ke beberapa buku kas (misalnya pribadi dan bisnis), tetap di HP Anda.</li>
   <li>Foto struk yang Anda ambil atau pilih saat memakai Scan Struk.</li>
   <li>Pengaturan aplikasi: tema, status onboarding, PIN (disimpan sebagai hash di penyimpanan aman Android), dan preferensi lain.</li>
 </ul>
@@ -85,12 +85,13 @@
 <ul>
   <li><strong>Teks hasil pembacaan struk</strong> (maksimal 4.000 karakter). Foto struk <strong>tidak</strong> dikirim.</li>
   <li>Daftar nama kategori Anda pada jenis transaksi yang sedang dicatat.</li>
-  <li>ID pengguna anonim RevenueCat, untuk memverifikasi langganan Ultimate dan menghitung kuota 60 scan per bulan.</li>
+  <li>ID pengguna anonim RevenueCat, untuk memverifikasi langganan Ultimate dan menghitung kuota (60 scan per bulan dan 15 per hari).</li>
 </ul>
-<p>Server tersebut berjalan di <strong>Cloudflare Workers</strong>. Server memverifikasi langganan ke RevenueCat, lalu meneruskan teks struk dan daftar kategori ke <strong>Anthropic</strong> (model Claude) untuk menebak nama toko dan kategori. Hasilnya dikembalikan ke aplikasi Anda.</p>
+<p>Server tersebut (<code>dompetku-api.hardan-ti.com</code>) berjalan di <strong>Cloudflare Workers</strong>. Server memverifikasi langganan ke RevenueCat, lalu meneruskan teks struk dan daftar kategori ke <strong>Google</strong> lewat Gemini API (layanan berbayar) untuk menebak nama toko, kategori, total, dan tanggal transaksi. Hasilnya dikembalikan ke aplikasi Anda.</p>
 <ul>
-  <li>Kami <strong>tidak menyimpan</strong> teks struk dan tidak mencatatnya di log. Yang kami simpan hanya penghitung pemakaian per bulan yang terkait ID anonim, dan otomatis kedaluwarsa dalam sekitar 35 hari.</li>
-  <li>Cloudflare dan Anthropic memproses data sebagai penyedia layanan menurut kebijakan masing-masing (<a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, <a href="https://www.anthropic.com/legal/privacy">Anthropic</a>). Cloudflare dapat mencatat data teknis koneksi seperti alamat IP.</li>
+  <li>Kami <strong>tidak menyimpan</strong> teks struk dan tidak mencatatnya di log. Yang kami simpan hanya penghitung pemakaian (per bulan dan per hari) yang terkait ID anonim, yang otomatis kedaluwarsa dalam sekitar 35 hari, serta hasil pengecekan langganan yang disimpan sementara beberapa menit.</li>
+  <li>Cloudflare dan Google memproses data sebagai penyedia layanan menurut kebijakan masing-masing (<a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, <a href="https://policies.google.com/privacy">Google</a>). Cloudflare dapat mencatat data teknis koneksi seperti alamat IP.</li>
+  <li>Kami memakai Gemini API <strong>berbayar</strong>. Menurut <a href="https://ai.google.dev/gemini-api/terms">ketentuan Gemini API</a>, pada layanan berbayar Google tidak memakai teks yang dikirim untuk melatih atau memperbaiki produknya. Google dapat menyimpan data itu untuk jangka terbatas semata-mata untuk mendeteksi penyalahgunaan dan memenuhi kewajiban hukum.</li>
   <li>Teks struk dapat memuat nama toko, daftar barang, atau informasi lain yang tercetak di struk. Hindari memindai struk yang memuat data pribadi sensitif jika Anda tidak ingin data itu diproses.</li>
 </ul>
 
@@ -110,7 +111,7 @@
   <li><strong>Di HP:</strong> menu Pengaturan &gt; <em>Hapus semua data</em> menghapus permanen seluruh data keuangan, foto struk, PIN, dan pengaturan sehingga aplikasi kembali seperti baru dipasang. Menghapus (uninstall) aplikasi juga menghapus data lokal.</li>
   <li><strong>Backup Cloud:</strong> hapus lewat pengaturan Google Drive (Kelola aplikasi &gt; DompetKu &gt; Hapus data tersembunyi), atau cabut akses aplikasi dari akun Google Anda. Menghapus data di HP tidak otomatis menghapus cadangan di Drive.</li>
   <li><strong>Langganan:</strong> batalkan lewat Google Play. Menghapus aplikasi tidak membatalkan langganan.</li>
-  <li><strong>Data di server kami:</strong> hanya penghitung kuota AI yang kedaluwarsa otomatis. Untuk penghapusan lebih awal, hubungi kami dengan menyebutkan ID pengguna anonim Anda.</li>
+  <li><strong>Data di server kami:</strong> hanya penghitung kuota AI dan cache status langganan yang kedaluwarsa otomatis. Untuk penghapusan lebih awal, hubungi kami dengan menyebutkan ID pengguna anonim Anda.</li>
 </ul>
 
 <h2>10. Hak Anda</h2>
