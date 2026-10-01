@@ -1,7 +1,7 @@
 # Worker ekstraksi struk (fitur Ultimate)
 
 Cloudflare Worker: menerima teks OCR struk + daftar kategori pengguna, memastikan pemanggil punya
-entitlement `ultimate` aktif (server-ke-server ke RevenueCat), membatasi pemakaian (60 scan/bulan dan
+entitlement `ultimate` aktif (server-ke-server ke RevenueCat), membatasi pemakaian (300 scan/bulan dan
 15/hari per pengguna), lalu meminta model AI mengembalikan `merchant`, `categoryId`, `total`, dan `date`.
 Penyedia: **Google Gemini** (paid tier); Claude dipertimbangkan lalu tidak dipakai. Desain dan alasan pemilihan:
 `docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md` (B0, B3) dan `docs/RENCANA-IMPLEMENTASI-OCR-SCAN-STRUK.md` §3.
@@ -31,8 +31,15 @@ npx wrangler deploy                              # memasang ke https://dompetku-
 Produksi dipasang di domain sendiri (`routes` + `workers_dev = false` di `wrangler.toml`; zona harus ada di
 Cloudflare, hostname satu tingkat di bawah domain). Alamat: `https://dompetku-api.hardan-ti.com/extract`.
 
-Model dan penyedia diatur di `wrangler.toml` (`AI_PROVIDER`, `AI_MODEL`, `DAILY_LIMIT`, opsional
-`AI_THINKING_CONFIG`), bukan di kode. Log Worker mencatat `ai_usage model=… in=… out=… thoughts=…`
+Model dan penyedia diatur di `wrangler.toml` (`AI_PROVIDER`, `AI_MODEL`, `AI_MODEL_FALLBACK`, `DAILY_LIMIT`,
+opsional `AI_THINKING_CONFIG`), bukan di kode.
+
+**Model cadangan.** Bila model utama gagal (HTTP 404 karena dihentikan Google, 5xx, keluaran rusak), Worker mencoba
+model di `AI_MODEL_FALLBACK` berurutan (maks. 3 model termasuk utama). Kunci ditolak (401/403) langsung gagal tanpa
+mencoba cadangan. Model yang 404 dilewati 10 menit per isolate agar tidak dicoba tiap permintaan; galat sementara
+tidak membuat model dilewati. Setiap kegagalan dicatat sebagai `ai_model_failed model=... reason=...` (tanpa isi
+struk) dan **log inilah yang sebaiknya dipasangi peringatan**: model utama bermasalah walau pengguna tidak merasakan.
+Kosongkan `AI_THINKING_CONFIG` bila cadangan berasal dari seri berbeda (format `thinkingConfig` berbeda antarseri). Log Worker mencatat `ai_usage model=… in=… out=… thoughts=…`
 (jumlah token saja, tanpa isi struk) untuk mengukur biaya nyata.
 
 **Sebelum dibuka untuk pengguna:** kirim satu permintaan nyata (`curl`) untuk memastikan bentuk keluaran

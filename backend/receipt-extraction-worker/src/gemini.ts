@@ -19,6 +19,16 @@ const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 /** Ruang untuk token berpikir; keluaran JSON-nya sendiri hanya puluhan token. */
 const MAX_OUTPUT_TOKENS = 1024;
 
+/** Galat dari panggilan Gemini; [status] terisi bila berasal dari respons HTTP. */
+export class GeminiError extends Error {
+  status: number | undefined;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "GeminiError";
+    this.status = status;
+  }
+}
+
 export interface GeminiUsage {
   model: string;
   promptTokens?: number;
@@ -120,7 +130,7 @@ export function makeGeminiExtractor(apiKey: string, model: string, options: Gemi
       body: JSON.stringify(buildRequest(rawText, categories, options.thinkingConfig)),
     });
     // Jangan sertakan isi respons/kunci dalam pesan galat.
-    if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+    if (!res.ok) throw new GeminiError(`Gemini HTTP ${res.status}`, res.status);
     const data = (await res.json()) as GeminiResponse;
     const usage = data.usageMetadata;
     options.onUsage?.({

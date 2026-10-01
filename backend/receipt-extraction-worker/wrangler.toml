@@ -9,7 +9,7 @@ routes = [{ pattern = "dompetku-api.hardan-ti.com", custom_domain = true }]
 
 [vars]
 ULTIMATE_ENTITLEMENT = "ultimate"
-MONTHLY_LIMIT = "60"
+MONTHLY_LIMIT = "300"
 # Batas per hari per pengguna (0 = tanpa batas harian). Membatasi kerugian bila
 # satu ID pengguna bocor.
 DAILY_LIMIT = "15"
@@ -19,6 +19,12 @@ DAILY_LIMIT = "15"
 # Pilih model lewat evaluasi (eval/), lihat docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md B3.
 AI_PROVIDER = "gemini"
 AI_MODEL = "gemini-3.1-flash-lite"
+# Model cadangan (dipisah koma), dicoba berurutan bila model utama gagal, mis. dihentikan
+# Google (HTTP 404). Keduanya lolos eval 10/10 untuk total dan tanggal (lihat eval/ dan
+# docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md §8). Urut dari yang termurah; yang
+# kedua lebih mahal, jadi hanya terpakai bila dua model pertama gagal.
+# Pantau log "ai_model_failed": itu tanda model utama bermasalah.
+AI_MODEL_FALLBACK = "gemini-3.5-flash-lite,gemini-3.8-flash"
 # Opsional: thinkingConfig mentah untuk Gemini (JSON). Kosongkan sampai
 # diverifikasi dengan satu permintaan nyata (B0.1). Contoh seri 3:
 #   AI_THINKING_CONFIG = '{"thinkingLevel":"minimal"}'

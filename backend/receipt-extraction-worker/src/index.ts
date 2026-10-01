@@ -28,7 +28,7 @@ export default {
         env.RATE_LIMIT.put(key, String(count), { expirationTtl: ttlSeconds }),
       extract: buildExtractor(env),
       now: () => new Date(),
-      monthlyLimit: Number(env.MONTHLY_LIMIT) || 60,
+      monthlyLimit: Number(env.MONTHLY_LIMIT) || 300,
       dailyLimit: Number(env.DAILY_LIMIT) || 0,
       allowIp: ipLimiter ? async (ip) => (await ipLimiter.limit({ key: ip })).success : undefined,
     });

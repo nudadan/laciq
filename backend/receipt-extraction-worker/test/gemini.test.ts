@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { beforeEach, describe, it } from "node:test";
 import { buildRequest, makeGeminiExtractor, parseResponse } from "../src/gemini.ts";
-import { buildExtractor, parseThinkingConfig } from "../src/extractor.ts";
+import { buildExtractor, modelChain, parseThinkingConfig, resetModelSkips } from "../src/extractor.ts";
 
 const CATS = [
   { id: "cat-exp-makan", name: "Makanan & Minuman" },
@@ -171,5 +171,96 @@ describe("buildExtractor (pemilih penyedia)", () => {
     for (const bad of [undefined, "", "  ", "bukan json", "[1]", "5", "null"]) {
       assert.equal(parseThinkingConfig(bad), undefined, String(bad));
     }
+  });
+});
+
+describe("model cadangan (AI_MODEL_FALLBACK)", () => {
+  beforeEach(() => resetModelSkips());
+
+  const OK = okBody({ merchant: "Indomaret", category_id: "cat-exp-makan", total: 23500, date: null });
+
+  /** Fetch palsu: status per model (berdasarkan URL); mencatat model yang dipanggil. */
+  function perModelFetch(statuses: Record<string, number>) {
+    const called: string[] = [];
+    const fn = (async (url: string | URL | Request) => {
+      const model = /models\/([^:]+):/.exec(String(url))![1]!;
+      called.push(model);
+      const status = statuses[model] ?? 200;
+      return new Response(JSON.stringify(status === 200 ? OK : { error: "x" }), { status });
+    }) as typeof fetch;
+    return { fn, called };
+  }
+
+  it("modelChain: utama lalu cadangan, tanpa duplikat/kosong, maksimal 3", () => {
+    assert.deepEqual(modelChain({}), ["gemini-3.1-flash-lite"]);
+    assert.deepEqual(modelChain({ AI_MODEL: "a", AI_MODEL_FALLBACK: " b , ,a,c,d" }), ["a", "b", "c"]);
+    assert.deepEqual(modelChain({ AI_MODEL_FALLBACK: "b" }), ["gemini-3.1-flash-lite", "b"]);
+  });
+
+  it("model utama 404: cadangan dipakai, dan model mati dilewati pada permintaan berikutnya", async () => {
+    const { fn, called } = perModelFetch({ "m-utama": 404 });
+    const logs: string[] = [];
+    const extract = buildExtractor(
+      { GEMINI_API_KEY: "k", AI_MODEL: "m-utama", AI_MODEL_FALLBACK: "m-cadangan" },
+      (m) => logs.push(m),
+      fn,
+    );
+    const out = await extract("x", CATS);
+    assert.equal(out.merchant, "Indomaret");
+    assert.deepEqual(called, ["m-utama", "m-cadangan"]);
+    assert.ok(logs.some((l) => l.includes("ai_model_failed model=m-utama reason=Gemini HTTP 404")));
+    assert.equal(logs.join().includes("RAHASIA"), false);
+
+    await extract("x", CATS); // m-utama dilewati: langsung ke cadangan
+    assert.deepEqual(called, ["m-utama", "m-cadangan", "m-cadangan"]);
+  });
+
+  it("galat sementara (5xx): cadangan dipakai, tetapi model utama dicoba lagi di permintaan berikutnya", async () => {
+    const { fn, called } = perModelFetch({ "m-utama": 503 });
+    const extract = buildExtractor(
+      { GEMINI_API_KEY: "k", AI_MODEL: "m-utama", AI_MODEL_FALLBACK: "m-cadangan" },
+      () => {},
+      fn,
+    );
+    await extract("x", CATS);
+    await extract("x", CATS);
+    assert.deepEqual(called, ["m-utama", "m-cadangan", "m-utama", "m-cadangan"]);
+  });
+
+  it("kunci ditolak (401/403): langsung gagal, cadangan tidak dicoba", async () => {
+    const { fn, called } = perModelFetch({ "m-utama": 403 });
+    const extract = buildExtractor(
+      { GEMINI_API_KEY: "k", AI_MODEL: "m-utama", AI_MODEL_FALLBACK: "m-cadangan" },
+      () => {},
+      fn,
+    );
+    await assert.rejects(() => extract("x", CATS), /Gemini HTTP 403/);
+    assert.deepEqual(called, ["m-utama"]);
+  });
+
+  it("semua model gagal: melempar galat terakhir (handler menjawab 502)", async () => {
+    const { fn, called } = perModelFetch({ "m-utama": 404, "m-cadangan": 500 });
+    const extract = buildExtractor(
+      { GEMINI_API_KEY: "k", AI_MODEL: "m-utama", AI_MODEL_FALLBACK: "m-cadangan" },
+      () => {},
+      fn,
+    );
+    await assert.rejects(() => extract("x", CATS), /Gemini HTTP 500/);
+    assert.deepEqual(called, ["m-utama", "m-cadangan"]);
+  });
+
+  it("model terakhir tetap dicoba walau pernah 404 (tidak pernah tanpa model sama sekali)", async () => {
+    const { fn, called } = perModelFetch({ "m-satu": 404 });
+    const extract = buildExtractor({ GEMINI_API_KEY: "k", AI_MODEL: "m-satu" }, () => {}, fn);
+    await assert.rejects(() => extract("x", CATS), /Gemini HTTP 404/);
+    await assert.rejects(() => extract("x", CATS), /Gemini HTTP 404/);
+    assert.deepEqual(called, ["m-satu", "m-satu"]);
+  });
+
+  it("tanpa AI_MODEL_FALLBACK: perilaku lama (satu model)", async () => {
+    const { fn, called } = perModelFetch({ "m-utama": 404 });
+    const extract = buildExtractor({ GEMINI_API_KEY: "k", AI_MODEL: "m-utama" }, () => {}, fn);
+    await assert.rejects(() => extract("x", CATS), /Gemini HTTP 404/);
+    assert.deepEqual(called, ["m-utama"]);
   });
 });
