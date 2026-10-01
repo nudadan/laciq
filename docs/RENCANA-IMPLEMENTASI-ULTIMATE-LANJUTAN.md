@@ -278,7 +278,7 @@ tersisa butuh kunci/akun pemilik (Gemini, Cloudflare, Play, RevenueCat) atau per
 
 ## 8. Catatan hasil (diisi saat dikerjakan)
 
-- Nilai `oldProductId` yang benar untuk penggantian produk: _belum diuji_. Kode memakai
+- Nilai `oldProductId` untuk penggantian produk: **terbukti benar 2026-10-01** (lihat §9). Kode memakai
   `EntitlementInfo.productIdentifier` (ID langganan, mis. `dompetku_premium`). Bila Play menolak, coba
   `langganan:base-plan` (`dompetku_premium:monthly`).
 - **Evaluasi B3 (2026-09-30, 10 struk sintetis, `eval/run.ts`, kunci Gemini milik pemilik):**
@@ -335,5 +335,6 @@ Uji di Galaxy Z Fold6 (Android 16) dengan build 5 lalu 6 dari jalur uji internal
      `TOTAL BELAN JA`). Diperbaiki: penyusunan baris sejajar (`orderLinesIntoRows`), label toleran salah baca,
      tunai − kembali sebagai cadangan.
   4. Kegagalan scan sebelumnya diam; kini menampilkan pesan. Status langganan menunggu entitlement setelah pembelian.
-- **Belum diuji:** penggantian Premium → Ultimate (`oldProductId`, butir E4 daftar centang), migrasi dari rilis 3 (F7),
+- **Penggantian Premium → Ultimate terbukti** (riwayat pelanggan sandbox RevenueCat, build 6): `dompetku_premium:monthly` (IDR 7.500) -> `dompetku_ultimate:monthly` dibayar prorata IDR 4.386; Premium berstatus Inactive/expired, hanya Ultimate aktif, perpanjangan berikutnya IDR 12.500. `oldProductId` = ID langganan (`dompetku_premium`) benar; tidak ada tagihan ganda.
+- **Belum diuji:** migrasi dari rilis 3 (F7),
   Backup Cloud di build Play, notifikasi berbunyi, multi buku kas di perangkat nyata (G), Ultimate berakhir (I).
