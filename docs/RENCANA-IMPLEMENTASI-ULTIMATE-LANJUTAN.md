@@ -304,3 +304,36 @@ tersisa butuh kunci/akun pemilik (Gemini, Cloudflare, Play, RevenueCat) atau per
 - Kunci Gemini dibagikan lewat obrolan; anggap terbuka. Buat kunci baru di project Google Cloud khusus untuk produksi.
 - Temuan saat implementasi: fake langganan di tes memakai `onListen` pada stream broadcast sehingga nilai awal hilang
   saat Riverpod menjeda langganan; diganti generator `async*` (sama dengan produksi). Lihat MULTI-BUKU-KAS §11.
+
+## 9. Verifikasi di perangkat nyata (2026-10-01)
+
+Uji di Galaxy Z Fold6 (Android 16) dengan build 5 lalu 6 dari jalur uji internal Play.
+
+- **Scan struk AI end-to-end terbukti.** Lima scan berturut-turut lewat `https://dompetku-api.hardan-ti.com/extract`
+  dijawab 200 dengan `gemini-3.1-flash-lite`; tidak ada `ai_model_failed` (model cadangan tidak terpakai). Pemilik juga
+  menguji beberapa struk berbeda: hasil valid.
+- **Biaya nyata per scan** (token dari log `ai_usage`, kurs Rp17.930/USD, harga $0,25/$1,50 per juta token):
+
+  | Scan | Token masuk | Token keluar |
+  |---|---|---|
+  | 1 | 732 | 57 |
+  | 2 | 674 | 56 |
+  | 3 | 688 | 48 |
+  | 4 | 641 | 59 |
+  | 5 | 729 | 59 |
+  | **Rata-rata** | **693** | **56** |
+
+  ≈ $0,000257 ≈ **Rp4,6 per scan** (perkiraan eval: Rp3,8; terburuk teoretis Rp9,4). Kuota 300/bulan terpakai habis
+  ≈ Rp1.382 = **13%** pendapatan bersih bulanan (Rp10.625) atau **16%** tahunan (±Rp8.850/bulan). Tidak ada token berpikir
+  (`thoughts=0`). Sampel hanya 5 scan; ulangi pengukuran setelah ada pemakaian pelanggan sungguhan (E3).
+- **Temuan dari uji perangkat (semua sudah diperbaiki di build 6):**
+  1. Entitlement RevenueCat `ultimate` belum dibuat (hanya `premium`), sehingga pelanggan Ultimate tampak Premium dan
+     Worker menolak 403. Dibuat dan dilampiri dua produk Ultimate; produk Ultimate tetap juga di `premium`.
+  2. `TextRecognizer.processImage` crash `NullPointerException` (kelas telemetri `zzmj`, vision-common 17.3.0) di build
+     rilis karena R8. Diperbaiki dengan aturan keep ML Kit di `android/app/proguard-rules.pro`. Tidak terlihat di debug.
+  3. Heuristik total mengambil tunai/barang karena OCR memecah label dan angka (dan salah baca huruf: `TUNAJ`,
+     `TOTAL BELAN JA`). Diperbaiki: penyusunan baris sejajar (`orderLinesIntoRows`), label toleran salah baca,
+     tunai − kembali sebagai cadangan.
+  4. Kegagalan scan sebelumnya diam; kini menampilkan pesan. Status langganan menunggu entitlement setelah pembelian.
+- **Belum diuji:** penggantian Premium → Ultimate (`oldProductId`, butir E4 daftar centang), migrasi dari rilis 3 (F7),
+  Backup Cloud di build Play, notifikasi berbunyi, multi buku kas di perangkat nyata (G), Ultimate berakhir (I).
