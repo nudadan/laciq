@@ -81,6 +81,7 @@ tidak menjanjikan fitur yang belum ada di versi yang beredar. Produk Ultimate di
 
 ## Catatan untuk pemilik
 - Setelah ini beres, baru bisa klik **Kirim aplikasi untuk ditinjau** di Ringkasan publikasi.
+- 2026-10-01: deskripsi lengkap versi Ultimate (2.254 karakter) sudah DISIMPAN sebagai draf di Play Console (belum dikirim; ikut tinjauan bersama rilis). Aset: ikon, gambar fitur, 7 screenshot ponsel dan tablet sudah ada (belum ada screenshot khusus fitur Ultimate; opsional).
 - Bagian Ultimate kini sudah ada di deskripsi (produk Ultimate aktif di Play dan Worker AI di-deploy 2026-10-01),
   tetapi pasang bersama rilis 4. Jawaban Data Safety ada di `docs/DATA-SAFETY-PLAY.md`.
 - Detail kontak (support@hardan-ti.com, https://dompetku.hardan-ti.com) sudah dipublikasikan 2026-09-30; kategori
