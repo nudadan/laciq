@@ -57,3 +57,12 @@ membedakan paket, jadi tetap dideklarasikan.
    Cocokkan dengan <https://ai.google.dev/gemini-api/terms> bila ada perubahan.
 3. Jawaban ini mengikuti kode saat ini. Jika nanti ada analitik/crash reporting, atau mode "ads terbatas" diaktifkan,
    perbarui.
+
+## Catatan login Google (Backup Cloud) — 2026-10-01
+Login Google gagal di build dari Play dengan galat 28444 ("Developer console is not set up correctly"; server Google:
+"This android application is not registered to use OAuth2.0"). Penyebab: sidik jari (SHA-1) sertifikat yang benar-benar
+menandatangani APK terpasang dari Play (`92:09:67:BB:F4:21:44:71:5F:F4:25:80:F8:3B:10:0E:B5:F3:E1:63`, dibaca dengan
+`apksigner verify --print-certs` dari APK di perangkat) tidak sama dengan yang terdaftar di client OAuth "Play App Signing"
+(`21:30:93:26:...`, nilai kunci klasik di konsol Play). Konsol Play juga menampilkan kunci post-quantum
+(`2D:C6:90:1C:...`). Perbaikan: client OAuth Android baru "DompetKu - Play (terpasang)" dengan SHA-1 hasil baca dari APK.
+Setelah rilis produksi, periksa lagi sidik jari APK hasil unduhan produksi dan daftarkan bila berbeda.
