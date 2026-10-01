@@ -117,6 +117,26 @@ void main() {
       expect(find.textContaining('Upgrade ke Ultimate'), findsNothing);
     }, subscription: _PremiumOnlyStatus());
 
+    appTest('tombol kartu berada di bawah judul, bukan di sampingnya (judul '
+        'tidak ikut menyempit di layar sempit)', (tester, h) async {
+      await _openSettings(tester);
+
+      final title = find.text('DompetKu Premium aktif');
+      final subtitle = find.textContaining('Upgrade ke Ultimate untuk AI');
+      expect(title, findsOneWidget);
+      final textBottom = tester.getBottomLeft(subtitle).dy;
+      expect(
+        tester.getTopLeft(find.text('Upgrade')).dy,
+        greaterThan(textBottom),
+      );
+      expect(
+        tester.getTopLeft(find.text('Kelola')).dy,
+        greaterThan(textBottom),
+      );
+      // Judul dan keterangan memakai lebar yang sama (kolom penuh).
+      expect(tester.getTopLeft(title).dx, tester.getTopLeft(subtitle).dx);
+    }, subscription: FakeSubscriptionStatus(premium: true));
+
     appTest('Ultimate: penanda Ultimate, tanpa tombol Upgrade', (
       tester,
       h,
@@ -247,10 +267,27 @@ void main() {
     }
 
     appTest(
-      'sisa 10 atau kurang: pengguna diberi tahu',
+      'sisa tepat 10: pengguna diberi tahu sekali',
       (tester, h) async {
         await scanAndAllow(tester);
-        expect(find.text('Sisa scan AI bulan ini: 7'), findsOneWidget);
+        expect(find.text('Sisa scan AI bulan ini: 10'), findsOneWidget);
+      },
+      subscription: FakeSubscriptionStatus(ultimate: true),
+      receiptScanner: _scanner(),
+      aiExtraction: FakeAiExtractionService(
+        result: AiReceiptExtraction(
+          merchant: 'Indomaret',
+          categoryId: 'cat-exp-makan',
+          remaining: 10,
+        ),
+      ),
+    );
+
+    appTest(
+      'sisa di bawah 10: tidak diulang tiap scan',
+      (tester, h) async {
+        await scanAndAllow(tester);
+        expect(find.textContaining('Sisa scan AI'), findsNothing);
       },
       subscription: FakeSubscriptionStatus(ultimate: true),
       receiptScanner: _scanner(),

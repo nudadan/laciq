@@ -310,7 +310,8 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
           .read(aiExtractionServiceProvider)
           .extract(rawText: rawText, categories: options);
     } on AiQuotaExceeded catch (e) {
-      if (mounted) {
+      if (mounted && !_aiQuotaNoticeShown) {
+        _aiQuotaNoticeShown = true;
         notify(
           messenger,
           e.daily
@@ -323,10 +324,10 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     }
     if (!mounted || result == null || _type != typeAtStart) return;
     final extraction = result;
-    // Beri tahu sebelum kuota habis, bukan setelah kena 429. Tidak setiap kali,
-    // supaya tidak berisik: hanya di 10 scan terakhir.
+    // Beri tahu sebelum kuota habis, bukan setelah kena 429. Hanya satu kali,
+    // saat sisa tepat 10, supaya tidak berisik.
     final left = extraction.remaining;
-    if (left != null && left <= 10) {
+    if (left == 10) {
       notify(messenger, 'Sisa scan AI bulan ini: $left');
     }
     setState(() {
@@ -1062,5 +1063,12 @@ class _UltimateUpsellState extends ConsumerState<_UltimateUpsell> {
 
 /// Untuk tes: melupakan bahwa ajakan Ultimate sudah tampil di sesi ini.
 @visibleForTesting
-void resetUltimateUpsellSession() =>
-    _UltimateUpsellState._shownThisSession = false;
+void resetUltimateUpsellSession() {
+  _UltimateUpsellState._shownThisSession = false;
+  _aiQuotaNoticeShown = false;
+}
+
+/// Pesan "kuota AI habis" cukup sekali per sesi aplikasi: scan berikutnya tetap
+/// jalan dengan hasil biasa, dan mengulang pesan yang sama tiap scan hanya
+/// mengganggu.
+bool _aiQuotaNoticeShown = false;

@@ -17,16 +17,24 @@ void main() {
   }, seenOnboarding: false);
 
   appTest(
-    '"Lanjut" 2x sampai halaman terakhir, "Mulai" menandai selesai dan ke dashboard',
+    '"Lanjut" melewati semua halaman panduan, "Mulai" di halaman terakhir '
+    'menandai selesai dan ke dashboard',
     (tester, h) async {
-      await tester.tap(find.text('Lanjut'));
-      await settle(tester);
-      expect(find.text('Anggaran dan tren yang mudah dibaca'), findsOneWidget);
-
-      await tester.tap(find.text('Lanjut'));
-      await settle(tester);
-      expect(find.text('Data Anda tetap di HP Anda'), findsOneWidget);
+      const titles = [
+        'Anggaran dan tren yang mudah dibaca',
+        'Rencanakan keuangan ke depan',
+        'Data Anda tetap di HP Anda',
+        'Ultimate untuk pembukuan serius',
+        'Pilih paket yang cocok',
+      ];
+      for (final title in titles) {
+        expect(find.text('Mulai'), findsNothing);
+        await tester.tap(find.text('Lanjut'));
+        await settle(tester);
+        expect(find.text(title), findsOneWidget);
+      }
       expect(find.text('Mulai'), findsOneWidget);
+      expect(find.text('Lanjut'), findsNothing);
 
       await tester.tap(find.text('Mulai'));
       await settle(tester);
@@ -36,6 +44,31 @@ void main() {
     },
     seenOnboarding: false,
   );
+
+  appTest('panduan menjelaskan fitur beserta paket yang membukanya', (
+    tester,
+    h,
+  ) async {
+    // Halaman 1: fitur dasar dan fitur Premium berlabel.
+    expect(find.text('Banyak dompet'), findsOneWidget);
+    expect(find.text('Scan struk'), findsOneWidget);
+    expect(find.text('Premium'), findsWidgets);
+
+    // Halaman Ultimate: kedua fitur khusus berlabel Ultimate.
+    for (var i = 0; i < 4; i++) {
+      await tester.tap(find.text('Lanjut'));
+      await settle(tester);
+    }
+    expect(find.text('Multi buku kas'), findsOneWidget);
+    expect(find.text('Scan struk dengan AI'), findsOneWidget);
+    expect(find.text('Ultimate'), findsWidgets);
+
+    // Halaman paket: perbandingan Gratis, Premium, Ultimate.
+    await tester.tap(find.text('Lanjut'));
+    await settle(tester);
+    expect(find.text('Gratis'), findsOneWidget);
+    expect(find.text('Premium'), findsOneWidget);
+  }, seenOnboarding: false);
 
   appTest('"Lewati" dari halaman pertama langsung ke dashboard', (
     tester,

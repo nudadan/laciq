@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dompet_pintar/features/ai/ai_extraction_service.dart';
 import 'package:dompet_pintar/features/transactions/receipt_scanner.dart';
+import 'package:dompet_pintar/features/transactions/transaction_form_page.dart'
+    show resetUltimateUpsellSession;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -42,6 +44,7 @@ String _note(WidgetTester tester) => tester
 
 void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
+  setUp(resetUltimateUpsellSession);
 
   group('form Catat — pengguna Ultimate', () {
     appTest(
@@ -124,6 +127,42 @@ void main() {
           findsOneWidget,
         );
         expect(_note(tester), 'INDOMARET CIKINI');
+      },
+      subscription: FakeSubscriptionStatus(ultimate: true),
+      receiptScanner: _scanner(),
+      aiExtraction: FakeAiExtractionService(quotaExceeded: true),
+    );
+
+    appTest(
+      'kuota habis: pesan hanya sekali per sesi, scan berikutnya tetap '
+      'jalan dengan hasil biasa',
+      (tester, h) async {
+        await h.store.write('ai_extraction_consent', 'granted');
+        await _scan(tester);
+        expect(
+          find.textContaining('Kuota scan AI bulan ini habis'),
+          findsOneWidget,
+        );
+
+        // Biarkan pesan pertama hilang, lalu scan lagi.
+        await tester.pump(const Duration(seconds: 10));
+        await tester.pump(const Duration(seconds: 1));
+        expect(
+          find.textContaining('Kuota scan AI bulan ini habis'),
+          findsNothing,
+        );
+
+        await tester.tap(find.text('Scan Struk'));
+        await settle(tester);
+        await tester.tap(find.text('Kamera'));
+        await settle(tester);
+
+        expect(h.aiExtraction.calls, hasLength(2)); // AI tetap dicoba
+        expect(
+          find.textContaining('Kuota scan AI bulan ini habis'),
+          findsNothing,
+        );
+        expect(_note(tester), 'INDOMARET CIKINI'); // hasil biasa dipakai
       },
       subscription: FakeSubscriptionStatus(ultimate: true),
       receiptScanner: _scanner(),

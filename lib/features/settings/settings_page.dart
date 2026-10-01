@@ -452,40 +452,19 @@ class _SubscriptionTile extends ConsumerWidget {
 
     switch (tier) {
       case ActiveTier.ultimate:
-        return ListTile(
-          leading: const Icon(Icons.workspace_premium_rounded),
-          title: const Text('DompetKu Ultimate aktif'),
-          subtitle: const Text(
-            'Tanpa iklan · Ekstraksi struk AI · Multi buku kas',
-          ),
-          trailing: TextButton(
-            onPressed: () => launchUrl(_manageSubsUrl),
-            child: const Text('Kelola'),
-          ),
+        return _ActiveSubscriptionTile(
+          title: 'DompetKu Ultimate aktif',
+          subtitle: 'Tanpa iklan · Ekstraksi struk AI · Multi buku kas',
+          onManage: () => launchUrl(_manageSubsUrl),
         );
       case ActiveTier.premium:
-        return ListTile(
-          leading: const Icon(Icons.workspace_premium_rounded),
-          title: const Text('DompetKu Premium aktif'),
-          subtitle: Text(
-            ultimateOnSale
-                ? 'Tanpa iklan · Upgrade ke Ultimate untuk AI dan multi buku kas'
-                : 'Tanpa iklan',
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (ultimateOnSale)
-                TextButton(
-                  onPressed: () => openPage(upgradeOnly: true),
-                  child: const Text('Upgrade'),
-                ),
-              TextButton(
-                onPressed: () => launchUrl(_manageSubsUrl),
-                child: const Text('Kelola'),
-              ),
-            ],
-          ),
+        return _ActiveSubscriptionTile(
+          title: 'DompetKu Premium aktif',
+          subtitle: ultimateOnSale
+              ? 'Tanpa iklan · Upgrade ke Ultimate untuk AI dan multi buku kas'
+              : 'Tanpa iklan',
+          onUpgrade: ultimateOnSale ? () => openPage(upgradeOnly: true) : null,
+          onManage: () => launchUrl(_manageSubsUrl),
         );
       case ActiveTier.free:
         return ListTile(
@@ -498,6 +477,79 @@ class _SubscriptionTile extends ConsumerWidget {
           onTap: openPage,
         );
     }
+  }
+}
+
+/// Kartu langganan aktif: judul dan keterangan memakai lebar penuh, tombol
+/// berada di baris sendiri di bawahnya. (Tombol sebagai `trailing` ListTile
+/// menyempitkan judul sampai terpotong per huruf di layar sempit.)
+class _ActiveSubscriptionTile extends StatelessWidget {
+  const _ActiveSubscriptionTile({
+    required this.title,
+    required this.subtitle,
+    required this.onManage,
+    this.onUpgrade,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback onManage;
+  final VoidCallback? onUpgrade;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.workspace_premium_rounded, color: scheme.primary),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: text.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: text.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              spacing: 8,
+              children: [
+                if (onUpgrade != null)
+                  FilledButton.tonal(
+                    onPressed: onUpgrade,
+                    child: const Text('Upgrade'),
+                  ),
+                TextButton(onPressed: onManage, child: const Text('Kelola')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
