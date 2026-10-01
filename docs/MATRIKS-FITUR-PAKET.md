@@ -1,13 +1,13 @@
 # Matriks Fitur per Paket Langganan — DompetKu
 
-Disusun 2026-09-30 dari pemeriksaan langsung kode (`lib/`, `backend/`) dan dokumen `docs/`. Angka tes: 416 Flutter + 9 Worker lulus.
+Disusun 2026-09-30 dari pemeriksaan langsung kode (`lib/`, `backend/`) dan dokumen `docs/`; **diperbarui 2026-10-01** setelah Ultimate selesai dikode dan infrastrukturnya dipasang. Angka tes: 490 Flutter + 38 Worker lulus.
 
 **Legenda**
 - Paket: ✅ tersedia penuh · 🟡 tersedia dengan batas · ❌ tidak tersedia
 - Status implementasi: ✅ selesai dan diverifikasi · 🟡 selesai di kode, verifikasi belum lengkap · 🔴 kode ada tetapi belum bisa dipakai (butuh deploy/produk) · ⬜ belum dibuat
 
 Harga (ditetapkan 2026-09-29): Premium Rp7.500/bulan atau Rp75.000/tahun; Ultimate Rp12.500/bulan atau Rp125.000/tahun.
-Produk yang sudah aktif di Play Console dan RevenueCat: hanya **Premium**. Ultimate belum dibuat.
+Produk aktif di Play Console: **Premium** (`dompetku_premium`) dan **Ultimate** (`dompetku_ultimate`, base plan `monthly` dan `yearly`, hanya Indonesia, aktif 2026-09-30/10-01). Di RevenueCat kedua produk, entitlement `ultimate`, dan paket Custom `ultimate_monthly`/`ultimate_annual` di offering `dompetku` sudah disiapkan pemilik. Aplikasi yang beredar (rilis 3) belum memuat Ultimate; itu menunggu rilis 4.
 
 ## 1. Fitur inti (semua paket)
 
@@ -51,7 +51,7 @@ Produk yang sudah aktif di Play Console dan RevenueCat: hanya **Premium**. Ultim
 
 | Fitur | Gratis | Premium | Ultimate | Status implementasi |
 |---|---|---|---|---|
-| Ekstraksi struk dengan AI: nama toko, kategori, **total, dan tanggal** terisi otomatis (kuota 60 scan/bulan, 15/hari) | ❌ | ❌ | ✅ | 🟡 Kode klien dan Worker selesai (Gemini bawaan, Claude sebagai pembanding; 490 tes Flutter + 38 tes Worker lulus). **Belum bisa dipakai**: Worker belum di-deploy, bentuk keluaran Gemini sudah diverifikasi dengan permintaan nyata, tetapi akurasi pada struk nyata belum diuji; lihat bagian 6 dan [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md) |
+| Ekstraksi struk dengan AI: nama toko, kategori, **total, dan tanggal** terisi otomatis (kuota 60 scan/bulan, 15/hari) | ❌ | ❌ | ✅ | 🟡 Kode klien dan Worker selesai (Gemini saja, model `gemini-3.1-flash-lite` hasil eval 10 struk sintetis; Claude dibuang; 490 tes Flutter + 38 tes Worker lulus). **Worker sudah di-deploy** di `https://dompetku-api.hardan-ti.com/extract` (2026-10-01; cek entitlement ke RevenueCat terbukti jalan: id tak dikenal dijawab 403 `not_ultimate`). **Belum terbukti ujung ke ujung**: jalur Gemini lewat Worker baru teruji bila ada akun Ultimate sungguhan (butuh build rilis 4 + uji beli); akurasi pada struk nyata dan kecukupan kuota 60/bulan belum diukur. Lihat [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md) |
 | **Multi buku kas**: pembukuan terpisah (mis. pribadi vs bisnis), masing-masing punya dompet, kategori, anggaran, transaksi berulang, agenda, utang/piutang, dan target sendiri; sampai 5 buku, pengalih buku di aplikasi | ❌ (satu Buku Utama) | ❌ (satu Buku Utama) | ✅ | 🟡 Kode selesai dan diuji otomatis (skema v10, backup v7, pengalih, Kelola Buku Kas, operasi lintas buku; 30 tes DB + tes UI). **Belum diuji di perangkat nyata** (upgrade dari rilis 3, F7). Rincian: [RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md](RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md) |
 
 Cara kerja ekstraksi AI bila aktif: hasil OCR on-device diisi dulu oleh heuristik, lalu Ultimate meminta AI (Cloudflare Worker) menyempurnakan nama toko dan kategori. Tanpa `AI_EXTRACTION_URL`, fitur mati diam-diam dan scan tetap jalan dengan heuristik.
@@ -62,25 +62,30 @@ Cara kerja ekstraksi AI bila aktif: hasil OCR on-device diisi dulu oleh heuristi
 |---|---|---|
 | Gratis | 13 inti + 3 dengan batas | Ya |
 | Premium | Semua Gratis + 7 fitur Premium penuh, tanpa iklan, batas dibuka | Ya (produk aktif, RevenueCat valid; uji beli di HP belum dilakukan) |
-| Ultimate | Semua Premium + 2 fitur khusus (ekstraksi AI, multi buku kas) | Belum (kode kedua fitur selesai; AI menunggu deploy Worker + pilihan model, multi buku kas menunggu uji di perangkat, dan produk Ultimate belum dibuat di Play/RevenueCat) |
+| Ultimate | Semua Premium + 2 fitur khusus (ekstraksi AI, multi buku kas) | Belum bisa dibeli pengguna: kode, Worker, produk Play, dan RevenueCat siap, tetapi aplikasi yang beredar belum memuatnya. Menunggu rilis 4 dan uji beli/uji migrasi di perangkat |
 
-## 6. Yang menghalangi Ultimate (semua belum dikerjakan)
+## 6. Yang menghalangi Ultimate (diperbarui 2026-10-01)
 
 | Butir | Status |
 |---|---|
-| Deploy Cloudflare Worker + kunci (`ANTHROPIC_API_KEY`, kunci REST RevenueCat, KV `RATE_LIMIT`) | ⬜ |
-| Isi `AI_EXTRACTION_URL` saat build (`--dart-define`) | ⬜ |
-| Produk Play `dompetku_ultimate` (base plan monthly Rp12.500 dan yearly Rp125.000) | ⬜ |
-| Entitlement RevenueCat `ultimate`; produk Ultimate dikaitkan ke `ultimate` **dan** `premium` (lihat `revenuecat_config.dart`) | ⬜ |
-| Paket Ultimate ditambahkan ke offering `dompetku` (kartu Ultimate baru muncul di halaman langganan bila paketnya ada) | ⬜ |
-| Uji nyata dengan akun Ultimate | ⬜ |
-| Kebijakan privasi: aliran AI sudah ditulis dengan penyedia **Anthropic**; harus diubah menjadi **Google (Gemini API berbayar)** saat Worker di-deploy (jangan diubah lebih awal, versi online harus sesuai kenyataan), lalu Data Safety Play disesuaikan | 🟡 |
-| Penyedia AI: uji 10 struk (heuristik, 3.1 Flash-Lite, 3.8 Flash, Haiku 4.5), pilih model termurah yang lolos; wajib Gemini **paid tier** dengan project Google Cloud terpisah | ⬜ |
-| Bagian Ultimate di deskripsi listing Play sengaja dihapus; tambahkan lagi saat Ultimate rilis | ⬜ |
+| Deploy Cloudflare Worker + kunci (`GEMINI_API_KEY`, kunci REST RevenueCat V1, KV `RATE_LIMIT`) | ✅ 2026-10-01, domain `dompetku-api.hardan-ti.com`. Kunci Gemini belum terbukti ujung ke ujung |
+| Isi `AI_EXTRACTION_URL` saat build (`--dart-define`) | ⬜ ikut rilis 4 |
+| Produk Play `dompetku_ultimate` (base plan monthly Rp12.500 dan yearly Rp125.000) | ✅ aktif |
+| Entitlement RevenueCat `ultimate`; produk Ultimate dikaitkan ke `ultimate` **dan** `premium` (lihat `revenuecat_config.dart`) | ✅ dikerjakan pemilik (belum saya verifikasi di dasbor) |
+| Paket Ultimate ditambahkan ke offering `dompetku` (Custom: `ultimate_monthly`, `ultimate_annual`) | ✅ dikerjakan pemilik |
+| Uji nyata dengan akun Ultimate | ⬜ butuh rilis 4 |
+| Kebijakan privasi: Anthropic → Google (Gemini API berbayar), buku kas, kuota harian | ✅ online 2026-10-01 (klaim tentang ketentuan Google perlu dicocokkan pemilik) |
+| Data Safety Play | ✅ disimpan 2026-10-01 (belum dikirim untuk ditinjau; ikut rilis 4). Lihat [DATA-SAFETY-PLAY.md](DATA-SAFETY-PLAY.md) |
+| Penyedia AI: eval 10 struk sintetis, model `gemini-3.1-flash-lite` dipilih; wajib Gemini **paid tier** dengan project Google Cloud terpisah | ✅ (eval); anggaran biaya Cloud Billing ⬜ |
+| Teks Ultimate di deskripsi listing Play | 🟡 teks final siap di [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md); dipasang bersama rilis 4 |
+| Rilis 4 (`1.0.0+4`): build AAB, uji internal, uji migrasi Redmi (F7), uji beli + penggantian Premium → Ultimate | ⬜ |
+| Cek target audiens Play (klausul di bawah 18 tahun pada ketentuan Gemini) | ⬜ |
 
 ## 6b. Temuan audit Ultimate (2026-09-30)
 
 Audit dokumen rancangan (`RANCANGAN-AWAL.md`, `RENCANA-IMPLEMENTASI-OCR-SCAN-STRUK.md`) terhadap kode. Rencana perbaikan tiap temuan ada di [RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md](RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md); kolom terakhir merujuk ke butirnya.
+
+> **Status 2026-10-01:** semua temuan di bagian ini sudah dikerjakan di kode dan lulus tes otomatis. T1 (jalur upgrade Premium → Ultimate), T2 (penggantian produk, `oldProductId`), T3 (penanda Ultimate), T4 (sisa kuota), T5 (ajakan upgrade di Scan struk), T6 (cache entitlement, batas harian 15, pembatas IP opsional) dan kesenjangan AI (total + tanggal kini diekstrak). Yang tersisa hanya **verifikasi di perangkat nyata**, terutama penggantian produk (`oldProductId`) yang baru bisa dipastikan lewat uji beli.
 
 ### Celah yang belum tercatat di rencana mana pun
 
