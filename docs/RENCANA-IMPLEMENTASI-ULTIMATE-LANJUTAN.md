@@ -262,11 +262,11 @@ tersisa butuh kunci/akun pemilik (Gemini, Cloudflare, Play, RevenueCat) atau per
 - [x] C1 batas harian (`DAILY_LIMIT`, 429 `daily_limit_exceeded`; klien menampilkan pesan berbeda)
 - [x] C2 cache entitlement di KV (5 menit / 1 menit)
 - [x] C3 pembatas per IP (`IP_LIMITER`, opsional; **sintaks binding di wrangler.toml belum diuji**, aktifkan saat deploy)
-- [ ] C4 anggaran Google Cloud Billing (atau batas Anthropic bila Haiku menang) — konsol
+- [x] C4 anggaran Google Cloud Billing — dibuat 2026-10-01: "Gemini DompetKu - bulanan", project gen-lang-client-0824436134, Rp200.000, peringatan 50/90/100% (email, tanpa spend cap)
 - [x] C5 dan C6 diputuskan tidak dikerjakan sekarang (lihat tabel C)
 
 ### D — Operasional
-- [ ] D0 project Google Cloud khusus kunci Gemini + billing aktif (paid tier)
+- [x] D0 project Google Cloud khusus kunci Gemini + billing aktif (paid tier) — project "DompetKu" gen-lang-client-0824436134, kunci API "CF_Worker"
 - [ ] D1 deploy Worker + secret + KV + `AI_MODEL` · [ ] D2 produk Play Ultimate · [ ] D3 impor produk RevenueCat
 - [ ] D4 entitlement `ultimate` (+ `premium`) · [ ] D5 paket di offering `dompetku` · [ ] D6 build dengan `AI_EXTRACTION_URL`
 - [ ] D7 listing dan Data Safety (draf teks listing sudah ada di `docs/LISTING-PLAY-STORE.md`) · [ ] D8 kebijakan privasi: Anthropic → Google, hosting ulang (setelah Worker di-deploy)
