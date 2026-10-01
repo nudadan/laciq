@@ -41,7 +41,7 @@ PAHAMI ARUS UANG ANDA
 PRIVASI DAN KEAMANAN
 • Tidak perlu daftar atau login
 • Kunci aplikasi dengan PIN atau sidik jari
-• Data keuangan tersimpan di perangkat Anda; kami tidak punya server yang menampungnya
+• Data keuangan tersimpan di perangkat Anda dan tidak kami simpan di server. Satu-satunya pengecualian: bila Anda memakai Scan struk dengan AI (Ultimate) dan menyetujuinya, teks struk dikirim untuk diproses dan tidak disimpan
 • Hapus semua data kapan saja dari menu Pengaturan
 
 FITUR PREMIUM (BERLANGGANAN)
@@ -53,6 +53,11 @@ FITUR PREMIUM (BERLANGGANAN)
 • Catatan utang dan piutang
 • Scan struk: foto struk dibaca langsung di HP Anda
 
+FITUR ULTIMATE (BERLANGGANAN)
+• Semua fitur Premium
+• Multi buku kas: pisahkan pembukuan pribadi dan bisnis, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri (sampai 5 buku)
+• Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis (60 scan per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke server AI kami untuk diproses, dan tidak disimpan
+
 Paket gratis menampilkan iklan banner dan sudah mencakup pencatatan, dompet, anggaran, target tabungan, serta sebagian fitur Agenda dan Analisa Tren. Langganan dapat dibatalkan kapan saja lewat Google Play.
 
 DompetKu mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.
@@ -61,18 +66,10 @@ Kebijakan privasi: https://dompetku.hardan-ti.com/privacy
 Bantuan: support@hardan-ti.com
 ```
 
-## Tambahan deskripsi saat Ultimate dirilis (JANGAN dipasang sebelum produk Ultimate bisa dibeli)
-Sisipkan setelah blok "FITUR PREMIUM"; total deskripsi tetap jauh di bawah 4.000 karakter. Sesuaikan kalimat
-Scan struk di Premium agar tidak tumpang tindih (Premium = dibaca di HP; Ultimate = dilengkapi AI).
-```
-FITUR ULTIMATE (BERLANGGANAN)
-• Semua fitur Premium
-• Multi buku kas: pisahkan pembukuan pribadi dan bisnis, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri (sampai 5 buku)
-• Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis. Teks hasil scan (bukan foto) dikirim ke server AI kami untuk diproses dan tidak disimpan
-```
-Kalimat "kami tidak punya server yang menampungnya" di bagian Privasi juga perlu dilunakkan saat Ultimate rilis
-(mis. "Data keuangan tersimpan di perangkat Anda; hanya teks struk yang dikirim ke server AI bila Anda memakai
-fitur Ultimate dan menyetujuinya").
+## Ultimate sudah masuk ke deskripsi di atas (diperbarui 2026-10-01)
+Blok "FITUR ULTIMATE" dan kalimat privasi yang sudah dilunakkan sudah menyatu di deskripsi lengkap. **Pasang ke
+Play Console bersamaan dengan rilis 4** (versi aplikasi yang memuat Ultimate), bukan sebelumnya, supaya listing
+tidak menjanjikan fitur yang belum ada di versi yang beredar. Produk Ultimate di Play sudah aktif (2026-09-30).
 
 ## Aset yang harus disediakan (belum ada di repo)
 | Aset | Ukuran | Catatan |
@@ -84,9 +81,8 @@ fitur Ultimate dan menyetujuinya").
 
 ## Catatan untuk pemilik
 - Setelah ini beres, baru bisa klik **Kirim aplikasi untuk ditinjau** di Ringkasan publikasi.
-- Bagian Ultimate (ekstraksi struk AI) sengaja dihapus dari deskripsi karena produknya belum dibuat di Play Console
-  dan Worker AI belum di-deploy. Tambahkan lagi saat tier Ultimate sudah bisa dibeli, sekalian revisi bagian
-  "Scan struk" agar tidak tumpang tindih.
+- Bagian Ultimate kini sudah ada di deskripsi (produk Ultimate aktif di Play dan Worker AI di-deploy 2026-10-01),
+  tetapi pasang bersama rilis 4. Jawaban Data Safety ada di `docs/DATA-SAFETY-PLAY.md`.
 - Detail kontak (support@hardan-ti.com, https://dompetku.hardan-ti.com) sudah dipublikasikan 2026-09-30; kategori
   aplikasi = Keuangan (tersimpan sebagai perubahan draf).
 - "Scan struk" ditulis di bawah Premium sesuai GAP-ANALISA (fitur Premium); akurasi parser struk kompleks tercatat
