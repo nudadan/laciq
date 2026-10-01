@@ -257,14 +257,18 @@ class FakeCloudBackupService implements CloudBackupService {
 /// tanpa menyentuh `image_picker`/ML Kit sungguhan sama sekali. Null (default)
 /// mensimulasikan pengguna membatalkan pemilihan foto.
 class FakeReceiptScanner implements ReceiptScanner {
-  FakeReceiptScanner({this.result});
+  FakeReceiptScanner({this.result, this.error});
 
   ScannedReceipt? result;
+
+  /// Bila diisi, scan melempar galat ini (mensimulasikan kamera/OCR gagal).
+  Object? error;
   final List<ImageSource> requestedSources = [];
 
   @override
   Future<ScannedReceipt?> scan(ImageSource source) async {
     requestedSources.add(source);
+    if (error != null) throw error!;
     return result;
   }
 }

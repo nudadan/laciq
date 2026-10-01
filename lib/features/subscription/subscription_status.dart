@@ -209,15 +209,42 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     }
     try {
       final change = await _productChangeFor(package);
-      await Purchases.purchase(
+      final result = await Purchases.purchase(
         PurchaseParams.package(native, productChangeInfo: change),
       );
+      await _waitForEntitlement(package.tier, result.customerInfo);
     } on PlatformException catch (e) {
       if (PurchasesErrorHelper.getErrorCode(e) ==
           PurchasesErrorCode.purchaseCancelledError) {
         throw const SubscriptionCancelled();
       }
       throw const SubscriptionException('Pembelian gagal. Coba lagi nanti.');
+    }
+  }
+
+  /// Setelah pembelian (terutama penggantian Premium -> Ultimate), Play dan
+  /// RevenueCat kadang butuh beberapa detik sebelum entitlement baru muncul,
+  /// sehingga layar sempat menampilkan paket lama padahal pembelian sudah
+  /// selesai. Tunggu (maks. ±10 detik) sampai entitlement paket yang dibeli
+  /// aktif; bila belum juga, lanjut saja: pembaruan berikutnya tetap sampai
+  /// lewat listener CustomerInfo.
+  Future<void> _waitForEntitlement(
+    SubscriptionTier tier,
+    CustomerInfo purchased,
+  ) async {
+    final id = tier == SubscriptionTier.ultimate
+        ? kUltimateEntitlementId
+        : kPremiumEntitlementId;
+    if (purchased.entitlements.active.containsKey(id)) return;
+    for (var i = 0; i < 5; i++) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      try {
+        await Purchases.invalidateCustomerInfoCache();
+        final info = await Purchases.getCustomerInfo();
+        if (info.entitlements.active.containsKey(id)) return;
+      } catch (_) {
+        // Coba lagi pada putaran berikutnya.
+      }
     }
   }
 

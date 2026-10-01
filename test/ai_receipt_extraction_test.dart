@@ -5,6 +5,7 @@ import 'package:dompet_pintar/features/transactions/receipt_scanner.dart';
 import 'package:dompet_pintar/features/transactions/transaction_form_page.dart'
     show resetUltimateUpsellSession;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -182,6 +183,23 @@ void main() {
     },
     subscription: FakeSubscriptionStatus(premium: true),
     receiptScanner: _scanner(),
+  );
+
+  appTest(
+    'scan gagal (kamera/OCR melempar galat): pengguna diberi tahu, bukan diam',
+    (tester, h) async {
+      await _scan(tester);
+      expect(
+        find.textContaining('Scan struk gagal (camera_access_denied)'),
+        findsOneWidget,
+      );
+      expect(h.aiExtraction.calls, isEmpty);
+      expect(_note(tester), isEmpty); // form tidak berubah
+    },
+    subscription: FakeSubscriptionStatus(premium: true),
+    receiptScanner: FakeReceiptScanner(
+      error: PlatformException(code: 'camera_access_denied'),
+    ),
   );
 
   group('HttpAiExtractionService', () {

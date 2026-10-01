@@ -199,6 +199,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
   /// menyimpan. Belum premium: arahkan ke [SubscriptionPage], pola sama
   /// [_ReminderPicker].
   Future<void> _scanReceipt() async {
+    final messenger = ScaffoldMessenger.of(context);
     final premium = ref.read(isPremiumProvider).value ?? false;
     if (!premium) {
       await Navigator.of(
@@ -226,8 +227,24 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       ),
     );
     if (source == null) return;
-    final scanned = await ref.read(receiptScannerProvider).scan(source);
-    if (scanned == null || !mounted) return;
+    final ScannedReceipt? picked;
+    try {
+      picked = await ref.read(receiptScannerProvider).scan(source);
+    } catch (e) {
+      // Jangan diam: gagal baca foto/OCR harus terlihat supaya pengguna tahu
+      // harus mengulang, dan jenis galatnya membantu penelusuran.
+      debugPrint('Scan struk gagal: $e');
+      if (mounted) {
+        final code = e is PlatformException ? e.code : e.runtimeType.toString();
+        notify(
+          messenger,
+          'Scan struk gagal ($code). Coba foto ulang, atau pilih dari Galeri.',
+        );
+      }
+      return;
+    }
+    if (picked == null || !mounted) return;
+    final scanned = picked;
     setState(() {
       if (scanned.amount != null) {
         _amountCtrl.text = groupedNumber(scanned.amount!);

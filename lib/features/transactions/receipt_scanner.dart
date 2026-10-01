@@ -46,9 +46,19 @@ abstract interface class ReceiptScanner {
 /// ulang semua baris dari semua blok berdasarkan posisi Y (`boundingBox.top`)
 /// yang sebenarnya jauh lebih andal daripada percaya urutan string gabungan.
 String _linesByPosition(RecognizedText recognized) {
-  final lines = [for (final block in recognized.blocks) ...block.lines]
-    ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
-  return lines.map((l) => l.text).join('\n');
+  // Potongan yang sejajar (label di kiri, angka di kanan) digabung jadi satu
+  // baris; urutan per batas atas saja menaruh angka sebelum labelnya pada foto
+  // yang miring. Lihat [orderLinesIntoRows].
+  return orderLinesIntoRows([
+    for (final block in recognized.blocks)
+      for (final line in block.lines)
+        OcrLine(
+          line.text,
+          top: line.boundingBox.top,
+          bottom: line.boundingBox.bottom,
+          left: line.boundingBox.left,
+        ),
+  ]).join('\n');
 }
 
 class MlKitReceiptScanner implements ReceiptScanner {
