@@ -39,7 +39,7 @@ Produk aktif di Play Console: **Premium** (`dompetku_premium`) dan **Ultimate** 
 
 | Fitur | Gratis | Premium | Ultimate | Status implementasi |
 |---|---|---|---|---|
-| Backup cloud terenkripsi ke Google Drive pengguna (`drive.appdata`, AES) | ❌ | ✅ | ✅ | ✅ Terbukti di build Play (2026-10-01, Galaxy Z Fold6: login, cadangkan, pulihkan). Butuh client OAuth dengan SHA-1 APK terpasang (`DompetKu - Play (terpasang)`) dan scope `drive.appdata` di Data Access. **Sebelum rilis produksi: layar persetujuan OAuth masih Testing (hanya 5 penguji, token habis 7 hari); harus dipublikasikan ke Production** |
+| Backup cloud terenkripsi ke Google Drive pengguna (`drive.appdata`, AES) | ❌ | ✅ | ✅ | ✅ Terbukti di build Play (2026-10-01, Galaxy Z Fold6: login, cadangkan, pulihkan). Butuh client OAuth dengan SHA-1 APK terpasang (`DompetKu - Play (terpasang)`) dan scope `drive.appdata` di Data Access. Layar persetujuan OAuth sudah **In production** (2026-10-01; branding: beranda dompetku.hardan-ti.com, kebijakan privasi, domain hardan-ti.com; tanpa logo agar tidak perlu verifikasi; scope non-sensitif `drive.appdata`) |
 | Pengingat transaksi berulang | ❌ (baris upsell) | ✅ | ✅ | ✅ |
 | Proyeksi keuangan bulanan (Agenda + transaksi berulang) | ❌ (ajakan upgrade) | ✅ | ✅ | 🟡 Tes lulus; belum diverifikasi manual di HP dengan data nyata |
 | Simulasi arus kas harian ("cukup sampai tanggal X") | ❌ | ✅ | ✅ | 🟡 Sama seperti proyeksi bulanan |

@@ -70,3 +70,7 @@ Uji ulang 2026-10-01 setelah client OAuth baru dan scope `drive.appdata` ditamba
 pulihkan lewat Backup Cloud berhasil di build 6 dari Play. Sisa tugas: publikasikan layar persetujuan OAuth ke Production
 (scope non-sensitif, tanpa verifikasi) agar bukan hanya 5 penguji yang bisa masuk; tampilkan kode galat Google di pesan
 aplikasi (`cloud_backup_service.dart`) pada build berikutnya.
+Update 2026-10-01: layar persetujuan OAuth dipublikasikan ke **Production**. Syarat tanpa verifikasi: <= 10 domain, TANPA logo
+aplikasi (mengunggah logo mewajibkan verifikasi), hanya scope non-sensitif (`drive.appdata`). Branding diisi: beranda
+`https://dompetku.hardan-ti.com`, kebijakan privasi `/privacy`, domain terotorisasi `hardan-ti.com`. Beranda dipasang di
+nginx (`location = /`, lihat `docs/situs-beranda/`). Bila suatu saat ingin menambah logo, ajukan verifikasi dulu.
