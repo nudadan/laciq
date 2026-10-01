@@ -25,8 +25,11 @@ npx wrangler login
 npx wrangler kv namespace create RATE_LIMIT      # tempel id ke wrangler.toml
 npx wrangler secret put GEMINI_API_KEY           # kunci paid tier
 npx wrangler secret put REVENUECAT_SECRET_KEY    # RevenueCat > API keys > Secret key (sk_...)
-npx wrangler deploy                              # mencetak URL https://....workers.dev
+npx wrangler deploy                              # memasang ke https://dompetku-api.hardan-ti.com
 ```
+
+Produksi dipasang di domain sendiri (`routes` + `workers_dev = false` di `wrangler.toml`; zona harus ada di
+Cloudflare, hostname satu tingkat di bawah domain). Alamat: `https://dompetku-api.hardan-ti.com/extract`.
 
 Model dan penyedia diatur di `wrangler.toml` (`AI_PROVIDER`, `AI_MODEL`, `DAILY_LIMIT`, opsional
 `AI_THINKING_CONFIG`), bukan di kode. Log Worker mencatat `ai_usage model=… in=… out=… thoughts=…`

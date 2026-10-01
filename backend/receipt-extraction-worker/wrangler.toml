@@ -2,6 +2,11 @@ name = "dompetku-receipt-extraction"
 main = "src/index.ts"
 compatibility_date = "2026-09-29"
 
+# Alamat publik Worker (zona hardan-ti.com ada di Cloudflare). Satu tingkat di bawah
+# domain supaya tercakup sertifikat HTTPS gratis. workers.dev tidak dipakai.
+workers_dev = false
+routes = [{ pattern = "dompetku-api.hardan-ti.com", custom_domain = true }]
+
 [vars]
 ULTIMATE_ENTITLEMENT = "ultimate"
 MONTHLY_LIMIT = "60"
@@ -24,7 +29,7 @@ AI_MODEL = "gemini-3.1-flash-lite"
 # Dipakai untuk penghitung pemakaian DAN cache entitlement (kunci berawalan "ent:").
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "GANTI_DENGAN_ID_KV_NAMESPACE"
+id = "85728dd92a8d4c4dbf7de95efeefbd56"
 
 # Opsional: pembatas laju per IP (Cloudflare Rate Limiting). Tanpa binding ini
 # pembatasan IP dilewati. Sintaks: lihat dokumentasi Cloudflare "Rate Limiting"
