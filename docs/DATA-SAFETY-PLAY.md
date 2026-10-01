@@ -66,3 +66,7 @@ menandatangani APK terpasang dari Play (`92:09:67:BB:F4:21:44:71:5F:F4:25:80:F8:
 (`21:30:93:26:...`, nilai kunci klasik di konsol Play). Konsol Play juga menampilkan kunci post-quantum
 (`2D:C6:90:1C:...`). Perbaikan: client OAuth Android baru "DompetKu - Play (terpasang)" dengan SHA-1 hasil baca dari APK.
 Setelah rilis produksi, periksa lagi sidik jari APK hasil unduhan produksi dan daftarkan bila berbeda.
+Uji ulang 2026-10-01 setelah client OAuth baru dan scope `drive.appdata` ditambahkan di Data Access: login, cadangkan, dan
+pulihkan lewat Backup Cloud berhasil di build 6 dari Play. Sisa tugas: publikasikan layar persetujuan OAuth ke Production
+(scope non-sensitif, tanpa verifikasi) agar bukan hanya 5 penguji yang bisa masuk; tampilkan kode galat Google di pesan
+aplikasi (`cloud_backup_service.dart`) pada build berikutnya.
