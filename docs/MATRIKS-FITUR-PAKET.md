@@ -16,7 +16,7 @@ Produk aktif di Play Console: **Premium** (`dompetku_premium`) dan **Ultimate** 
 | Transaksi pemasukan, pengeluaran, transfer | ✅ | ✅ | ✅ | ✅ |
 | Multi-dompet / akun | ✅ | ✅ | ✅ | ✅ |
 | Kategori, sub-kategori, tag | ✅ | ✅ | ✅ | ✅ |
-| Anggaran bulanan + notifikasi | ✅ | ✅ | ✅ | ✅ (bunyi notifikasi belum diuji sampai berbunyi, GAP-ANALISA P4) |
+| Anggaran bulanan + notifikasi | ✅ | ✅ | ✅ | ✅ Notifikasi anggaran terbukti di Galaxy Z Fold6 (2026-10-01): muncul saat aplikasi dibuka ulang (dicek tiap buka/kembali dari latar, bukan layanan latar), sekali per kategori per ambang |
 | Dashboard: saldo, arus kas, grafik kategori | ✅ | ✅ | ✅ | ✅ |
 | Transaksi berulang (dibuat otomatis saat app dibuka) | ✅ | ✅ | ✅ | ✅ (bukan pekerjaan latar belakang, sengaja) |
 | Target tabungan | ✅ | ✅ | ✅ | ✅ |
