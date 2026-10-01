@@ -223,7 +223,7 @@ Status per 2026-09-30 (K1–K7 memakai rekomendasi; lihat §11).
 - [x] F4 backup v7 · default `ledger-main` bila kunci tidak ada · integritas lintas buku · tes (fixture v6 disintesis dari ekspor)
 - [x] F5 `ledgersProvider`/`activeLedgerIdProvider` · gerbang Ultimate · pengalih · Kelola buku kas · "Mencatat di" · kondisi terkunci
 - [x] F6 teks manfaat Ultimate (halaman langganan) · tile Buku Kas (upsell/terkunci) · draf teks listing Play (belum dipasang)
-- [ ] F7 pemeriksaan singkat di Redmi (upgrade dari rilis 3) · backup sebelum update · rilis
+- [x] F7 (selesai 2026-10-01, Galaxy Z Fold6; G1-G12 lulus) pemeriksaan singkat di Redmi (upgrade dari rilis 3) · backup sebelum update · rilis
 
 ## 11. Catatan implementasi (2026-09-30)
 
@@ -246,4 +246,4 @@ Hal-hal yang berbeda dari rencana atau baru ditemukan saat mengerjakan:
   datang saat itu hilang, sehingga provider macet di loading. Implementasi produksi sudah memakai `async*`.
 - **Pengalih buku hanya untuk Ultimate.** Pengguna yang Ultimate-nya berakhir tetap melihat buku tambahan di
   halaman Kelola Buku Kas (terkunci, dengan Ekspor CSV), bukan di pengalih.
-- Belum diverifikasi di perangkat nyata (F7). Migrasi dari skema v9 ke v10 diuji otomatis dari semua versi lama.
+- Terverifikasi di perangkat nyata 2026-10-01 (F7, G1-G12 lulus). Migrasi dari skema v9 ke v10 diuji otomatis dari semua versi lama.

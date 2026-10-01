@@ -337,4 +337,4 @@ Uji di Galaxy Z Fold6 (Android 16) dengan build 5 lalu 6 dari jalur uji internal
   4. Kegagalan scan sebelumnya diam; kini menampilkan pesan. Status langganan menunggu entitlement setelah pembelian.
 - **Penggantian Premium → Ultimate terbukti** (riwayat pelanggan sandbox RevenueCat, build 6): `dompetku_premium:monthly` (IDR 7.500) -> `dompetku_ultimate:monthly` dibayar prorata IDR 4.386; Premium berstatus Inactive/expired, hanya Ultimate aktif, perpanjangan berikutnya IDR 12.500. `oldProductId` = ID langganan (`dompetku_premium`) benar; tidak ada tagihan ganda.
 - **Belum diuji:** migrasi dari rilis 3 (F7),
-  Backup Cloud di build Play, notifikasi berbunyi, multi buku kas di perangkat nyata (G), Ultimate berakhir (I).
+  Backup Cloud di build Play, notifikasi berbunyi, Ultimate berakhir (I). Multi buku kas (G1-G12) lulus semua di perangkat nyata.
