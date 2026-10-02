@@ -93,3 +93,9 @@ tidak menjanjikan fitur yang belum ada di versi yang beredar. Produk Ultimate di
   langganan `dompetku_ultimate`, uji coba 30 hari, 2.000 penukaran, berlaku 2 Okt 2026 - 31 Mar 2027; "DOMPETKUREVIEW"
   ditolak Play karena kata terlarang). Jangan hapus/jeda kode selama peninjauan. Pembaruan publikasi (10 perubahan,
   rilis produksi 6) dikirim untuk ditinjau pada 2026-10-02.
+- 2026-10-02: **Screenshot Ultimate dipasang** di Listingan Play Store (draf, belum dikirim; batas 8 ponsel). Urutan:
+  08 buku kas, 09 scan struk AI, Ringkasan, Anggaran, Proyeksi, 10 ringkasan per buku, Transaksi, 11 grafik. Dilepas:
+  Dompet, Lainnya, Catat transaksi (berkas asli di `store-assets/screenshots/`). Berkas baru:
+  `store-assets/screenshots_ultimate/` (1220x2300, dengan caption); mentahnya di `store-assets/_raw/ultimate/`.
+  Struk di gambar 09 adalah gambar buatan ("Toko Grosir Makmur"), bukan struk nyata. Kirim lewat Ringkasan publikasi
+  setelah peninjauan pertama selesai.
