@@ -45,7 +45,7 @@ Produk aktif di Play Console: **Premium** (`dompetku_premium`) dan **Ultimate** 
 | Simulasi arus kas harian ("cukup sampai tanggal X") | ❌ | ✅ | ✅ | 🟡 Sama seperti proyeksi bulanan |
 | Utang dan Piutang beserta cicilan | ❌ | ✅ | ✅ | ✅ Diverifikasi di HP; uji backup/restore tabel `debts` belum |
 | Scan struk (OCR on-device ML Kit, parser heuristik, foto struk tersimpan) | ❌ | ✅ | ✅ | ✅ Diverifikasi di HP. Akurasi turun untuk struk kompleks (mis. SPBU); mode offline ML Kit belum dicek |
-| Foto struk ikut backup cloud terenkripsi | ❌ | ✅ | ✅ | ✅ Round-trip backup dan restore diverifikasi |
+| Foto struk ikut backup cloud terenkripsi, dengan saklar "Sertakan foto struk" (default aktif; mati = foto tidak diunggah dan tidak diunduh saat restore) | ❌ | ✅ | ✅ | ✅ Round-trip backup dan restore diverifikasi di HP; saklar baru lulus tes otomatis (2026-10-02), belum dicoba di HP. Teks kebijakan privasi di repo sudah diperbarui, BELUM di-deploy ke server |
 | Melihat kembali foto struk: ikon di daftar transaksi, baris "Foto struk" di formulir ubah (lihat/hapus), penampil layar penuh dengan zoom; tetap bisa dilihat walau paket turun ke Gratis; foto yatim dibersihkan saat app dibuka | ✅ (foto yang sudah ada) | ✅ | ✅ | 🟡 Kode selesai dan lulus tes otomatis (2026-10-02); belum dicoba di perangkat nyata |
 
 ## 4. Fitur khusus Ultimate

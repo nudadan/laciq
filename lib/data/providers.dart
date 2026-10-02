@@ -6,6 +6,7 @@ import '../features/review/review_prompt_service.dart';
 import '../features/ai/ai_extraction_service.dart';
 import '../features/agenda/agenda_reminder_service.dart';
 import '../features/budget/budget_notification_service.dart';
+import '../features/cloud_backup/cloud_backup_options.dart';
 import '../features/cloud_backup/cloud_backup_reminder_service.dart';
 import '../features/cloud_backup/cloud_backup_service.dart';
 import '../features/recurring/recurring_reminder_service.dart';
@@ -333,6 +334,10 @@ final cloudBackupServiceProvider = Provider<CloudBackupService>(
 
 final cloudSignedInProvider = StreamProvider<bool>(
   (ref) => ref.watch(cloudBackupServiceProvider).watchSignedIn(),
+);
+
+final cloudBackupOptionsProvider = Provider<CloudBackupOptions>(
+  (ref) => CloudBackupOptions(ref.watch(keyValueStoreProvider)),
 );
 
 final cloudBackupReminderServiceProvider = Provider<CloudBackupReminderService>(

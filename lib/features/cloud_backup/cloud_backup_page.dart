@@ -28,6 +28,7 @@ class CloudBackupPage extends ConsumerStatefulWidget {
 class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
   bool _busy = false;
   bool _reminderEnabled = true;
+  bool _includePhotos = true;
   int _reminderIntervalDays = CloudBackupReminderService.defaultIntervalDays;
 
   @override
@@ -40,10 +41,14 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
     final service = ref.read(cloudBackupReminderServiceProvider);
     final enabled = await service.enabled();
     final interval = await service.intervalDays();
+    final includePhotos = await ref
+        .read(cloudBackupOptionsProvider)
+        .includePhotos();
     if (mounted) {
       setState(() {
         _reminderEnabled = enabled;
         _reminderIntervalDays = interval;
+        _includePhotos = includePhotos;
       });
     }
   }
@@ -69,7 +74,9 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
       final db = ref.read(databaseProvider);
       final json = await BackupService(db).export();
       await ref.read(cloudBackupServiceProvider).uploadBackup(json);
-      await _uploadReceiptPhotos(db);
+      if (await ref.read(cloudBackupOptionsProvider).includePhotos()) {
+        await _uploadReceiptPhotos(db);
+      }
       if (mounted) setState(() {}); // refresh baris "terakhir backup"
       notify(messenger, 'Backup cloud tersimpan.');
     } on CloudBackupException catch (e) {
@@ -110,7 +117,10 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
       final data = BackupService.parse(json);
       if (mounted) {
         final restored = await confirmAndRestore(context, ref, data);
-        if (restored) await _downloadReceiptPhotos(data);
+        if (restored &&
+            await ref.read(cloudBackupOptionsProvider).includePhotos()) {
+          await _downloadReceiptPhotos(data);
+        }
       }
     } on CloudBackupException catch (e) {
       notify(messenger, e.message);
@@ -240,6 +250,27 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
             },
           ),
         ],
+        const SizedBox(height: 12),
+        Material(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(18),
+          clipBehavior: Clip.antiAlias,
+          child: SwitchListTile(
+            secondary: const Icon(Icons.receipt_long_rounded),
+            title: const Text('Sertakan foto struk'),
+            subtitle: const Text(
+              'Foto ikut dicadangkan terenkripsi ke Google Drive Anda dan '
+              'kembali saat Anda memulihkan. Matikan bila foto tidak boleh '
+              'keluar dari HP ini. Foto yang sudah terunggah tetap ada di '
+              'Drive Anda sampai Anda menghapusnya.',
+            ),
+            value: _includePhotos,
+            onChanged: (v) async {
+              setState(() => _includePhotos = v);
+              await ref.read(cloudBackupOptionsProvider).setIncludePhotos(v);
+            },
+          ),
+        ),
         const SizedBox(height: 20),
         FilledButton.icon(
           onPressed: _busy ? null : _backupNow,

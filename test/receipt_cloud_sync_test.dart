@@ -129,5 +129,98 @@ void main() {
         await writeReceiptFile('receipts/r1.jpg', [9, 8, 7]);
       },
     );
+
+    appTest(
+      'saklar "Sertakan foto struk" aktif secara default dan menjelaskan '
+      'dampaknya',
+      (tester, h) async {
+        await _openCloudBackupPage(tester);
+
+        expect(find.text('Sertakan foto struk'), findsOneWidget);
+        expect(
+          tester
+              .widget<SwitchListTile>(
+                find.widgetWithText(SwitchListTile, 'Sertakan foto struk'),
+              )
+              .value,
+          isTrue,
+        );
+        expect(find.textContaining('Matikan bila foto tidak boleh'), findsOne);
+      },
+      subscription: FakeSubscriptionStatus(premium: true),
+      cloudBackup: FakeCloudBackupService(signedIn: true),
+    );
+
+    appTest(
+      'saklar dimatikan: data ikut dicadangkan tetapi foto TIDAK diunggah',
+      (tester, h) async {
+        await _openCloudBackupPage(tester);
+        await tester.tap(find.text('Sertakan foto struk'));
+        await settle(tester);
+        expect(await h.store.read('backup_include_receipt_photos'), '0');
+
+        await tester.tap(find.text('Backup sekarang'));
+        await settle(tester);
+
+        expect(
+          h.cloudBackup.storedFiles.keys,
+          isNot(contains('receipt_r1.jpg.enc')),
+        );
+        expect(find.text('Backup cloud tersimpan.'), findsOneWidget);
+      },
+      subscription: FakeSubscriptionStatus(premium: true),
+      cloudBackup: FakeCloudBackupService(signedIn: true),
+      seed: (db) async {
+        // 'acc-tunai'/'cat-exp-makan': dompet & kategori bawaan dari seed
+        // default (_seed() di database.dart), tidak perlu buat baru.
+        await db.addTransaction(
+          type: TxType.expense,
+          amount: 15000,
+          accountId: 'acc-tunai',
+          categoryId: 'cat-exp-makan',
+          date: DateTime(2026, 9, 20),
+          receiptPath: 'receipts/r1.jpg',
+        );
+        await writeReceiptFile('receipts/r1.jpg', [9, 8, 7]);
+      },
+    );
+
+    appTest(
+      'saklar dimatikan: restore tidak mengunduh foto dari Drive',
+      (tester, h) async {
+        await _openCloudBackupPage(tester);
+        // Foto sudah ada di Drive dari backup sebelumnya (saklar masih aktif).
+        await tester.tap(find.text('Backup sekarang'));
+        await settle(tester);
+        expect(h.cloudBackup.storedFiles.keys, contains('receipt_r1.jpg.enc'));
+
+        await tester.tap(find.text('Sertakan foto struk'));
+        await settle(tester);
+        final localFile = File(await resolveReceiptPath('receipts/r1.jpg'));
+        await tester.runAsync(() => localFile.delete());
+
+        await tester.tap(find.text('Pulihkan dari cloud'));
+        await settle(tester);
+        await tester.tap(find.text('Ganti data'));
+        await settle(tester);
+
+        expect(await tester.runAsync(() => localFile.exists()), isFalse);
+      },
+      subscription: FakeSubscriptionStatus(premium: true),
+      cloudBackup: FakeCloudBackupService(signedIn: true),
+      seed: (db) async {
+        // 'acc-tunai'/'cat-exp-makan': dompet & kategori bawaan dari seed
+        // default (_seed() di database.dart), tidak perlu buat baru.
+        await db.addTransaction(
+          type: TxType.expense,
+          amount: 15000,
+          accountId: 'acc-tunai',
+          categoryId: 'cat-exp-makan',
+          date: DateTime(2026, 9, 20),
+          receiptPath: 'receipts/r1.jpg',
+        );
+        await writeReceiptFile('receipts/r1.jpg', [9, 8, 7]);
+      },
+    );
   });
 }
