@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import 'receipt_viewer_page.dart';
 import 'transaction_form_page.dart';
 
 class TransactionsPage extends ConsumerWidget {
@@ -131,7 +132,18 @@ class _GroupedList extends ConsumerWidget {
                 ),
               );
             },
-            child: _TxTile(v, onTap: () => _edit(context, v.tx)),
+            child: _TxTile(
+              v,
+              onTap: () => _edit(context, v.tx),
+              onViewReceipt: v.tx.receiptPath == null
+                  ? null
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            ReceiptViewerPage(relativePath: v.tx.receiptPath!),
+                      ),
+                    ),
+            ),
           ),
         );
       },
@@ -148,10 +160,13 @@ Future<void> _edit(BuildContext context, TxEntry tx) async {
 }
 
 class _TxTile extends StatelessWidget {
-  const _TxTile(this.v, {required this.onTap});
+  const _TxTile(this.v, {required this.onTap, this.onViewReceipt});
 
   final TxView v;
   final VoidCallback onTap;
+
+  /// Non-null bila transaksi punya foto struk; membuka penampil foto.
+  final VoidCallback? onViewReceipt;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +224,24 @@ class _TxTile extends StatelessWidget {
                     if (tx.recurringId != null) ...[
                       const SizedBox(width: 6),
                       Icon(Icons.repeat, size: 14, color: scheme.primary),
+                    ],
+                    if (onViewReceipt != null) ...[
+                      const SizedBox(width: 4),
+                      InkResponse(
+                        onTap: onViewReceipt,
+                        radius: 20,
+                        child: Tooltip(
+                          message: 'Lihat foto struk',
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.receipt_long_rounded,
+                              size: 16,
+                              color: scheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ],
                 ),

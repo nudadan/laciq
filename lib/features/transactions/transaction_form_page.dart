@@ -20,6 +20,8 @@ import '../security/lock_providers.dart' show keyValueStoreProvider;
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
 import 'receipt_scanner.dart' show ScannedReceipt;
+import 'receipt_storage.dart' show deleteReceiptFile;
+import 'receipt_viewer_page.dart';
 
 enum _Mode { create, editTx, editRule, executeAgenda, payDebt }
 
@@ -118,6 +120,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       _categoryId = tx.categoryId;
       _date = tx.date;
       _noteCtrl.text = tx.note ?? '';
+      _receiptPath = tx.receiptPath;
     } else if (rule != null) {
       _type = rule.type;
       _amountCtrl.text = groupedNumber(rule.amount);
@@ -397,6 +400,38 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     return null;
   }
 
+  /// Melepas foto struk dari transaksi yang sedang diubah. Berlaku langsung
+  /// (tidak menunggu Simpan) karena fotonya ikut dihapus dari perangkat.
+  Future<void> _removeReceipt() async {
+    final path = _receiptPath;
+    final tx = widget.editingTx;
+    if (path == null || tx == null) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus foto struk?'),
+        content: const Text(
+          'Foto dihapus dari perangkat ini dan tidak bisa dikembalikan. '
+          'Data transaksi tidak berubah.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await ref.read(databaseProvider).removeTransactionReceipt(tx.id);
+    await deleteReceiptFile(path);
+    if (mounted) setState(() => _receiptPath = null);
+  }
+
   Future<void> _save() async {
     final amount = parseRupiah(_amountCtrl.text);
     final error = _validate(amount);
@@ -635,6 +670,25 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                   ref.watch(subscriptionTierProvider) == ActiveTier.premium &&
                   (ref.watch(ultimateAvailableProvider).value ?? false))
                 const _UltimateUpsell(),
+              const SizedBox(height: 16),
+            ],
+            if (mode == _Mode.editTx && _receiptPath != null) ...[
+              FieldTile(
+                leading: Icons.receipt_long_rounded,
+                title: 'Foto struk',
+                subtitle: 'Ketuk untuk melihat',
+                trailing: IconButton(
+                  tooltip: 'Hapus foto',
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  onPressed: _removeReceipt,
+                ),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        ReceiptViewerPage(relativePath: _receiptPath!),
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
             ],
             if (mode != _Mode.executeAgenda && mode != _Mode.payDebt)

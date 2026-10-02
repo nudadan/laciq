@@ -19,6 +19,8 @@ import 'features/onboarding/onboarding_page.dart';
 import 'features/onboarding/onboarding_providers.dart';
 import 'features/security/lock_gate.dart';
 import 'features/settings/settings_page.dart';
+import 'features/transactions/receipt_storage.dart'
+    show purgeOrphanReceiptFiles;
 import 'features/transactions/transaction_form_page.dart';
 import 'features/transactions/transactions_page.dart';
 
@@ -89,6 +91,7 @@ class _HomeShellState extends ConsumerState<HomeShell>
     _checkBackupReminder();
     _recordFirstUse();
     _rescheduleReminders();
+    _purgeOrphanReceipts();
   }
 
   @override
@@ -120,6 +123,18 @@ class _HomeShellState extends ConsumerState<HomeShell>
       // removeCurrentSnackBar() men-set value controller langsung (bukan
       // lewat animasi berjalan), jadi selalu langsung hilang.
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    }
+  }
+
+  /// Menghapus foto struk yang tidak dirujuk transaksi mana pun (mis. foto
+  /// yang dibuang sebelum transaksi disimpan). Sekali saat app dibuka; foto
+  /// baru (< 1 hari) dibiarkan. Gagal = diam.
+  Future<void> _purgeOrphanReceipts() async {
+    try {
+      final referenced = await ref.read(databaseProvider).allReceiptPaths();
+      await purgeOrphanReceiptFiles(referenced);
+    } catch (e) {
+      debugPrint('Gagal membersihkan foto struk yatim: $e');
     }
   }
 

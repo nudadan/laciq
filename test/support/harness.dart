@@ -18,6 +18,7 @@ import 'package:dompet_pintar/features/transactions/receipt_scanner.dart';
 import 'package:image_picker/image_picker.dart' show ImageSource;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 /// Drift bekerja dengan async sungguhan, sementara testWidgets memakai jam
@@ -347,6 +348,7 @@ void appTest(
   FakeCloudBackupService? cloudBackup,
   FakeReceiptScanner? receiptScanner,
   FakeAiExtractionService? aiExtraction,
+  List<Override> extraOverrides = const [],
   Duration grace = const Duration(seconds: 30),
   // Kebanyakan tes tidak menguji alur onboarding itu sendiri, jadi lewati
   // begitu saja (langsung ke HomeShell) kecuali diminta lain lewat `false`.
@@ -386,6 +388,7 @@ void appTest(
           receiptScannerProvider.overrideWithValue(scanner),
           aiExtractionServiceProvider.overrideWithValue(ai),
           reviewLauncherProvider.overrideWithValue(reviewLauncher),
+          ...extraOverrides,
         ],
         child: const DompetPintarApp(),
       ),

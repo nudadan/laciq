@@ -1324,6 +1324,28 @@ class AppDatabase extends _$AppDatabase {
     return id;
   }
 
+  /// Melepas foto struk dari transaksi (kolom dikosongkan). File fisiknya
+  /// dihapus pemanggil lewat `deleteReceiptFile`.
+  Future<void> removeTransactionReceipt(String id) {
+    return (update(transactions)..where((t) => t.id.equals(id))).write(
+      TransactionsCompanion(
+        receiptPath: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Semua path foto struk yang masih dirujuk transaksi, TERMASUK yang sudah
+  /// dihapus lunak (masih bisa dibatalkan) dan dari semua buku kas.
+  Future<Set<String>> allReceiptPaths() async {
+    final rows =
+        await (selectOnly(transactions)
+              ..addColumns([transactions.receiptPath])
+              ..where(transactions.receiptPath.isNotNull()))
+            .get();
+    return {for (final r in rows) ?r.read(transactions.receiptPath)};
+  }
+
   Future<void> setTransactionDeleted(String id, {required bool deleted}) {
     final now = DateTime.now();
     return (update(transactions)..where((t) => t.id.equals(id))).write(
