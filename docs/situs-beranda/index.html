@@ -3,63 +3,701 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DompetKu: Catatan Keuangan</title>
-<meta name="description" content="DompetKu adalah aplikasi pencatat keuangan pribadi untuk Android. Data tersimpan di HP Anda.">
+<title>DompetKu: Catatan Keuangan tanpa akun, data tetap di HP</title>
+<meta name="description" content="DompetKu adalah aplikasi pencatat keuangan pribadi dan usaha untuk Android. Tanpa akun, data tersimpan di HP Anda. Anggaran, target tabungan, utang piutang, scan struk dengan AI, dan multi buku kas.">
+<meta name="theme-color" content="#0b0f1e">
+<link rel="canonical" href="https://dompetku.hardan-ti.com/">
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DompetKu">
+<meta property="og:title" content="DompetKu: Catatan Keuangan tanpa akun, data tetap di HP">
+<meta property="og:description" content="Catat pemasukan dan pengeluaran, atur anggaran, scan struk dengan AI, pisahkan keuangan pribadi dan usaha. Tanpa akun.">
+<meta property="og:url" content="https://dompetku.hardan-ti.com/">
+<meta property="og:image" content="https://dompetku.hardan-ti.com/img/og.jpg">
+<meta property="og:locale" content="id_ID">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DompetKu: Catatan Keuangan",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Android",
+  "inLanguage": "id",
+  "url": "https://dompetku.hardan-ti.com/",
+  "description": "Aplikasi pencatat keuangan pribadi dan usaha untuk Android. Tanpa akun, data tersimpan di HP.",
+  "publisher": {"@type": "Organization", "name": "hardan-ti", "email": "support@hardan-ti.com"},
+  "offers": [
+    {"@type": "Offer", "name": "Gratis", "price": "0", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Premium bulanan", "price": "7500", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Ultimate bulanan", "price": "12500", "priceCurrency": "IDR"}
+  ]
+}
+</script>
+
+<link rel="preload" href="/fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  :root { --bg:#fff; --fg:#1d2433; --muted:#5b6478; --line:#e3e6ee; --accent:#0b6b5c; --card:#f5f7fa; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#12161f; --fg:#e7eaf1; --muted:#98a1b5; --line:#2a3142; --accent:#4cc7b1; --card:#1a2030; }
-  }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-  main { max-width:760px; margin:0 auto; padding:40px 16px 64px; }
-  h1 { font-size:2rem; line-height:1.25; margin:0 0 6px; }
-  h2 { font-size:1.2rem; margin:2em 0 .5em; padding-top:.4em; border-top:1px solid var(--line); }
-  p, li { margin:.5em 0; }
-  ul { padding-left:1.3em; }
-  a { color:var(--accent); }
-  .lead { color:var(--muted); font-size:1.1rem; margin:0 0 1.5em; }
-  .box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:1em 0; }
-  footer { margin-top:2.5em; color:var(--muted); font-size:.95rem; border-top:1px solid var(--line); padding-top:1em; }
+@font-face{font-family:"Space Grotesk";src:url(/fonts/SpaceGrotesk.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Plus Jakarta Sans";src:url(/fonts/PlusJakartaSans.woff2) format("woff2");font-weight:200 800;font-display:swap}
+
+:root{
+  --bg:#0b0f1e; --bg2:#0f1530; --surface:#141a38; --surface2:#1a2144;
+  --line:rgba(255,255,255,.09); --text:#e9ecf8; --muted:#a1a9c7;
+  --a1:#4f6bff; --a2:#8a4dff; --ok:#34d399; --warn:#fbbf24;
+  --grad:linear-gradient(135deg,var(--a1),var(--a2));
+  --radius:22px; --max:1120px;
+  --head:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:#9db0ff}
+h1,h2,h3{font-family:var(--head);line-height:1.15;margin:0;letter-spacing:-.02em}
+p{margin:0}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+.skip{position:absolute;left:-999px;top:8px;background:#fff;color:#000;padding:8px 14px;border-radius:8px;z-index:100}
+.skip:focus{left:8px}
+:focus-visible{outline:3px solid #9db0ff;outline-offset:3px;border-radius:8px}
+
+/* ---------- Tombol ---------- */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;font:600 16px/1 var(--body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 30px -8px rgba(99,102,255,.7)}
+.btn-primary:hover{box-shadow:0 14px 36px -8px rgba(120,100,255,.85)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border-color:var(--line)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn svg{width:20px;height:20px;flex:none}
+
+/* ---------- Navigasi ---------- */
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,15,30,.78);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font:700 20px/1 var(--head)}
+.brand img{width:34px;height:34px;border-radius:9px}
+.nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;align-items:center}
+.nav ul a{display:block;padding:9px 14px;color:var(--muted);text-decoration:none;border-radius:999px;font-weight:500;font-size:15px}
+.nav ul a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nav .btn{padding:10px 18px;font-size:14px}
+.menu-btn{display:none;background:none;border:1px solid var(--line);color:var(--text);width:44px;height:44px;border-radius:12px;cursor:pointer}
+@media (max-width:860px){
+  .menu-btn{display:grid;place-items:center}
+  .nav ul{position:absolute;left:0;right:0;top:68px;background:var(--bg2);flex-direction:column;align-items:stretch;padding:12px 20px 20px;border-bottom:1px solid var(--line);display:none}
+  .nav ul.open{display:flex}
+  .nav ul a{padding:14px}
+}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;padding:72px 0 40px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto -10%;height:90%;background:radial-gradient(60% 60% at 25% 20%,rgba(79,107,255,.28),transparent 70%),radial-gradient(50% 50% at 85% 10%,rgba(138,77,255,.25),transparent 70%);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);color:#c7d0ff;font-size:14px;font-weight:500;margin-bottom:22px}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(52,211,153,.2)}
+.hero h1{font-size:clamp(38px,6vw,64px);font-weight:700}
+.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{margin-top:22px;font-size:19px;color:var(--muted);max-width:34em}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:22px;margin-top:30px;color:var(--muted);font-size:15px}
+.hero-meta span{display:flex;align-items:center;gap:8px}
+.hero-meta svg{width:18px;height:18px;color:var(--ok)}
+.phones{position:relative;height:620px}
+.phone{position:absolute;border-radius:38px;padding:9px;background:linear-gradient(160deg,#2a3260,#141a38);box-shadow:0 30px 70px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.08) inset}
+.phone img{border-radius:30px;width:100%}
+.phones .p1{width:268px;left:50%;top:0;transform:translateX(-4%) rotate(4deg);z-index:2}
+.phones .p2{width:236px;left:2%;top:70px;transform:rotate(-7deg);z-index:1;opacity:.95}
+.phones .chip{position:absolute;z-index:3;background:rgba(20,26,56,.92);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:11px 15px;font-size:14px;font-weight:600;display:flex;gap:9px;align-items:center;box-shadow:0 14px 34px -10px rgba(0,0,0,.7)}
+.chip svg{width:20px;height:20px;color:var(--ok)}
+.chip.c1{left:0;bottom:90px}
+.chip.c2{left:0;top:6px}
+@media (max-width:900px){
+  .hero{padding-top:44px}
+  .hero .wrap{grid-template-columns:1fr}
+  .phones{height:min(560px,130vw);max-width:440px;margin:10px auto 0;width:100%}
+  .phones .p1{width:min(250px,58%);left:auto;right:2%;top:6%;transform:rotate(3deg)}
+  .phones .p2{width:min(220px,52%);left:2%;top:12%;transform:rotate(-6deg)}
+  .chip.c1{bottom:4%}
+}
+
+/* ---------- Bagian umum ---------- */
+section{padding:88px 0}
+.sec-head{max-width:720px;margin:0 auto 54px;text-align:center}
+.sec-head .tag{color:#9db0ff;font:600 14px/1 var(--body);letter-spacing:.12em;text-transform:uppercase}
+.sec-head h2{font-size:clamp(30px,4.4vw,46px);margin-top:14px}
+.sec-head p{color:var(--muted);margin-top:16px;font-size:18px}
+.alt{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+
+/* ---------- Angka ---------- */
+.stats{padding:20px 0 0}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{padding:26px 22px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02))}
+.stat b{display:block;font:700 40px/1 var(--head);background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{display:block;margin-top:10px;color:var(--muted);font-size:15px}
+@media (max-width:760px){.stats .wrap{grid-template-columns:repeat(2,1fr)}.stat b{font-size:32px}}
+
+/* ---------- Fitur ---------- */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:rgba(157,176,255,.4)}
+.ico{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:var(--grad);margin-bottom:20px;color:#fff}
+.ico svg{width:26px;height:26px}
+.card h3{font-size:21px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.card p{color:var(--muted);font-size:16px}
+.badge{display:inline-block;margin:0;padding:3px 10px;border-radius:999px;font:600 12px/1.4 var(--body);vertical-align:middle;letter-spacing:.02em}
+.b-free{background:rgba(52,211,153,.14);color:#6ee7b7}
+.b-pro{background:rgba(79,107,255,.2);color:#b4c0ff}
+.b-ult{background:rgba(251,191,36,.15);color:#fcd34d}
+@media (max-width:900px){.grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.grid3{grid-template-columns:1fr}}
+
+/* ---------- Tampilan / showcase ---------- */
+.show{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-bottom:96px}
+.show:last-child{margin-bottom:0}
+.show.rev .show-img{order:2}
+.show-img{display:flex;justify-content:center}
+.show-img .phone{position:relative;width:290px;transform:none}
+.show-img .phone.tilt{transform:rotate(-3deg)}
+.show-text h3{font-size:clamp(26px,3.4vw,36px);margin:14px 0 16px}
+.show-text p{color:var(--muted)}
+.ticks{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px}
+.ticks li{display:flex;gap:12px;color:var(--text);font-size:16px}
+.ticks svg{width:22px;height:22px;flex:none;color:var(--ok);margin-top:2px}
+@media (max-width:860px){
+  .show{grid-template-columns:1fr;gap:34px;margin-bottom:72px}
+  .show.rev .show-img{order:0}
+  .show-img .phone{width:250px}
+}
+
+/* ---------- Infografis: alur scan ---------- */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.step{position:relative;padding:0 14px;text-align:center}
+.step .n{width:64px;height:64px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--line);position:relative;z-index:1;color:#c7d0ff}
+.step .n svg{width:28px;height:28px}
+.step.hl .n{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 12px 30px -8px rgba(110,100,255,.8)}
+.step::after{content:"";position:absolute;top:32px;left:calc(50% + 40px);right:calc(-50% + 40px);border-top:2px dashed rgba(157,176,255,.35)}
+.step:last-child::after{display:none}
+.step h3{font-size:18px;margin-bottom:8px}
+.step p{color:var(--muted);font-size:15px}
+.flow-note{margin:38px auto 0;max-width:640px;text-align:center;color:var(--muted);font-size:15px}
+.receipt-demo{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:56px;align-items:center}
+@media (max-width:860px){
+  .flow{grid-template-columns:1fr;gap:26px}
+  .step::after{display:none}
+  .step{display:grid;grid-template-columns:64px 1fr;gap:16px;text-align:left;align-items:center;padding:0}
+  .step .n{margin:0}
+}
+
+/* ---------- Infografis: privasi ---------- */
+.map{display:grid;grid-template-columns:1fr 70px 1fr;gap:0;align-items:stretch}
+.node{padding:30px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.node.center{background:linear-gradient(160deg,rgba(79,107,255,.22),rgba(138,77,255,.18));border-color:rgba(157,176,255,.4)}
+.node h3{font-size:22px;margin:14px 0 8px}
+.node p,.node li{color:var(--muted);font-size:15.5px}
+.node ul{margin:14px 0 0;padding-left:20px}
+.node .ico{margin:0}
+.link{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9db0ff;gap:6px;font-size:12px;text-align:center}
+.link svg{width:48px;height:24px}
+.map-stack{display:grid;gap:18px}
+.neg{display:flex;align-items:center;gap:12px;margin-top:22px;padding:16px 20px;border-radius:16px;border:1px dashed rgba(251,113,133,.5);background:rgba(251,113,133,.06);color:#fecdd3;font-size:15.5px}
+.neg svg{width:24px;height:24px;flex:none;color:#fb7185}
+@media (max-width:860px){
+  .map{grid-template-columns:1fr}
+  .link{flex-direction:row;padding:12px 0}
+  .link svg{transform:rotate(90deg)}
+}
+
+/* ---------- Paket ---------- */
+.toggle{display:flex;width:max-content;margin:0 auto 38px;padding:5px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.toggle button{border:0;background:none;color:var(--muted);font:600 15px/1 var(--body);padding:12px 22px;border-radius:999px;cursor:pointer}
+.toggle button[aria-pressed=true]{background:var(--grad);color:#fff}
+.toggle small{font-weight:600;color:var(--ok);margin-left:6px}
+.toggle button[aria-pressed=true] small{color:#d1fae5}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+.plan{display:flex;flex-direction:column;padding:32px 28px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.plan.pop{background:linear-gradient(170deg,#1c2455,#171c42);border-color:rgba(157,176,255,.55);box-shadow:0 30px 60px -30px rgba(100,90,255,.7);position:relative}
+.plan.pop::before{content:"Terlengkap";position:absolute;top:-13px;left:28px;background:var(--grad);color:#fff;font:700 12px/1 var(--body);padding:7px 13px;border-radius:999px;letter-spacing:.04em}
+.plan h3{font-size:24px}
+.plan .desc{color:var(--muted);font-size:15px;margin-top:6px;min-height:46px}
+.price{margin:22px 0 4px;font:700 40px/1 var(--head)}
+.price small{font:500 16px/1 var(--body);color:var(--muted)}
+.price-sub{color:var(--muted);font-size:14px;min-height:21px;margin-bottom:22px}
+.plan ul{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:11px;font-size:15.5px;flex:1;align-content:start}
+.plan li{display:flex;gap:11px}
+.plan li svg{width:20px;height:20px;flex:none;color:var(--ok);margin-top:3px}
+.plan li.off{color:#6b7497}
+.plan li.off svg{color:#4a5275}
+.plan li.inh{color:var(--muted);font-weight:600}
+.plan .btn{justify-content:center;width:100%}
+.fine{max-width:760px;margin:30px auto 0;text-align:center;color:var(--muted);font-size:14px}
+@media (max-width:960px){.plans{grid-template-columns:1fr;max-width:480px;margin:0 auto}}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:780px;margin:0 auto;display:grid;gap:12px}
+details{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:0 24px}
+summary{cursor:pointer;list-style:none;padding:20px 0;font:600 18px/1.4 var(--head);display:flex;justify-content:space-between;gap:16px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 28px/1 var(--head);color:#9db0ff;transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 0 22px;color:var(--muted)}
+
+/* ---------- CTA & footer ---------- */
+.cta-band{margin:0 20px;border-radius:32px;background:var(--grad);padding:64px 24px;text-align:center;position:relative;overflow:hidden}
+.cta-band::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 80% at 80% 0%,rgba(255,255,255,.22),transparent 60%);pointer-events:none}
+.cta-band>*{position:relative}
+.cta-band h2{font-size:clamp(30px,4.6vw,48px);color:#fff}
+.cta-band p{color:rgba(255,255,255,.85);margin:16px auto 30px;max-width:540px;font-size:18px}
+.cta-band .btn{background:#fff;color:#2b2f8f;box-shadow:0 14px 40px -12px rgba(0,0,0,.5)}
+footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
+.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:34px}
+.foot h4{color:var(--text);font:600 15px/1 var(--head);margin:0 0 16px;letter-spacing:.04em}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.foot a{color:var(--muted);text-decoration:none}
+.foot a:hover{color:var(--text)}
+.legal{margin-top:42px;padding-top:24px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}
+@media (max-width:700px){.foot{grid-template-columns:1fr}}
+
+/* ---------- Animasi masuk ---------- */
+.js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media print{.js .reveal{opacity:1!important;transform:none!important}.nav{position:static}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;transition:none}
+  .btn,.card{transition:none}
+}
 </style>
 </head>
 <body>
-<main>
+<a class="skip" href="#utama">Lewati ke konten</a>
 
-<h1>DompetKu: Catatan Keuangan</h1>
-<p class="lead">Catat pemasukan dan pengeluaran, atur anggaran, dan pahami arus uang Anda. Data keuangan tersimpan di HP Anda sendiri.</p>
+<!-- Ikon SVG dipakai ulang lewat <use> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M7 7l10 10M17 7L7 17"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M8 11V8a4 4 0 018 0v3"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M11 18.5h2"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M4 7.5A2.5 2.5 0 016.5 5H18v3M4 7.5V17a2 2 0 002 2h12.5a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0018.5 9H6.5A2.5 2.5 0 014 7.5z"/><circle cx="16" cy="13.5" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-pie" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 3v9h9a9 9 0 11-9-9z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M15 3.5a9 9 0 015.5 5.5H15z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5 21V4M5 4h11l-2.2 3.6L16 11H5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M8 3v4M16 3v4M4 10h16"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M3 12l4-4 4 2 3-2 5 4-4 5-3 1-3-1-2 1-4-4zM9 17l-2 2M12 18l-1.5 2"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8M15 7h6v6"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M8 9h8M8 12.5h8M8 16h5"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 6.5c-1.8-1.4-4.2-2-8-2v13c3.8 0 6.2.6 8 2 1.8-1.4 4.2-2 8-2v-13c-3.8 0-6.2.6-8 2zM12 6.5v13"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M7 18a4.5 4.5 0 01-.6-8.96A6 6 0 0118 9.5 4.3 4.3 0 0117.5 18zM12 17v-6m-2.5 2.5L12 11l2.5 2.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M6 17V11a6 6 0 1112 0v6l1.5 2h-15zM10 21h4"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M4 8.5A1.5 1.5 0 015.5 7H8l1.4-2h5.2L16 7h2.5A1.5 1.5 0 0120 8.5v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 17.5z"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M5 6h14M5 11h14M5 16h9"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM18.5 16l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5 4h11l3 3v13H5zM8 4v5h7M8 20v-6h8v6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3.6v16.8c0 .6.7 1 1.2.7l14-8.4c.5-.3.5-1.1 0-1.4l-14-8.4C5.7 2.6 5 3 5 3.6z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 48 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5" d="M2 12h38"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M34 5l9 7-9 7"/></symbol>
+  </defs>
+</svg>
 
-<div class="box">
-  DompetKu adalah aplikasi pencatat keuangan pribadi untuk Android, dikembangkan oleh <strong>hardan-ti</strong>.
-  Aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="/img/icon-192.png" alt="" width="34" height="34">DompetKu</a>
+    <button class="menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="menu"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <ul id="menu">
+      <li><a href="#fitur">Fitur</a></li>
+      <li><a href="#tampilan">Tampilan</a></li>
+      <li><a href="#scan">Scan struk</a></li>
+      <li><a href="#privasi">Privasi</a></li>
+      <li><a href="#paket">Paket</a></li>
+      <li><a href="#faq">Tanya jawab</a></li>
+      <li><a class="btn btn-primary play-cta" href="#unduh">Google Play</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="utama">
+
+<!-- ================= HERO ================= -->
+<section class="hero" style="padding-bottom:40px">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow"><i></i>Aplikasi keuangan untuk Android</div>
+      <h1>Catat uang tanpa daftar akun. <em>Datamu tetap di HP-mu.</em></h1>
+      <p class="lead">DompetKu membantu Anda mencatat pemasukan dan pengeluaran, mengatur anggaran, dan memahami ke mana uang pergi. Tanpa email, tanpa login, tanpa ribet.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary play-cta" href="#unduh"><svg><use href="#i-play"/></svg><span class="play-label">Segera hadir di Google Play</span></a>
+        <a class="btn btn-ghost" href="#fitur">Lihat fitur</a>
+      </div>
+      <div class="hero-meta">
+        <span><svg><use href="#i-check"/></svg>Tanpa akun</span>
+        <span><svg><use href="#i-check"/></svg>Kunci PIN / sidik jari</span>
+        <span><svg><use href="#i-check"/></svg>Gratis untuk mulai</span>
+      </div>
+    </div>
+    <div class="phones" aria-hidden="false">
+      <div class="phone p2"><img src="/img/anggaran.webp" alt="Layar Anggaran DompetKu: batas pengeluaran per kategori dengan indikator persentase" width="560" height="1017" loading="eager"></div>
+      <div class="phone p1"><img src="/img/ringkasan.webp" alt="Layar Ringkasan DompetKu: total saldo, pemasukan, pengeluaran, dan proyeksi bulan ini" width="560" height="1017" loading="eager" fetchpriority="high"></div>
+      <div class="chip c1"><svg><use href="#i-lock"/></svg>Data di HP Anda</div>
+      <div class="chip c2"><svg><use href="#i-scan"/></svg>Scan struk dengan AI</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANGKA ================= -->
+<div class="stats">
+  <div class="wrap">
+    <div class="stat reveal"><b>0</b><span>akun yang harus dibuat</span></div>
+    <div class="stat reveal"><b>5</b><span>buku kas terpisah untuk pribadi dan usaha</span></div>
+    <div class="stat reveal"><b>300</b><span>scan struk AI per bulan (Ultimate)</span></div>
+    <div class="stat reveal"><b>Rp0</b><span>untuk mulai memakai</span></div>
+  </div>
 </div>
 
-<h2>Fitur utama</h2>
-<ul>
-  <li>Catat pemasukan, pengeluaran, dan transfer antar dompet (tunai, rekening bank, e-wallet).</li>
-  <li>Kategori, sub-kategori, dan tag yang bisa diatur sendiri; transaksi berulang.</li>
-  <li>Anggaran bulanan dengan notifikasi, target tabungan, ringkasan dan grafik pengeluaran, ekspor CSV.</li>
-  <li>Tanpa akun dan tanpa login. Kunci aplikasi dengan PIN atau sidik jari.</li>
-</ul>
+<!-- ================= FITUR ================= -->
+<section id="fitur">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Fitur</div>
+      <h2>Semua yang Anda perlukan untuk mengatur uang</h2>
+      <p>Dari mencatat harian sampai merencanakan bulan depan, dirancang sederhana supaya benar-benar terpakai.</p>
+    </div>
+    <div class="grid3">
+      <article class="card reveal"><div class="ico"><svg><use href="#i-swap"/></svg></div><h3>Catat dalam hitungan detik<span class="badge b-free">Gratis</span></h3><p>Pemasukan, pengeluaran, dan transfer antar dompet. Kategori, sub-kategori, dan tag bisa Anda atur sendiri. Transaksi berulang untuk gaji, cicilan, dan langganan.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-wallet"/></svg></div><h3>Banyak dompet<span class="badge b-free">Gratis</span></h3><p>Tunai, rekening bank, dan e-wallet. Saldo tiap dompet dan total saldo terlihat jelas di satu layar.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-pie"/></svg></div><h3>Anggaran yang mengingatkan<span class="badge b-free">Gratis</span></h3><p>Tetapkan batas bulanan per kategori. Anda mendapat pemberitahuan saat pengeluaran mendekati atau melewati batas.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-flag"/></svg></div><h3>Target tabungan<span class="badge b-free">Gratis</span></h3><p>Dana darurat, liburan, atau HP baru. Pantau progres menuju tujuan Anda dari hari ke hari.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-cal"/></svg></div><h3>Agenda tagihan<span class="badge b-free">Gratis</span><span class="badge b-pro">Premium</span></h3><p>Servis kendaraan, tagihan tahunan, biaya sekolah. Gratis 3 item aktif; Premium tanpa batas dan dengan pengingat.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-hand"/></svg></div><h3>Utang &amp; piutang<span class="badge b-pro">Premium</span></h3><p>Catat siapa berutang ke siapa, lunas sebagian atau penuh, lengkap dengan riwayat cicilannya.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-trend"/></svg></div><h3>Analisa tren &amp; proyeksi<span class="badge b-pro">Premium</span></h3><p>Lihat pengeluaran per kategori 6 dan 12 bulan, serta simulasi apakah dana cukup sampai akhir bulan.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-scan"/></svg></div><h3>Scan struk<span class="badge b-pro">Premium</span><span class="badge b-ult">Ultimate: AI</span></h3><p>Foto struk dibaca langsung di HP Anda. Dengan AI (Ultimate), nama toko, kategori, total, dan tanggal terisi otomatis.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-book"/></svg></div><h3>Multi buku kas<span class="badge b-ult">Ultimate</span></h3><p>Pisahkan pembukuan pribadi dan usaha, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri. Sampai 5 buku.</p></article>
+    </div>
+  </div>
+</section>
 
-<h2>Paket berlangganan</h2>
-<ul>
-  <li><strong>Gratis</strong>: pencatatan, dompet, anggaran, target, dan ekspor CSV, dengan iklan banner.</li>
-  <li><strong>Premium</strong>: tanpa iklan, Backup Cloud terenkripsi ke Google Drive Anda sendiri, Analisa Tren penuh, Agenda tanpa batas, proyeksi pengeluaran, Utang &amp; Piutang, dan Scan struk.</li>
-  <li><strong>Ultimate</strong>: semua fitur Premium, ditambah multi buku kas (pembukuan pribadi dan bisnis terpisah) dan Scan struk dengan AI.</li>
-</ul>
-<p>Langganan dikelola lewat Google Play dan dapat dibatalkan kapan saja.</p>
+<!-- ================= TAMPILAN ================= -->
+<section id="tampilan" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Tampilan</div>
+      <h2>Rapi, gelap, dan nyaman di mata</h2>
+      <p>Desain modern dengan tema terang, gelap, atau mengikuti sistem.</p>
+    </div>
 
-<h2>Privasi</h2>
-<p>Data keuangan Anda disimpan di perangkat Anda. Rincian data yang diproses, termasuk iklan, langganan, Backup Cloud, dan Scan struk dengan AI, dijelaskan di <a href="/privacy">Kebijakan Privasi</a>.</p>
+    <div class="show">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/ringkasan.webp" alt="Ringkasan keuangan bulanan dengan total saldo dan proyeksi" width="560" height="1017" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-free" style="margin:0">Gratis</span>
+        <h3>Ringkasan yang langsung menjawab: uang saya aman?</h3>
+        <p>Total saldo, pemasukan dan pengeluaran bulan ini, agenda terdekat, serta proyeksi sampai akhir bulan, semua di satu layar.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Total saldo seluruh dompet</li>
+          <li><svg><use href="#i-check"/></svg>Arus kas bulan ini dan grafik per kategori</li>
+          <li><svg><use href="#i-check"/></svg>Proyeksi cukup atau tidak sampai akhir bulan (Premium)</li>
+        </ul>
+      </div>
+    </div>
 
-<h2>Bantuan</h2>
-<p>Pertanyaan atau permintaan terkait data: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
+    <div class="show rev">
+      <div class="show-img reveal"><div class="phone"><img src="/img/anggaran.webp" alt="Anggaran per kategori dengan batas dan persentase terpakai" width="560" height="1017" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-free" style="margin:0">Gratis</span>
+        <h3>Anggaran yang tidak sekadar angka</h3>
+        <p>Setiap kategori punya batas, bar kemajuan, dan peringatan sebelum Anda kebablasan. Cukup beberapa ketukan untuk mengaturnya.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Batas bulanan per kategori</li>
+          <li><svg><use href="#i-check"/></svg>Pemberitahuan saat mendekati dan melewati batas</li>
+          <li><svg><use href="#i-check"/></svg>Sisa anggaran terlihat langsung</li>
+        </ul>
+      </div>
+    </div>
 
-<footer>
-  <a href="/privacy">Kebijakan Privasi</a> · &copy; hardan-ti
-</footer>
+    <div class="show">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/buku-kas.webp" alt="Pengalih buku kas: Pribadi, Warung Bu Sari, dan Freelance dengan saldo masing-masing" width="560" height="1152" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-ult" style="margin:0">Ultimate</span>
+        <h3>Uang pribadi dan usaha, tidak lagi tercampur</h3>
+        <p>Buat buku kas terpisah untuk setiap kebutuhan. Berpindah buku cukup satu ketukan, dan setiap buku punya saldo serta laporan sendiri.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Sampai 5 buku kas dalam satu aplikasi</li>
+          <li><svg><use href="#i-check"/></svg>Kategori awal siap pakai untuk pribadi atau bisnis</li>
+          <li><svg><use href="#i-check"/></svg>Cocok untuk warung, toko online, dan freelancer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="show rev">
+      <div class="show-img reveal"><div class="phone"><img src="/img/grafik.webp" alt="Grafik donat pengeluaran per kategori pada satu buku kas" width="560" height="1152" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-free" style="margin:0">Gratis</span>
+        <h3>Lihat uang keluar ke mana</h3>
+        <p>Grafik pengeluaran per kategori membantu menemukan kebocoran dengan cepat, tanpa spreadsheet dan tanpa rumus.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Grafik donat dan daftar kategori</li>
+          <li><svg><use href="#i-check"/></svg>Ekspor ke CSV untuk Excel atau Google Sheets</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SCAN STRUK ================= -->
+<section id="scan">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Scan struk</div>
+      <h2>Dari foto struk jadi catatan, tanpa mengetik</h2>
+      <p>Foto dibaca di HP Anda. Pelanggan Ultimate mendapat bantuan AI untuk mengisi form lebih lengkap.</p>
+    </div>
+
+    <div class="flow reveal">
+      <div class="step">
+        <div class="n"><svg><use href="#i-camera"/></svg></div>
+        <div><h3>1. Foto struk</h3><p>Ambil foto dari kamera atau pilih dari galeri.</p></div>
+      </div>
+      <div class="step">
+        <div class="n"><svg><use href="#i-text"/></svg></div>
+        <div><h3>2. Dibaca di HP</h3><p>Teks struk dikenali langsung di perangkat Anda, foto tidak dikirim ke mana pun.</p></div>
+      </div>
+      <div class="step hl">
+        <div class="n"><svg><use href="#i-spark"/></svg></div>
+        <div><h3>3. AI mengisi form</h3><p>Ultimate: AI membantu mengisi nama toko, kategori, total, dan tanggal.</p></div>
+      </div>
+      <div class="step">
+        <div class="n"><svg><use href="#i-save"/></svg></div>
+        <div><h3>4. Periksa &amp; simpan</h3><p>Anda tetap memeriksa hasilnya. Foto struk tersimpan bersama transaksi.</p></div>
+      </div>
+    </div>
+
+    <div class="receipt-demo">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/scan-ai.webp" alt="Form transaksi setelah scan struk: nominal Rp217.500 dan kategori Pembelian Stok terisi otomatis" width="560" height="1152" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <h3>Hasilnya langsung terisi</h3>
+        <p>Pada contoh ini, nominal Rp217.500 dan nama toko terbaca dari struk dan langsung masuk ke form. Anda tinggal memeriksa, memilih kategori bila perlu, lalu menyimpan.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Hanya teks hasil baca yang dikirim ke server AI, dan hanya jika Anda mengizinkan</li>
+          <li><svg><use href="#i-check"/></svg>Teks tidak disimpan di server</li>
+          <li><svg><use href="#i-check"/></svg>300 scan AI per bulan untuk pelanggan Ultimate</li>
+        </ul>
+        <p class="flow-note" style="text-align:left;margin:20px 0 0">Hasil pembacaan bergantung pada kualitas foto dan jenis struk. Selalu periksa sebelum menyimpan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVASI ================= -->
+<section id="privasi" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Privasi</div>
+      <h2>Ke mana data Anda pergi? Hampir ke mana-mana tidak.</h2>
+      <p>Kami merancang DompetKu supaya data keuangan Anda tinggal di perangkat Anda sendiri.</p>
+    </div>
+
+    <div class="map reveal">
+      <div class="node center">
+        <div class="ico"><svg><use href="#i-phone"/></svg></div>
+        <h3>HP Anda</h3>
+        <p>Semua data keuangan Anda tersimpan di sini:</p>
+        <ul>
+          <li>Transaksi, dompet, anggaran, target</li>
+          <li>Utang piutang dan buku kas</li>
+          <li>Foto struk</li>
+          <li>Kunci PIN atau sidik jari opsional</li>
+        </ul>
+      </div>
+      <div class="link"><svg><use href="#i-arrow"/></svg><span>opsional</span></div>
+      <div class="map-stack">
+        <div class="node">
+          <div class="ico"><svg><use href="#i-cloud"/></svg></div>
+          <h3>Google Drive Anda</h3>
+          <p>Backup Cloud (Premium) menyimpan salinan terenkripsi di folder data aplikasi pada Drive Anda sendiri. Foto struk ikut hanya jika Anda mengaktifkannya. Kami tidak menerima salinannya.</p>
+        </div>
+        <div class="node">
+          <div class="ico"><svg><use href="#i-spark"/></svg></div>
+          <h3>Server AI (hanya Ultimate)</h3>
+          <p>Hanya teks hasil scan struk, bukan fotonya, dan hanya setelah Anda setuju. Tidak disimpan di server.</p>
+        </div>
+      </div>
+    </div>
+    <div class="neg reveal"><svg><use href="#i-x"/></svg><span><b>Tidak ada akun DompetKu dan tidak ada server kami yang menyimpan transaksi Anda.</b> Paket gratis menampilkan iklan lewat Google AdMob; rincian lengkapnya ada di <a href="/privacy">Kebijakan Privasi</a>.</span></div>
+  </div>
+</section>
+
+<!-- ================= PAKET ================= -->
+<section id="paket">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Paket</div>
+      <h2>Mulai gratis, tingkatkan saat Anda butuh</h2>
+      <p>Berlangganan lewat Google Play dan batalkan kapan saja.</p>
+    </div>
+
+    <div class="toggle reveal" role="group" aria-label="Periode tagihan">
+      <button type="button" data-period="monthly" aria-pressed="true">Bulanan</button>
+      <button type="button" data-period="yearly" aria-pressed="false">Tahunan<small>hemat</small></button>
+    </div>
+
+    <div class="plans">
+      <div class="plan reveal">
+        <h3>Gratis</h3>
+        <p class="desc">Semua yang dibutuhkan untuk mencatat dan mengatur keuangan harian.</p>
+        <div class="price">Rp0</div>
+        <div class="price-sub">selamanya</div>
+        <ul>
+          <li><svg><use href="#i-check"/></svg>Catat pemasukan, pengeluaran, transfer</li>
+          <li><svg><use href="#i-check"/></svg>Banyak dompet, kategori, dan tag</li>
+          <li><svg><use href="#i-check"/></svg>Anggaran dengan pemberitahuan</li>
+          <li><svg><use href="#i-check"/></svg>Target tabungan dan transaksi berulang</li>
+          <li><svg><use href="#i-check"/></svg>Ringkasan, grafik, dan ekspor CSV</li>
+          <li><svg><use href="#i-check"/></svg>Agenda 3 item, tren 3 bulan</li>
+          <li class="off"><svg><use href="#i-x"/></svg>Menampilkan iklan banner</li>
+        </ul>
+        <a class="btn btn-ghost play-cta" href="#unduh">Mulai gratis</a>
+      </div>
+
+      <div class="plan reveal">
+        <h3>Premium</h3>
+        <p class="desc">Bebas iklan dan alat lengkap untuk perencanaan keuangan.</p>
+        <div class="price"><span class="amt" data-monthly="Rp7.500" data-yearly="Rp75.000">Rp7.500</span><small> / <span class="per">bulan</span></small></div>
+        <div class="price-sub" data-monthly="" data-yearly="Setara Rp6.250 per bulan">&nbsp;</div>
+        <ul>
+          <li class="inh"><svg><use href="#i-check"/></svg>Semua fitur Gratis</li>
+          <li><svg><use href="#i-check"/></svg>Tanpa iklan</li>
+          <li><svg><use href="#i-check"/></svg>Backup Cloud terenkripsi ke Google Drive Anda</li>
+          <li><svg><use href="#i-check"/></svg>Analisa tren 6 dan 12 bulan</li>
+          <li><svg><use href="#i-check"/></svg>Agenda tanpa batas dengan pengingat</li>
+          <li><svg><use href="#i-check"/></svg>Proyeksi dan simulasi arus kas</li>
+          <li><svg><use href="#i-check"/></svg>Utang &amp; piutang</li>
+          <li><svg><use href="#i-check"/></svg>Scan struk (dibaca di HP)</li>
+        </ul>
+        <a class="btn btn-ghost play-cta" href="#unduh">Pilih Premium</a>
+      </div>
+
+      <div class="plan pop reveal">
+        <h3>Ultimate</h3>
+        <p class="desc">Untuk Anda yang mengelola keuangan pribadi dan usaha sekaligus.</p>
+        <div class="price"><span class="amt" data-monthly="Rp12.500" data-yearly="Rp125.000">Rp12.500</span><small> / <span class="per">bulan</span></small></div>
+        <div class="price-sub" data-monthly="" data-yearly="Setara Rp10.417 per bulan">&nbsp;</div>
+        <ul>
+          <li class="inh"><svg><use href="#i-check"/></svg>Semua fitur Premium</li>
+          <li><svg><use href="#i-check"/></svg>Multi buku kas, sampai 5 buku</li>
+          <li><svg><use href="#i-check"/></svg>Scan struk dengan AI: toko, kategori, total, tanggal</li>
+          <li><svg><use href="#i-check"/></svg>300 scan AI per bulan</li>
+          <li><svg><use href="#i-check"/></svg>Dompet, anggaran, dan laporan terpisah per buku</li>
+        </ul>
+        <a class="btn btn-primary play-cta" href="#unduh">Pilih Ultimate</a>
+      </div>
+    </div>
+    <p class="fine">Harga dalam Rupiah dan dapat berbeda sesuai ketentuan Google Play. Langganan diperpanjang otomatis dan dapat dibatalkan kapan saja lewat Google Play. DompetKu mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Tanya jawab</div>
+      <h2>Pertanyaan yang sering diajukan</h2>
+    </div>
+    <div class="faq reveal">
+      <details open><summary>Apakah saya harus membuat akun?</summary><p>Tidak. DompetKu tidak memiliki akun. Pasang, buka, dan langsung catat. Anda hanya masuk dengan akun Google bila ingin memakai Backup Cloud (Premium), dan itu untuk menyimpan cadangan di Drive Anda sendiri.</p></details>
+      <details><summary>Di mana data saya disimpan?</summary><p>Di HP Anda. Kami tidak menyimpan transaksi, dompet, atau anggaran Anda di server. Satu-satunya data yang keluar dari HP adalah cadangan ke Drive Anda (jika Anda memakai Backup Cloud) dan teks struk untuk diproses AI (jika Anda memakai Scan struk AI dan menyetujuinya).</p></details>
+      <details><summary>Bagaimana jika saya ganti HP atau menghapus aplikasi?</summary><p>Data lokal ikut hilang bila aplikasi dihapus. Karena itu tersedia Backup data ke file dan Backup Cloud terenkripsi (Premium) yang dapat dipulihkan di HP baru dengan akun Google yang sama. Foto struk ikut dipulihkan bila opsi foto aktif.</p></details>
+      <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, dan scan struk di HP. Ultimate mencakup semua itu, ditambah multi buku kas (pribadi dan usaha terpisah) dan scan struk dengan AI.</p></details>
+      <details><summary>Bagaimana cara berhenti berlangganan?</summary><p>Buka Google Play, pilih Pembayaran &amp; langganan, lalu Langganan, dan batalkan DompetKu. Fitur berbayar tetap aktif sampai akhir periode yang sudah dibayar.</p></details>
+      <details><summary>Seberapa akurat scan struk?</summary><p>Cukup baik untuk struk yang jelas, tetapi hasilnya bergantung pada kualitas foto dan format struk. Karena itu Anda selalu memeriksa dan dapat mengubah isi form sebelum menyimpan.</p></details>
+      <details><summary>Apakah DompetKu menyarankan investasi atau memindahkan uang?</summary><p>Tidak. DompetKu adalah alat pencatat. Aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p></details>
+      <details><summary>Bagaimana jika saya butuh bantuan?</summary><p>Tulis ke <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a>. Sertakan versi aplikasi dan penjelasan singkat masalahnya.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section id="unduh" style="padding:88px 0">
+  <div class="cta-band reveal">
+    <h2>Mulai atur uang Anda hari ini</h2>
+    <p>Gratis untuk mulai, tanpa akun. Pasang DompetKu dan catat transaksi pertama Anda dalam semenit.</p>
+    <a class="btn play-cta" href="#unduh"><svg><use href="#i-play"/></svg><span class="play-label">Segera hadir di Google Play</span></a>
+  </div>
+</section>
 
 </main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#" style="margin-bottom:14px"><img src="/img/icon-192.png" alt="" width="34" height="34">DompetKu</a>
+        <p>Aplikasi pencatat keuangan pribadi dan usaha untuk Android. Dikembangkan oleh hardan-ti.</p>
+      </div>
+      <div>
+        <h4>Jelajahi</h4>
+        <ul>
+          <li><a href="#fitur">Fitur</a></li>
+          <li><a href="#scan">Scan struk</a></li>
+          <li><a href="#paket">Paket &amp; harga</a></li>
+          <li><a href="#faq">Tanya jawab</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bantuan</h4>
+        <ul>
+          <li><a href="/privacy">Kebijakan Privasi</a></li>
+          <li><a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      &copy; hardan-ti. Google Play dan logo Google Play adalah merek dagang Google LLC. Gambar layar adalah contoh tampilan aplikasi.
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+
+  // Setelah aplikasi tayang di Play, isi PLAY_URL dengan tautan toko:
+  // https://play.google.com/store/apps/details?id=com.hardanti.lacipintar
+  var PLAY_URL = null;
+  if (PLAY_URL) {
+    document.querySelectorAll('.play-cta').forEach(function(a){ a.href = PLAY_URL; a.target = '_blank'; a.rel = 'noopener'; });
+    document.querySelectorAll('.play-label').forEach(function(s){ s.textContent = 'Dapatkan di Google Play'; });
+  }
+
+  // Menu seluler
+  var btn = document.querySelector('.menu-btn'), menu = document.getElementById('menu');
+  btn.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  menu.addEventListener('click', function(e){ if (e.target.tagName === 'A') { menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
+
+  // Bulanan / tahunan
+  var toggles = document.querySelectorAll('.toggle button');
+  toggles.forEach(function(b){
+    b.addEventListener('click', function(){
+      var p = b.dataset.period;
+      toggles.forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('.amt').forEach(function(el){ el.textContent = el.dataset[p]; });
+      document.querySelectorAll('.per').forEach(function(el){ el.textContent = p === 'yearly' ? 'tahun' : 'bulan'; });
+      document.querySelectorAll('.price-sub[data-monthly]').forEach(function(el){ el.innerHTML = el.dataset[p] || '&nbsp;'; });
+    });
+  });
+
+  // Animasi masuk saat digulir
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold: .12, rootMargin: '0px 0px -40px 0px'});
+    items.forEach(function(el){ io.observe(el); });
+  } else {
+    items.forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
 </body>
 </html>
