@@ -338,3 +338,15 @@ Uji di Galaxy Z Fold6 (Android 16) dengan build 5 lalu 6 dari jalur uji internal
 - **Penggantian Premium → Ultimate terbukti** (riwayat pelanggan sandbox RevenueCat, build 6): `dompetku_premium:monthly` (IDR 7.500) -> `dompetku_ultimate:monthly` dibayar prorata IDR 4.386; Premium berstatus Inactive/expired, hanya Ultimate aktif, perpanjangan berikutnya IDR 12.500. `oldProductId` = ID langganan (`dompetku_premium`) benar; tidak ada tagihan ganda.
 - **Belum diuji:** migrasi dari rilis 3 (F7),
   Backup Cloud di build Play, notifikasi berbunyi, Ultimate berakhir (I). Multi buku kas (G1-G12) lulus semua di perangkat nyata.
+
+## 10. Temuan 2026-10-02: scan AI gagal diam-diam di buku bisnis
+
+- Gejala (uji di HP Redmi): di buku "Warung Bu Sari" (template Bisnis) nominal dan nama toko terisi tetapi kategori tidak
+  dipilih AI. Penyebab: ID kategori buku non-utama berbentuk `ledger-<uuid>:cat-exp-<slug>`; tiga di antaranya
+  (`gaji-karyawan`, `cicilan-usaha` = 65 karakter, `pendapatan-lain` = 67) melewati batas `MAX_ID_CHARS = 64` di Worker,
+  sehingga SELURUH permintaan ditolak 400 `invalid_request`. Klien menelan galat itu (heuristik tetap dipakai), jadi
+  pengguna hanya melihat "tidak ada kategori" dan kuota tidak terpakai. Buku Utama (ID pendek `cat-exp-makan`) tidak
+  terdampak; buku Pribadi baru (maks. 63 karakter) lolos tipis.
+- Perbaikan: (1) Worker `MAX_ID_CHARS` 64 -> 128 (berlaku untuk semua versi app begitu di-deploy); (2) klien mengirim alias
+  pendek `c0`, `c1`, ... dan memetakan balasan ke ID asli (menghemat token prompt dan menutup masalah ini dari sisi app;
+  masuk versi 1.0.0+7). Tes: 2 tes Worker + 2 tes klien baru.

@@ -85,8 +85,12 @@ class HttpAiExtractionService implements AiExtractionService {
             body: jsonEncode({
               'appUserId': userId,
               'rawText': text,
+              // ID asli bisa panjang (`ledger-<uuid>:cat-exp-...`, 40+ karakter):
+              // boros token dan sempat ditolak Worker (batas 64). Kirim alias
+              // pendek "c0", "c1", ... lalu petakan balasan ke ID asli.
               'categories': [
-                for (final c in categories) {'id': c.id, 'name': c.label},
+                for (final (i, c) in categories.indexed)
+                  {'id': 'c$i', 'name': c.label},
               ],
             }),
           )
@@ -116,10 +120,7 @@ class HttpAiExtractionService implements AiExtractionService {
         total: total is int && total > 0 ? total : null,
         date: _parseDate(json['date']),
         merchant: merchant.isEmpty ? null : merchant,
-        categoryId:
-            categoryId is String && categories.any((c) => c.id == categoryId)
-            ? categoryId
-            : null,
+        categoryId: _resolveCategory(categoryId, categories),
       );
     } on AiQuotaExceeded {
       rethrow;
@@ -148,4 +149,15 @@ DateTime? _parseDate(Object? value) {
   final (y, mo, d) = (int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!));
   final date = DateTime(y, mo, d);
   return date.year == y && date.month == mo && date.day == d ? date : null;
+}
+
+/// Memetakan alias balasan server ("c3") kembali ke ID kategori asli; alias di
+/// luar daftar (karangan model) menjadi null.
+String? _resolveCategory(Object? alias, List<AiCategoryOption> categories) {
+  if (alias is! String || !alias.startsWith('c')) return null;
+  final i = int.tryParse(alias.substring(1));
+  if (i == null || i < 0 || i >= categories.length || 'c$i' != alias) {
+    return null;
+  }
+  return categories[i].id;
 }

@@ -43,6 +43,32 @@ function post(body: unknown, path = "/extract", method = "POST") {
 
 const valid = { appUserId: USER, rawText: "INDOMARET\nTOTAL 23.500", categories: CATS };
 
+describe("handleExtract: panjang id kategori", () => {
+  const longId = "ledger-01a0fb40-a8d8-74be-957a-1f30ff00cff6:cat-exp-pendapatan-lain"; // 67 karakter
+
+  it("id kategori buku non-utama (67 karakter) diterima", async () => {
+    assert.equal(longId.length, 67);
+    const { deps } = makeDeps({
+      extract: async () => ({ merchant: "Toko", categoryId: longId, total: 1000, date: null }),
+    });
+    const res = await handleExtract(
+      post({ ...valid, categories: [{ id: longId, name: "Pendapatan Lain" }] }),
+      deps,
+    );
+    assert.equal(res.status, 200);
+    assert.equal(((await res.json()) as { categoryId: string }).categoryId, longId);
+  });
+
+  it("id yang terlalu panjang (> 128) tetap ditolak", async () => {
+    const { deps } = makeDeps();
+    const res = await handleExtract(
+      post({ ...valid, categories: [{ id: "x".repeat(129), name: "A" }] }),
+      deps,
+    );
+    assert.equal(res.status, 400);
+  });
+});
+
 describe("handleExtract", () => {
   it("mengembalikan hasil untuk pengguna Ultimate dan menghitung kuota", async () => {
     const { deps, usage } = makeDeps();

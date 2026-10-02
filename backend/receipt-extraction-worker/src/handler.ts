@@ -31,7 +31,9 @@ export interface Deps {
 const MAX_BODY_BYTES = 20_000;
 const MAX_TEXT_CHARS = 4000;
 const MAX_CATEGORIES = 80;
-const MAX_ID_CHARS = 64;
+// ID kategori buku non-utama berbentuk `ledger-<uuid>:cat-exp-<slug>` (bisa 67 karakter);
+// batas 64 dulu menolak SELURUH permintaan sehingga scan AI diam-diam gagal di buku bisnis.
+const MAX_ID_CHARS = 128;
 const MAX_NAME_CHARS = 80;
 const USER_ID_PATTERN = /^[\w$:.\-]{8,128}$/;
 

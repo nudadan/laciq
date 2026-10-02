@@ -232,10 +232,7 @@ void main() {
         final s = service(
           MockClient((req) async {
             sent = req;
-            return json({
-              'merchant': ' Indomaret ',
-              'categoryId': 'cat-exp-makan',
-            });
+            return json({'merchant': ' Indomaret ', 'categoryId': 'c0'});
           }),
         );
         final r = await s.extract(rawText: _rawText, categories: categories);
@@ -244,9 +241,10 @@ void main() {
         final body = jsonDecode(sent.body) as Map<String, dynamic>;
         expect(body['appUserId'], 'test-user');
         expect(body['rawText'], _rawText);
+        // Alias pendek yang dikirim, bukan ID asli.
         expect(body['categories'], [
-          {'id': 'cat-exp-makan', 'name': 'Makanan & Minuman'},
-          {'id': 'cat-exp-transport', 'name': 'Transportasi'},
+          {'id': 'c0', 'name': 'Makanan & Minuman'},
+          {'id': 'c1', 'name': 'Transportasi'},
         ]);
         expect(r?.merchant, 'Indomaret');
         expect(r?.categoryId, 'cat-exp-makan');
@@ -254,12 +252,51 @@ void main() {
     );
 
     test(
+      'ID kategori buku bisnis yang panjang dikirim sebagai alias dan balasan '
+      'dipetakan kembali ke ID asli',
+      () async {
+        const long =
+            'ledger-01a0fb40-a8d8-74be-957a-1f30ff00cff6:cat-exp-gaji-karyawan';
+        late http.Request sent;
+        final s = service(
+          MockClient((req) async {
+            sent = req;
+            return json({'merchant': 'Toko', 'categoryId': 'c1'});
+          }),
+        );
+        final r = await s.extract(
+          rawText: _rawText,
+          categories: const [
+            AiCategoryOption(id: 'cat-exp-makan', label: 'Makan'),
+            AiCategoryOption(id: long, label: 'Gaji Karyawan'),
+          ],
+        );
+        final ids = [
+          for (final c in (jsonDecode(sent.body)['categories'] as List))
+            (c as Map)['id'],
+        ];
+        expect(ids, ['c0', 'c1']);
+        expect(sent.body, isNot(contains('ledger-')));
+        expect(r?.categoryId, long);
+      },
+    );
+
+    test('alias tidak valid ditolak: c, c-1, c01, c2 di luar daftar', () async {
+      for (final bad in ['c', 'c-1', 'c01', 'c2', 'x0', 5]) {
+        final s = service(
+          MockClient((_) async => json({'merchant': 'T', 'categoryId': bad})),
+        );
+        final r = await s.extract(rawText: _rawText, categories: categories);
+        expect(r?.categoryId, isNull, reason: '$bad');
+      }
+    });
+
+    test(
       'categoryId di luar daftar dibuang, merchant kosong jadi null',
       () async {
         final s = service(
           MockClient(
-            (_) async =>
-                json({'merchant': '  ', 'categoryId': 'cat-hasil-karangan'}),
+            (_) async => json({'merchant': '  ', 'categoryId': 'c99'}),
           ),
         );
         final r = await s.extract(rawText: _rawText, categories: categories);
