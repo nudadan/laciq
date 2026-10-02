@@ -9,6 +9,7 @@ import 'package:dompet_pintar/core/notification_sender.dart';
 import 'package:dompet_pintar/features/ai/ai_extraction_service.dart';
 import 'package:dompet_pintar/features/cloud_backup/cloud_backup_service.dart';
 import 'package:dompet_pintar/features/onboarding/onboarding_providers.dart';
+import 'package:dompet_pintar/features/review/review_prompt_service.dart';
 import 'package:dompet_pintar/features/security/app_lock_service.dart';
 import 'package:dompet_pintar/features/security/lock_providers.dart';
 import 'package:dompet_pintar/features/subscription/subscription_plans.dart';
@@ -293,6 +294,21 @@ class FakeAiExtractionService implements AiExtractionService {
   }
 }
 
+/// Peluncur ulasan palsu: tidak menyentuh Play Store, hanya mencatat panggilan.
+class FakeReviewLauncher implements ReviewLauncher {
+  FakeReviewLauncher({this.available = true});
+  final bool available;
+  int requests = 0;
+  int listingOpens = 0;
+
+  @override
+  Future<bool> isAvailable() async => available;
+  @override
+  Future<void> requestReview() async => requests++;
+  @override
+  Future<void> openStoreListing() async => listingOpens++;
+}
+
 class AppHarness {
   AppHarness({
     required this.db,
@@ -303,6 +319,7 @@ class AppHarness {
     required this.cloudBackup,
     required this.receiptScanner,
     required this.aiExtraction,
+    required this.review,
   });
   final AppDatabase db;
   final MemoryKeyValueStore store;
@@ -312,6 +329,7 @@ class AppHarness {
   final FakeCloudBackupService cloudBackup;
   final FakeReceiptScanner receiptScanner;
   final FakeAiExtractionService aiExtraction;
+  final FakeReviewLauncher review;
   AppLockService get lock => AppLockService(store);
 }
 
@@ -349,6 +367,7 @@ void appTest(
     final cloud = cloudBackup ?? FakeCloudBackupService();
     final scanner = receiptScanner ?? FakeReceiptScanner();
     final ai = aiExtraction ?? FakeAiExtractionService();
+    final reviewLauncher = FakeReviewLauncher();
     if (seenOnboarding) await store.write(onboardingSeenKey, '1');
     if (preset != null) await preset(AppLockService(store));
     // Drift butuh async sungguhan: jalankan di luar jam palsu.
@@ -366,6 +385,7 @@ void appTest(
           cloudBackupServiceProvider.overrideWithValue(cloud),
           receiptScannerProvider.overrideWithValue(scanner),
           aiExtractionServiceProvider.overrideWithValue(ai),
+          reviewLauncherProvider.overrideWithValue(reviewLauncher),
         ],
         child: const DompetPintarApp(),
       ),
@@ -383,6 +403,7 @@ void appTest(
           cloudBackup: cloud,
           receiptScanner: scanner,
           aiExtraction: ai,
+          review: reviewLauncher,
         ),
       );
     } finally {

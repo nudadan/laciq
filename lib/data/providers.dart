@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/notification_sender.dart';
 import '../features/ads/ad_eligibility_service.dart';
+import '../features/review/review_prompt_service.dart';
 import '../features/ai/ai_extraction_service.dart';
 import '../features/agenda/agenda_reminder_service.dart';
 import '../features/budget/budget_notification_service.dart';
@@ -258,6 +259,17 @@ final transactionTagsProvider = StreamProvider.autoDispose
 
 final adEligibilityServiceProvider = Provider<AdEligibilityService>(
   (ref) => AdEligibilityService(ref.watch(keyValueStoreProvider)),
+);
+
+final reviewLauncherProvider = Provider<ReviewLauncher>(
+  (ref) => InAppReviewLauncher(),
+);
+
+final reviewPromptServiceProvider = Provider<ReviewPromptService>(
+  (ref) => ReviewPromptService(
+    ref.watch(keyValueStoreProvider),
+    ref.watch(reviewLauncherProvider),
+  ),
 );
 
 final subscriptionStatusProvider = Provider<SubscriptionStatus>(

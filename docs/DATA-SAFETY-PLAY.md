@@ -47,6 +47,9 @@ membedakan paket, jadi tetap dideklarasikan.
   tidak mewajibkan bila data hanya ke penyimpanan pribadi pengguna.)
 - **Email akun Google** pada Backup Cloud: hanya ditampilkan di layar, tidak dikirim ke kami.
 - **Biometrik**: dicocokkan oleh sistem Android; aplikasi tidak menerima datanya.
+- **Dialog ulasan Play (In-App Review, plugin `in_app_review`)**: dijalankan oleh Google Play; aplikasi tidak mengirim
+  data apa pun dan tidak menerima hasil/ratingnya. Hitungan transaksi dan waktu permintaan hanya disimpan lokal di
+  penyimpanan aman perangkat. Tidak perlu dideklarasikan.
 - **Data teknis koneksi di Cloudflare (IP)**: dicatat Cloudflare sebagai penyedia layanan; disebut di kebijakan bagian 6.
 
 ## Keputusan yang perlu diperiksa pemilik sebelum kirim

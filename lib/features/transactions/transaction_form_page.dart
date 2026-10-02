@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -495,7 +497,15 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       setState(() => _error = 'Gagal menyimpan: $e');
       return;
     }
-    if (mounted) Navigator.of(context).pop(message);
+    if (!mounted) return;
+    // Hanya transaksi baru (bukan ubah/berulang) yang dihitung sebagai momen
+    // positif untuk permintaan ulasan. Layanan diambil sebelum pop karena
+    // `ref` tidak boleh dipakai setelah widget dibuang.
+    final review = _mode == _Mode.create && _frequency == null
+        ? ref.read(reviewPromptServiceProvider)
+        : null;
+    Navigator.of(context).pop(message);
+    if (review != null) unawaited(review.onTransactionSaved());
   }
 
   static String _accountLabel(AccountBalance a) =>

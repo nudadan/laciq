@@ -131,6 +131,14 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              ListTile(
+                leading: const Icon(Icons.star_outline_rounded),
+                title: const Text('Beri nilai DompetKu'),
+                subtitle: const Text('Buka halaman aplikasi di Play Store'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () =>
+                    ref.read(reviewPromptServiceProvider).openStoreListing(),
+              ),
             ]),
           ],
         ),
