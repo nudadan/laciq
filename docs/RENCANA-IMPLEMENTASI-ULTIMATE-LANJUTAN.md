@@ -350,3 +350,7 @@ Uji di Galaxy Z Fold6 (Android 16) dengan build 5 lalu 6 dari jalur uji internal
 - Perbaikan: (1) Worker `MAX_ID_CHARS` 64 -> 128 (berlaku untuk semua versi app begitu di-deploy); (2) klien mengirim alias
   pendek `c0`, `c1`, ... dan memetakan balasan ke ID asli (menghemat token prompt dan menutup masalah ini dari sisi app;
   masuk versi 1.0.0+7). Tes: 2 tes Worker + 2 tes klien baru.
+- **Terbukti 2026-10-02 (versi Play rilis 6, Worker `d89e0e85`):** scan di buku Pribadi `categories=12` dan di buku
+  Bisnis `categories=11`, keduanya `model_category=set category_valid=true`, respons 200, model utama
+  (`gemini-3.1-flash-lite`). Kategori terpilih di form pada kedua buku. Token masuk buku bisnis 1.366 vs 952 di buku
+  Pribadi karena ID panjang; alias `c0..cN` di 1.0.0+7 akan memangkasnya.
