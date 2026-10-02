@@ -88,3 +88,8 @@ tidak menjanjikan fitur yang belum ada di versi yang beredar. Produk Ultimate di
   aplikasi = Keuangan (tersimpan sebagai perubahan draf).
 - "Scan struk" ditulis di bawah Premium sesuai GAP-ANALISA (fitur Premium); akurasi parser struk kompleks tercatat
   masih kurang, jadi tidak diklaim sebagai "otomatis akurat".
+- 2026-10-01/02: **Akses aplikasi untuk peninjau Play** — Detail login diisi "No login" + petunjuk Inggris, kotak "akses
+  penuh" dicentang. Peninjau membuka Ultimate lewat kode promo kustom **DKUULTIMATE2026** (Monetisasi > Kode promo,
+  langganan `dompetku_ultimate`, uji coba 30 hari, 2.000 penukaran, berlaku 2 Okt 2026 - 31 Mar 2027; "DOMPETKUREVIEW"
+  ditolak Play karena kata terlarang). Jangan hapus/jeda kode selama peninjauan. Pembaruan publikasi (10 perubahan,
+  rilis produksi 6) dikirim untuk ditinjau pada 2026-10-02.
