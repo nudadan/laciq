@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cryptography/cryptography.dart'
     show SecretBoxAuthenticationError;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
@@ -131,9 +132,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         throw const CloudBackupCancelled();
       }
-      throw const CloudBackupException(
-        'Gagal masuk dengan Google. Periksa koneksi internet Anda.',
-      );
+      throw CloudBackupException(signInFailureMessage(e.code, e.description));
     }
     await _store.write(_kSignedInFlag, '1');
   }
@@ -364,4 +363,34 @@ class _HeaderClient extends http.BaseClient {
     request.headers.addAll(_headers);
     return _inner.send(request);
   }
+}
+
+/// Pesan galat login Google yang bisa ditindaklanjuti. Selalu menyertakan kode
+/// (nama kode plugin + angka Google bila ada, mis. `[28444]`) supaya laporan
+/// pengguna langsung menunjuk penyebabnya, bukan "periksa koneksi" yang
+/// menyesatkan untuk galat konfigurasi.
+@visibleForTesting
+String signInFailureMessage(
+  GoogleSignInExceptionCode code,
+  String? description,
+) {
+  final google = RegExp(r'\[(\d{1,6})\]')
+      .firstMatch(description ?? '')
+      ?.group(1);
+  final tag = google == null ? code.name : '${code.name}, $google';
+  final hint = switch (code) {
+    GoogleSignInExceptionCode.clientConfigurationError ||
+    GoogleSignInExceptionCode.providerConfigurationError =>
+      'Login Google belum dikonfigurasi untuk versi aplikasi ini. Hubungi '
+          'support@hardan-ti.com dan sertakan kode di bawah.',
+    GoogleSignInExceptionCode.uiUnavailable =>
+      'Layar masuk Google tidak tersedia. Pastikan ada akun Google di '
+          'perangkat, lalu coba lagi.',
+    GoogleSignInExceptionCode.interrupted =>
+      'Proses masuk terputus. Coba lagi.',
+    GoogleSignInExceptionCode.userMismatch =>
+      'Akun Google yang dipilih berbeda dari sebelumnya. Coba lagi.',
+    _ => 'Gagal masuk dengan Google. Periksa koneksi internet Anda.',
+  };
+  return '$hint (kode: $tag)';
 }
