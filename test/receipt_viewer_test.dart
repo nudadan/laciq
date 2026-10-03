@@ -62,6 +62,47 @@ void main() {
     extraOverrides: [loadsFile],
   );
 
+  appTest(
+    'daftar transaksi menampilkan miniatur foto langsung (bukan hanya ikon '
+    'kecil) dan mengetuknya membuka penampil',
+    (tester, h) async {
+      await tester.tap(find.text('Transaksi').last);
+      await settle(tester);
+
+      // Miniatur ada di daftar tanpa perlu membuka transaksi.
+      expect(find.byType(ReceiptThumbnail), findsOneWidget);
+      await tester.tap(find.byType(ReceiptThumbnail));
+      await settle(tester);
+      expect(find.byType(InteractiveViewer), findsOneWidget);
+    },
+    seed: (db) => _seedTx(db, receiptPath: 'receipts/a.jpg'),
+    extraOverrides: [loadsFile],
+  );
+
+  appTest(
+    'formulir ubah transaksi menampilkan pratinjau foto di barisnya',
+    (tester, h) async {
+      await tester.tap(find.text('Transaksi').last);
+      await settle(tester);
+      await tester.tap(find.text('Makanan & Minuman'));
+      await settle(tester);
+
+      expect(find.byType(ReceiptThumbnail), findsOneWidget);
+    },
+    seed: (db) => _seedTx(db, receiptPath: 'receipts/a.jpg'),
+    extraOverrides: [loadsFile],
+  );
+
+  appTest('transaksi tanpa foto struk tidak menampilkan miniatur', (
+    tester,
+    h,
+  ) async {
+    await tester.tap(find.text('Transaksi').last);
+    await settle(tester);
+
+    expect(find.byType(ReceiptThumbnail), findsNothing);
+  }, seed: (db) => _seedTx(db));
+
   appTest('transaksi tanpa foto struk tidak menampilkan ikon', (
     tester,
     h,

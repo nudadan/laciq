@@ -111,7 +111,7 @@ void main() {
         expect(h.aiExtraction.calls, hasLength(1));
         expect(_note(tester), 'INDOMARET CIKINI');
         expect(_chipSelected(tester, 'Makanan & Minuman'), isFalse);
-        expect(find.text('Foto tersimpan'), findsOneWidget);
+        expect(find.textContaining('Foto tersimpan'), findsOneWidget);
       },
       subscription: FakeSubscriptionStatus(ultimate: true),
       receiptScanner: _scanner(),

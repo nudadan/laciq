@@ -46,7 +46,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.widgetWithText(TextField, 'INDOMARET'), findsOneWidget);
-      expect(find.text('Foto tersimpan'), findsOneWidget);
+      expect(find.textContaining('Foto tersimpan'), findsOneWidget);
 
       await tester.tap(find.text('Makanan & Minuman'));
       await tester.pump();
@@ -82,7 +82,7 @@ void main() {
       await settle(tester);
 
       expect(h.receiptScanner.requestedSources, [ImageSource.gallery]);
-      expect(find.text('Foto tersimpan'), findsNothing);
+      expect(find.textContaining('Foto tersimpan'), findsNothing);
       expect(
         tester.widget<TextField>(find.byType(TextField).first).controller!.text,
         isEmpty,

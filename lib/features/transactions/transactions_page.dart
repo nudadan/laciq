@@ -225,24 +225,6 @@ class _TxTile extends StatelessWidget {
                       const SizedBox(width: 6),
                       Icon(Icons.repeat, size: 14, color: scheme.primary),
                     ],
-                    if (onViewReceipt != null) ...[
-                      const SizedBox(width: 4),
-                      InkResponse(
-                        onTap: onViewReceipt,
-                        radius: 20,
-                        child: Tooltip(
-                          message: 'Lihat foto struk',
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Icon(
-                              Icons.receipt_long_rounded,
-                              size: 16,
-                              color: scheme.primary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -258,6 +240,17 @@ class _TxTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
+          if (onViewReceipt != null) ...[
+            Tooltip(
+              message: 'Lihat foto struk',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onViewReceipt,
+                child: ReceiptThumbnail(relativePath: tx.receiptPath!),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
           Text(
             '$sign${rupiah(tx.amount)}',
             style: text.titleSmall?.copyWith(color: color),

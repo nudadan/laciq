@@ -652,8 +652,22 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                     : _aiBusy
                     ? 'Mengisi otomatis dengan AI…'
                     : _receiptPath != null
-                    ? 'Foto tersimpan'
+                    ? 'Foto tersimpan, ketuk gambar untuk melihat'
                     : null,
+                leadingWidget: _receiptPath == null
+                    ? null
+                    : GestureDetector(
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                ReceiptViewerPage(relativePath: _receiptPath!),
+                          ),
+                        ),
+                        child: ReceiptThumbnail(
+                          relativePath: _receiptPath!,
+                          size: 48,
+                        ),
+                      ),
                 trailing: _receiptPath == null
                     ? null
                     : IconButton(
@@ -677,6 +691,10 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                 leading: Icons.receipt_long_rounded,
                 title: 'Foto struk',
                 subtitle: 'Ketuk untuk melihat',
+                leadingWidget: ReceiptThumbnail(
+                  relativePath: _receiptPath!,
+                  size: 48,
+                ),
                 trailing: IconButton(
                   tooltip: 'Hapus foto',
                   icon: const Icon(Icons.delete_outline_rounded),

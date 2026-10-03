@@ -175,7 +175,11 @@ class FieldTile extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.onTap,
+    this.leadingWidget,
   });
+
+  /// Menggantikan ikon [leading] bila diisi (mis. miniatur foto struk).
+  final Widget? leadingWidget;
 
   final IconData leading;
   final String title;
@@ -191,7 +195,7 @@ class FieldTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        leading: Icon(leading, color: scheme.primary),
+        leading: leadingWidget ?? Icon(leading, color: scheme.primary),
         title: Text(title),
         subtitle: subtitle == null ? null : Text(subtitle!),
         trailing: trailing,

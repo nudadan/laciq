@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:path_provider/path_provider.dart';
+
 import 'receipt_storage.dart';
 
 /// Memuat file foto struk dari path relatif. Dipisah jadi provider agar tes
@@ -11,6 +13,55 @@ final receiptFileLoaderProvider =
     Provider<Future<File?> Function(String relativePath)>(
       (ref) => existingReceiptFile,
     );
+
+/// Direktori dokumen aplikasi, dibaca sekali lalu dipakai ulang oleh semua
+/// miniatur (daftar transaksi bisa memuat puluhan baris).
+final receiptDocsDirProvider = FutureProvider<String>(
+  (ref) async => (await getApplicationDocumentsDirectory()).path,
+);
+
+/// Miniatur foto struk. Gambar diperkecil saat didekode (`cacheWidth`) supaya
+/// daftar panjang tetap ringan. Bila direktori/berkas tidak tersedia, jatuh ke
+/// ikon struk (bukan layar kosong), sehingga tetap bisa diketuk.
+class ReceiptThumbnail extends ConsumerWidget {
+  const ReceiptThumbnail({
+    super.key,
+    required this.relativePath,
+    this.size = 40,
+  });
+
+  final String relativePath;
+  final double size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final fallback = Container(
+      width: size,
+      height: size,
+      color: scheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.receipt_long_rounded,
+        size: size * 0.5,
+        color: scheme.primary,
+      ),
+    );
+    final dir = ref.watch(receiptDocsDirProvider).value;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.25),
+      child: dir == null
+          ? fallback
+          : Image.file(
+              File('$dir/$relativePath'),
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              cacheWidth: (size * 3).round(),
+              errorBuilder: (_, _, _) => fallback,
+            ),
+    );
+  }
+}
 
 /// Menampilkan foto struk yang tersimpan bersama transaksi, layar penuh,
 /// dengan zoom dan geser. Tidak mengecek paket langganan: foto itu milik
