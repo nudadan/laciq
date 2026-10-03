@@ -31,18 +31,25 @@
 1. [ ] **Cek PDKI** saat situs pulih. Bila ada merek bentrok: berhenti, JANGAN pasang nama di Play.
 2. [x] Domain `laciq.solusimandiri.id` TAYANG (2026-10-03): DNS di Cloudflare (proxy menyala) ke 169.58.153.201; vhost `/etc/nginx/sites-available/laciq.solusimandiri.id.conf`, webroot `/var/www/laciq.solusimandiri.id`, sertifikat Let's Encrypt (berlaku s.d. 2027-01-01, perpanjangan otomatis certbot). Terverifikasi: `/`, `/privacy`, `/img/`, `/fonts/` 200; `/img/` dan path acak 404; HTTP dialihkan 301 ke HTTPS. Halaman lama `dompetku.hardan-ti.com` TIDAK diubah (masih dirujuk listing Play yang sedang ditinjau).
 3. [ ] Ambil akun media sosial dengan nama yang sama.
-4. [ ] Play Console (setelah PDKI bersih dan domain hidup):
+4. [~] Play Console, DIKERJAKAN 2026-10-03 (DRAF disimpan, BELUM dikirim ke Google, kecuali kontak situs web yang langsung terbit):
    - Judul listing: **LaciQ: Catatan Keuangan** (maks. 30 karakter; tepat 23).
    - Deskripsi singkat dan lengkap: ganti "DompetKu" -> "LaciQ" (lihat `LISTING-PLAY-STORE.md`).
    - Feature graphic: unggah `feature-graphic-laciq-1024x500.png`.
    - URL kebijakan privasi: `https://laciq.solusimandiri.id/privacy` (pertahankan URL lama aktif sampai peninjauan selesai).
    - Detail kontak: situs web `https://laciq.solusimandiri.id`.
    - Catatan rilis build 10 menyebut perubahan nama.
-5. [ ] Google Cloud > layar persetujuan OAuth: nama aplikasi -> LaciQ; beranda dan kebijakan privasi -> laciq.solusimandiri.id; domain
+5. [x] SELESAI 2026-10-03 (proyek `dompetku-509508`; nama LaciQ, beranda dan privasi laciq.solusimandiri.id, domain terotorisasi hardan-ti.com + solusimandiri.id; Verification Center: tidak perlu verifikasi). Semula: Google Cloud > layar persetujuan OAuth: nama aplikasi -> LaciQ; beranda dan kebijakan privasi -> laciq.solusimandiri.id; domain
       terotorisasi tambah **`solusimandiri.id`** (domain induk, bukan subdomain). (Tanpa logo, scope non-sensitif: tidak memicu verifikasi; periksa lagi setelah diubah.)
 6. [ ] RevenueCat: ganti nama project/app (opsional, hanya tampilan di dashboard); ID produk TIDAK diubah.
 7. [ ] Ubah deskripsi Data Safety bila menyebut nama lama (`DATA-SAFETY-PLAY.md`).
 8. [ ] Pasang ulang situs: `docs/situs-beranda/` -> `/var/www/<laciq.solusimandiri.id>/` dan tambah `server_name laciq.solusimandiri.id`; buat pengalihan 301 dari
       `dompetku.hardan-ti.com` bila domain lama tidak dipakai lagi.
-9. [ ] Naikkan versi ke 1.0.0+10, bangun AAB, uji, lalu unggah (uji internal dulu).
+9. [~] 1.0.0+10 sudah digabung ke `main` (commit 6eac7e8) dan AAB dibangun (`build/app/outputs/bundle/release/app-release.aab`, 86 MB). Tinggal: unggah ke uji internal, uji, lalu naik ke produksi setelah peninjauan rilis 6 selesai.
 10. [ ] Merek: setelah PDKI bersih, pertimbangkan mendaftarkan "LaciQ" (kelas 9 dan 42) ke DJKI.
+
+## Status Play Console 2026-10-03
+- Listing (draf, tidak dikirim): nama `LaciQ: Catatan Keuangan`, deskripsi lengkap bernama LaciQ + URL privasi baru, gambar fitur baru.
+- Konten Aplikasi > Kebijakan privasi (draf): `https://laciq.solusimandiri.id/privacy`.
+- Setelan Store > Detail kontak: situs web `https://laciq.solusimandiri.id` (TERBIT langsung).
+- Perubahan draf dikirim lewat Ringkasan publikasi > "Kirim ... perubahan untuk ditinjau" (tombol ditekan pemilik).
+- PDKI: mode Normal "laciq" kosong; pencarian FONETIK (laciq, lasik, lacik) dan "laci" BELUM dijalankan.
