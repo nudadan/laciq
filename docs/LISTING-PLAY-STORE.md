@@ -1,7 +1,7 @@
 # Draf Listingan Play Store — LaciQ (sebelumnya DompetKu)
 
 > 2026-10-03: nama diganti ke **LaciQ: Catatan Keuangan** (23 karakter). Teks di bawah sudah memakai nama baru; JANGAN dipasang
-> ke Play sebelum PDKI dicek dan laciq.id hidup. Lihat `GANTI-NAMA-LACIQ.md`.
+> ke Play sebelum PDKI dicek dan laciq.solusimandiri.id hidup. Lihat `GANTI-NAMA-LACIQ.md`.
 
 > Dibuat 2026-09-30. Draf teks untuk Play Console → Kembangkan basis pengguna → Kehadiran di Store → Listingan Play
 > Store (bahasa: Indonesia – id). Isi disusun dari `docs/kebijakan-privasi/index.html` dan
@@ -65,7 +65,7 @@ Paket gratis menampilkan iklan banner dan sudah mencakup pencatatan, dompet, ang
 
 LaciQ mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.
 
-Kebijakan privasi: https://laciq.id/privacy
+Kebijakan privasi: https://laciq.solusimandiri.id/privacy
 Bantuan: support@hardan-ti.com
 ```
 
