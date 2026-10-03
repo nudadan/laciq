@@ -178,6 +178,10 @@ export async function handleExtract(req: Request, deps: Deps): Promise<Response>
     ? result.categoryId
     : null;
   const merchant = result.merchant?.trim().slice(0, 60) || null;
+  // Diagnostik tanpa data pengguna: hanya jumlah dan status (tanpa teks/nama/ID).
+  console.log(
+    `ai_result categories=${body.categories.length} model_category=${result.categoryId === null ? "null" : "set"} category_valid=${categoryId !== null} merchant=${merchant !== null}`,
+  );
   return json({
     merchant,
     categoryId,
