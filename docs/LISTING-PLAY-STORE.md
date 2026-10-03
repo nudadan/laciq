@@ -1,4 +1,7 @@
-# Draf Listingan Play Store — DompetKu
+# Draf Listingan Play Store — LaciQ (sebelumnya DompetKu)
+
+> 2026-10-03: nama diganti ke **LaciQ: Catatan Keuangan** (23 karakter). Teks di bawah sudah memakai nama baru; JANGAN dipasang
+> ke Play sebelum PDKI dicek dan laciq.id hidup. Lihat `GANTI-NAMA-LACIQ.md`.
 
 > Dibuat 2026-09-30. Draf teks untuk Play Console → Kembangkan basis pengguna → Kehadiran di Store → Listingan Play
 > Store (bahasa: Indonesia – id). Isi disusun dari `docs/kebijakan-privasi/index.html` dan
@@ -14,7 +17,7 @@
 
 ## Nama aplikasi (26 karakter)
 ```
-DompetKu: Catatan Keuangan
+LaciQ: Catatan Keuangan
 ```
 
 ## Deskripsi singkat (72 karakter)
@@ -24,7 +27,7 @@ Catat pemasukan & pengeluaran, atur anggaran. Data tersimpan di HP Anda.
 
 ## Deskripsi lengkap
 ```
-DompetKu membantu Anda mencatat dan memahami keuangan pribadi dengan cepat, tanpa perlu membuat akun. Data keuangan Anda disimpan di HP Anda sendiri.
+LaciQ membantu Anda mencatat dan memahami keuangan pribadi dengan cepat, tanpa perlu membuat akun. Data keuangan Anda disimpan di HP Anda sendiri.
 
 CATAT DENGAN CEPAT
 • Catat pemasukan, pengeluaran, dan transfer antar dompet dalam beberapa ketukan
@@ -60,9 +63,9 @@ FITUR ULTIMATE (BERLANGGANAN)
 
 Paket gratis menampilkan iklan banner dan sudah mencakup pencatatan, dompet, anggaran, target tabungan, serta sebagian fitur Agenda dan Analisa Tren. Langganan dapat dibatalkan kapan saja lewat Google Play.
 
-DompetKu mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.
+LaciQ mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.
 
-Kebijakan privasi: https://dompetku.hardan-ti.com/privacy
+Kebijakan privasi: https://laciq.id/privacy
 Bantuan: support@hardan-ti.com
 ```
 

@@ -39,7 +39,7 @@ icon.resize((64, 64), Image.LANCZOS).save(f"{OUT}/img/favicon.png", optimize=Tru
 icon.resize((180, 180), Image.LANCZOS).save(f"{OUT}/img/apple-touch-icon.png", optimize=True)
 
 # Gambar bagikan (Open Graph) 1200x630 dari feature graphic
-fg = Image.open("store-assets/feature-graphic-1024x500.png").convert("RGB")
+fg = Image.open("store-assets/feature-graphic-laciq-1024x500.png").convert("RGB")
 og = Image.new("RGB", (1200, 630), (11, 15, 30))
 scale = 1200 / fg.width
 fg2 = fg.resize((1200, round(fg.height * scale)), Image.LANCZOS)
