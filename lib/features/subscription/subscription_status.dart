@@ -66,7 +66,12 @@ abstract interface class SubscriptionStatus {
   Future<String?> activeSubscriptionProductId();
   Future<List<SubscriptionPackage>> fetchPackages();
   Future<void> purchase(SubscriptionPackage package);
-  Future<void> restorePurchases();
+
+  /// Memulihkan pembelian dari Google Play lalu mengembalikan true bila SESUDAH
+  /// itu ada langganan (Premium/Ultimate) yang aktif untuk ID pengguna ini.
+  /// False = tidak ada yang bisa dipulihkan; pemanggil TIDAK boleh mengklaim
+  /// "dipulihkan".
+  Future<bool> restorePurchases();
 }
 
 /// SDK RevenueCat menampilkan dialog "Wrong API Key" lalu MENUTUP aplikasi bila
@@ -122,24 +127,35 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     }
   }
 
+  /// Kabar CustomerInfo yang kita dorong sendiri (setelah beli/pulihkan), di
+  /// samping pemberitahuan plugin: status tidak boleh bergantung hanya pada
+  /// plugin mengirim ulang info yang sama.
+  static final _pushedInfo = StreamController<CustomerInfo>.broadcast();
+
   Stream<bool> _watchEntitlement(String entitlementId) async* {
     if (!_configured) {
       yield false;
       return;
     }
-    // Status awal aman sebelum listener pertama terpanggil (native butuh
-    // waktu mengirim CustomerInfo pertama; tanpa ini provider bisa
-    // menggantung menunggu nilai pertama tak terhingga).
+    // Status awal aman sebelum info pertama datang (native butuh waktu; tanpa
+    // ini provider bisa menggantung menunggu nilai pertama tak terhingga).
     yield false;
 
     final controller = StreamController<bool>();
     void listener(CustomerInfo info) {
-      controller.add(info.entitlements.active.containsKey(entitlementId));
+      if (!controller.isClosed) {
+        controller.add(info.entitlements.active.containsKey(entitlementId));
+      }
     }
 
     Purchases.addCustomerInfoUpdateListener(listener);
-    controller.onCancel = () =>
-        Purchases.removeCustomerInfoUpdateListener(listener);
+    final pushed = _pushedInfo.stream.listen(listener);
+    // Ambil status secara eksplisit juga, jangan hanya menunggu pemberitahuan.
+    unawaited(Purchases.getCustomerInfo().then(listener, onError: (_) {}));
+    controller.onCancel = () {
+      Purchases.removeCustomerInfoUpdateListener(listener);
+      pushed.cancel();
+    };
     yield* controller.stream;
   }
 
@@ -213,6 +229,7 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
         PurchaseParams.package(native, productChangeInfo: change),
       );
       await _waitForEntitlement(package.tier, result.customerInfo);
+      await _pushLatestInfo();
     } on PlatformException catch (e) {
       if (PurchasesErrorHelper.getErrorCode(e) ==
           PurchasesErrorCode.purchaseCancelledError) {
@@ -293,17 +310,38 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     );
   }
 
+  /// Memaksa info terbaru dari server (bukan cache) lalu mendorongnya ke
+  /// semua pengamat status. Gagal = diam.
+  Future<CustomerInfo?> _pushLatestInfo() async {
+    try {
+      await Purchases.invalidateCustomerInfoCache();
+      final info = await Purchases.getCustomerInfo();
+      _pushedInfo.add(info);
+      return info;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
-  Future<void> restorePurchases() async {
+  Future<bool> restorePurchases() async {
     if (!_configured) {
       throw const SubscriptionException('Layanan langganan belum siap.');
     }
+    final CustomerInfo restored;
     try {
-      await Purchases.restorePurchases();
+      restored = await Purchases.restorePurchases();
     } catch (e) {
       throw const SubscriptionException(
         'Gagal memulihkan pembelian. Periksa koneksi internet Anda.',
       );
     }
+    _pushedInfo.add(restored);
+    // Info dari restore bisa kosong walau server sudah tahu; cek sekali lagi
+    // langsung ke server sebelum menyimpulkan tidak ada langganan.
+    final fresh = await _pushLatestInfo() ?? restored;
+    final active = fresh.entitlements.active;
+    return active.containsKey(kPremiumEntitlementId) ||
+        active.containsKey(kUltimateEntitlementId);
   }
 }

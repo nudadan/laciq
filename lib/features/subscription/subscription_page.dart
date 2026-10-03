@@ -48,8 +48,17 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _busy = true);
     try {
-      await ref.read(subscriptionStatusProvider).restorePurchases();
-      notify(messenger, 'Pembelian dipulihkan.');
+      final found = await ref
+          .read(subscriptionStatusProvider)
+          .restorePurchases();
+      notify(
+        messenger,
+        found
+            ? 'Pembelian dipulihkan.'
+            : 'Tidak ada langganan aktif yang ditemukan untuk akun ini. '
+                  'Pastikan memakai akun Google Play yang sama dengan saat '
+                  'berlangganan, lalu coba lagi.',
+      );
     } on SubscriptionException catch (e) {
       notify(messenger, e.message);
     } finally {
@@ -133,7 +142,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 child: const Text('Pulihkan pembelian'),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            const _UserIdLine(),
+            const SizedBox(height: 12),
             Text(
               'Langganan diperpanjang otomatis lewat Google Play. '
               'Batalkan kapan saja lewat Play Store > Langganan.',
@@ -306,6 +317,29 @@ class _PriceRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// ID pengguna anonim (6 karakter terakhir) untuk membantu penelusuran bila
+/// status langganan tidak sesuai. Sengaja dipotong: cukup untuk dicocokkan di
+/// dashboard, tidak cukup untuk dipakai sebagai ID.
+class _UserIdLine extends ConsumerWidget {
+  const _UserIdLine();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return FutureBuilder<String?>(
+      future: ref.read(subscriptionStatusProvider).appUserId(),
+      builder: (context, snapshot) {
+        final id = snapshot.data;
+        if (id == null || id.length < 6) return const SizedBox.shrink();
+        return Text(
+          'ID pengguna: …${id.substring(id.length - 6)}',
+          style: Theme.of(context).textTheme.bodySmall,
+          textAlign: TextAlign.center,
+        );
+      },
     );
   }
 }

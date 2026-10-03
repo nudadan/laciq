@@ -99,4 +99,47 @@ void main() {
 
     expect(h.subscription.restoreCalled, isTrue);
   });
+
+  appTest('pulihkan: tidak ada langganan aktif -> tidak mengklaim dipulihkan', (
+    tester,
+    h,
+  ) async {
+    await _openSettings(tester);
+    await tester.tap(find.text('Upgrade ke Premium'));
+    await settle(tester);
+
+    await tester.tap(find.text('Pulihkan pembelian'));
+    await settle(tester);
+
+    expect(find.text('Pembelian dipulihkan.'), findsNothing);
+    expect(
+      find.textContaining('Tidak ada langganan aktif yang ditemukan'),
+      findsOneWidget,
+    );
+  });
+
+  appTest('pulihkan: langganan ditemukan -> dipulihkan', (tester, h) async {
+    h.subscription.restoreFindsSubscription = true;
+    await _openSettings(tester);
+    await tester.tap(find.text('Upgrade ke Premium'));
+    await settle(tester);
+
+    await tester.tap(find.text('Pulihkan pembelian'));
+    await settle(tester);
+
+    expect(find.text('Pembelian dipulihkan.'), findsOneWidget);
+    expect(find.textContaining('Tidak ada langganan aktif'), findsNothing);
+  });
+
+  appTest('halaman langganan menampilkan 6 karakter terakhir ID pengguna', (
+    tester,
+    h,
+  ) async {
+    await _openSettings(tester);
+    await tester.tap(find.text('Upgrade ke Premium'));
+    await settle(tester);
+
+    // Fake memakai ID 'test-user'.
+    expect(find.text('ID pengguna: …t-user'), findsOneWidget);
+  });
 }

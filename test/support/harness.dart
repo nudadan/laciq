@@ -143,6 +143,9 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   final purchased = <String>[];
   var restoreCalled = false;
 
+  /// Hasil restorePurchases (true = ada langganan aktif setelah dipulihkan).
+  bool restoreFindsSubscription = false;
+
   @override
   Stream<bool> watchIsPremium() async* {
     yield _premium;
@@ -180,7 +183,10 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   }
 
   @override
-  Future<void> restorePurchases() async => restoreCalled = true;
+  Future<bool> restorePurchases() async {
+    restoreCalled = true;
+    return restoreFindsSubscription;
+  }
 }
 
 /// Backup cloud palsu — map di memori mensimulasikan penyimpanan, tanpa
