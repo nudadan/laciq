@@ -48,7 +48,7 @@ void main() {
 
     // Membuka TrendPage langsung, bukan SubscriptionPage.
     expect(find.text('Analisa Tren'), findsWidgets);
-    expect(find.text('DompetKu Premium'), findsNothing);
+    expect(find.text('LaciQ Premium'), findsNothing);
   }, subscription: FakeSubscriptionStatus());
 
   appTest(
@@ -71,7 +71,7 @@ void main() {
 
       await tester.tap(find.text('12 bln'));
       await settle(tester);
-      expect(find.text('DompetKu Premium'), findsOneWidget);
+      expect(find.text('LaciQ Premium'), findsOneWidget);
     },
     seed: _seedTwoMonths,
     subscription: FakeSubscriptionStatus(),

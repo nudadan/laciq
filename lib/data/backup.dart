@@ -109,10 +109,10 @@ class BackupService {
     try {
       decoded = jsonDecode(source);
     } on FormatException {
-      throw const BackupException('File bukan backup DompetKu yang valid.');
+      throw const BackupException('File bukan backup LaciQ yang valid.');
     }
     if (decoded is! Map<String, dynamic> || decoded['format'] != formatName) {
-      throw const BackupException('File bukan backup DompetKu yang valid.');
+      throw const BackupException('File bukan backup LaciQ yang valid.');
     }
     final Map<String, dynamic> root = decoded;
     final version = root['version'];

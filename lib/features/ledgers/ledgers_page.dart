@@ -301,8 +301,7 @@ class LedgersPage extends ConsumerWidget {
         return;
       }
       await shareTextFile(
-        fileName:
-            'dompetku-${l.id.replaceAll(RegExp(r'[^A-Za-z0-9]'), '')}.csv',
+        fileName: 'laciq-${l.id.replaceAll(RegExp(r'[^A-Za-z0-9]'), '')}.csv',
         content: buildTransactionsCsv(items),
         mimeType: 'text/csv',
         subject: 'Transaksi ${l.name}',

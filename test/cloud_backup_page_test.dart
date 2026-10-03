@@ -31,7 +31,7 @@ void main() {
     await settle(tester);
 
     // Membuka SubscriptionPage, bukan CloudBackupPage.
-    expect(find.text('DompetKu Premium'), findsOneWidget);
+    expect(find.text('LaciQ Premium'), findsOneWidget);
     expect(find.text('Masuk dengan Google'), findsNothing);
   }, subscription: FakeSubscriptionStatus());
 

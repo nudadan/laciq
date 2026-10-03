@@ -36,7 +36,7 @@ void main() {
       await tester.tap(find.text('Utang & Piutang'));
       await settle(tester);
 
-      expect(find.text('DompetKu Premium'), findsOneWidget);
+      expect(find.text('LaciQ Premium'), findsOneWidget);
       expect(find.text('Utang & Piutang'), findsNothing);
     },
     subscription: FakeSubscriptionStatus(),

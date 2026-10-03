@@ -115,7 +115,7 @@ class SettingsPage extends ConsumerWidget {
             _Group([
               const ListTile(
                 leading: Icon(Icons.info_outline_rounded),
-                title: Text('DompetKu'),
+                title: Text('LaciQ'),
                 subtitle: Text(
                   'Data tersimpan di perangkat ini. Bila ganti HP atau menghapus '
                   'aplikasi, data hilang kecuali Anda sudah membuat backup.',
@@ -133,7 +133,7 @@ class SettingsPage extends ConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.star_outline_rounded),
-                title: const Text('Beri nilai DompetKu'),
+                title: const Text('Beri nilai LaciQ'),
                 subtitle: const Text('Buka halaman aplikasi di Play Store'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () =>
@@ -253,10 +253,10 @@ class SettingsPage extends ConsumerWidget {
           ? DateFormat('yyyy-MM').format(month)
           : 'semua';
       await shareTextFile(
-        fileName: 'dompetku-transaksi-$suffix.csv',
+        fileName: 'laciq-transaksi-$suffix.csv',
         content: buildTransactionsCsv(items),
         mimeType: 'text/csv',
-        subject: 'Transaksi DompetKu',
+        subject: 'Transaksi LaciQ',
       );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Ekspor gagal: $e')));
@@ -269,10 +269,10 @@ class SettingsPage extends ConsumerWidget {
       final json = await BackupService(ref.read(databaseProvider)).export();
       await shareTextFile(
         fileName:
-            'dompetku-backup-${DateFormat('yyyy-MM-dd').format(DateTime.now())}.json',
+            'laciq-backup-${DateFormat('yyyy-MM-dd').format(DateTime.now())}.json',
         content: json,
         mimeType: 'application/json',
-        subject: 'Backup DompetKu',
+        subject: 'Backup LaciQ',
       );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Backup gagal: $e')));
@@ -299,7 +299,7 @@ class SettingsPage extends ConsumerWidget {
       say(e.message);
       return;
     } on FormatException {
-      say('File bukan backup DompetKu yang valid.');
+      say('File bukan backup LaciQ yang valid.');
       return;
     } catch (e) {
       say('Tidak dapat membaca file: $e');
@@ -461,13 +461,13 @@ class _SubscriptionTile extends ConsumerWidget {
     switch (tier) {
       case ActiveTier.ultimate:
         return _ActiveSubscriptionTile(
-          title: 'DompetKu Ultimate aktif',
+          title: 'LaciQ Ultimate aktif',
           subtitle: 'Tanpa iklan · Ekstraksi struk AI · Multi buku kas',
           onManage: () => launchUrl(_manageSubsUrl),
         );
       case ActiveTier.premium:
         return _ActiveSubscriptionTile(
-          title: 'DompetKu Premium aktif',
+          title: 'LaciQ Premium aktif',
           subtitle: ultimateOnSale
               ? 'Tanpa iklan · Upgrade ke Ultimate untuk AI dan multi buku kas'
               : 'Tanpa iklan',

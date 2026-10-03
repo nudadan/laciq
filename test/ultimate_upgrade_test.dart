@@ -91,7 +91,7 @@ void main() {
       'saja',
       (tester, h) async {
         await _openSettings(tester);
-        expect(find.text('DompetKu Premium aktif'), findsOneWidget);
+        expect(find.text('LaciQ Premium aktif'), findsOneWidget);
         expect(find.text('Upgrade'), findsOneWidget);
         expect(find.text('Kelola'), findsOneWidget);
 
@@ -112,7 +112,7 @@ void main() {
       h,
     ) async {
       await _openSettings(tester);
-      expect(find.text('DompetKu Premium aktif'), findsOneWidget);
+      expect(find.text('LaciQ Premium aktif'), findsOneWidget);
       expect(find.text('Upgrade'), findsNothing);
       expect(find.textContaining('Upgrade ke Ultimate'), findsNothing);
     }, subscription: _PremiumOnlyStatus());
@@ -121,7 +121,7 @@ void main() {
         'tidak ikut menyempit di layar sempit)', (tester, h) async {
       await _openSettings(tester);
 
-      final title = find.text('DompetKu Premium aktif');
+      final title = find.text('LaciQ Premium aktif');
       final subtitle = find.textContaining('Upgrade ke Ultimate untuk AI');
       expect(title, findsOneWidget);
       final textBottom = tester.getBottomLeft(subtitle).dy;
@@ -142,8 +142,8 @@ void main() {
       h,
     ) async {
       await _openSettings(tester);
-      expect(find.text('DompetKu Ultimate aktif'), findsOneWidget);
-      expect(find.text('DompetKu Premium aktif'), findsNothing);
+      expect(find.text('LaciQ Ultimate aktif'), findsOneWidget);
+      expect(find.text('LaciQ Premium aktif'), findsNothing);
       expect(find.text('Upgrade'), findsNothing);
       expect(find.text('Kelola'), findsOneWidget);
     }, subscription: FakeSubscriptionStatus(ultimate: true));

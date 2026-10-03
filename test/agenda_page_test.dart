@@ -61,7 +61,7 @@ void main() {
       await settle(tester);
 
       expect(find.text('Agenda'), findsWidgets);
-      expect(find.text('DompetKu Premium'), findsNothing);
+      expect(find.text('LaciQ Premium'), findsNothing);
       expect(find.byIcon(Icons.add_rounded), findsOneWidget);
     },
     subscription: FakeSubscriptionStatus(),
@@ -84,7 +84,7 @@ void main() {
     // Percobaan ke-4: dialihkan ke SubscriptionPage, form TIDAK terbuka.
     await tester.tap(find.byIcon(Icons.add_rounded));
     await settle(tester);
-    expect(find.text('DompetKu Premium'), findsOneWidget);
+    expect(find.text('LaciQ Premium'), findsOneWidget);
     expect(find.text('Agenda Baru'), findsNothing);
   }, subscription: FakeSubscriptionStatus());
 

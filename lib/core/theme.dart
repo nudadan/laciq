@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 
-/// Sistem desain DompetKu: gelap-dulu, aksen elektrik cyan-violet,
+/// Sistem desain LaciQ: gelap-dulu, aksen elektrik cyan-violet,
 /// sudut sangat membulat, angka besar bergaya teknis.
 ///
 /// Semua warna dan bentuk dikendalikan dari sini agar seluruh layar konsisten.

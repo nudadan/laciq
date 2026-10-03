@@ -18,7 +18,7 @@ void main() {
   ) async {
     await _openSettings(tester);
     expect(find.text('Upgrade ke Premium'), findsOneWidget);
-    expect(find.text('DompetKu Premium aktif'), findsNothing);
+    expect(find.text('LaciQ Premium aktif'), findsNothing);
   });
 
   appTest('sudah premium: entri Settings menampilkan status aktif', (
@@ -26,7 +26,7 @@ void main() {
     h,
   ) async {
     await _openSettings(tester);
-    expect(find.text('DompetKu Premium aktif'), findsOneWidget);
+    expect(find.text('LaciQ Premium aktif'), findsOneWidget);
     expect(find.text('Upgrade ke Premium'), findsNothing);
   }, subscription: FakeSubscriptionStatus(premium: true));
 
@@ -66,7 +66,7 @@ void main() {
 
     expect(h.subscription.purchased, ['premium_monthly']);
     // Berhasil: halaman ditutup, kembali ke Settings dengan status aktif.
-    expect(find.text('DompetKu Premium aktif'), findsOneWidget);
+    expect(find.text('LaciQ Premium aktif'), findsOneWidget);
   });
 
   appTest('tile Settings menyebut harga Premium termurah dalam Rupiah', (

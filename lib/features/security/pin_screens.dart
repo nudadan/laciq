@@ -85,7 +85,7 @@ class _PinVerifyViewState extends ConsumerState<PinVerifyView> {
   }
 
   Future<void> _tryBiometric() async {
-    final ok = await ref.read(biometricProvider).authenticate('Buka DompetKu');
+    final ok = await ref.read(biometricProvider).authenticate('Buka LaciQ');
     if (ok && mounted) widget.onVerified();
   }
 

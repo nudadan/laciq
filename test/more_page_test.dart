@@ -85,7 +85,7 @@ void main() {
     await tester.tap(find.text('Analisa Tren'));
     await settle(tester);
     expect(find.text('Analisa Tren'), findsWidgets); // AppBar
-    expect(find.text('DompetKu Premium'), findsNothing);
+    expect(find.text('LaciQ Premium'), findsNothing);
     await tester.tap(find.byTooltip('Kembali'));
     await settle(tester);
 
@@ -97,7 +97,7 @@ void main() {
 
     await tester.tap(find.text('Utang & Piutang'));
     await settle(tester);
-    expect(find.text('DompetKu Premium'), findsOneWidget);
+    expect(find.text('LaciQ Premium'), findsOneWidget);
   }, subscription: FakeSubscriptionStatus());
 
   appTest('premium: Target dan Utang & Piutang membuka halamannya '

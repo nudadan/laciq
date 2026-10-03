@@ -30,18 +30,18 @@ void main() {
     expect(await h.store.read('review_tx_count'), isNull);
   });
 
-  appTest('Pengaturan > Beri nilai DompetKu membuka halaman Play Store', (
+  appTest('Pengaturan > Beri nilai LaciQ membuka halaman Play Store', (
     tester,
     h,
   ) async {
     await tester.tap(find.byTooltip('Pengaturan'));
     await settle(tester);
     await tester.scrollUntilVisible(
-      find.text('Beri nilai DompetKu'),
+      find.text('Beri nilai LaciQ'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    await tester.tap(find.text('Beri nilai DompetKu'));
+    await tester.tap(find.text('Beri nilai LaciQ'));
     await settle(tester);
 
     expect(h.review.listingOpens, 1);

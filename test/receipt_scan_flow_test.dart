@@ -20,7 +20,7 @@ void main() {
       await tester.tap(find.text('Scan Struk'));
       await settle(tester);
 
-      expect(find.text('DompetKu Premium'), findsOneWidget);
+      expect(find.text('LaciQ Premium'), findsOneWidget);
       expect(h.receiptScanner.requestedSources, isEmpty);
     },
     subscription: FakeSubscriptionStatus(),

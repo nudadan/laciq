@@ -72,7 +72,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.upgradeOnly ? 'Upgrade ke Ultimate' : 'DompetKu Premium',
+          widget.upgradeOnly ? 'Upgrade ke Ultimate' : 'LaciQ Premium',
         ),
       ),
       body: SafeArea(
@@ -82,7 +82,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             Text(
               widget.upgradeOnly
                   ? 'Buka ekstraksi struk dengan AI dan pembukuan terpisah.'
-                  : 'Hilangkan iklan dan dukung pengembangan DompetKu.',
+                  : 'Hilangkan iklan dan dukung pengembangan LaciQ.',
               style: textTheme.titleMedium,
             ),
             const SizedBox(height: 16),

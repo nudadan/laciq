@@ -32,7 +32,7 @@ void main() {
       await tester.tap(find.text('Proyeksi Bulan Ini'));
       await settle(tester);
 
-      expect(find.text('DompetKu Premium'), findsOneWidget);
+      expect(find.text('LaciQ Premium'), findsOneWidget);
     },
     subscription: FakeSubscriptionStatus(),
   );
