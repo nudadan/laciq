@@ -9,6 +9,7 @@ import '../debts/debts_page.dart';
 import '../goals/goals_page.dart';
 import '../ledgers/ledgers_page.dart';
 import '../recurring/recurring_page.dart';
+import '../reports/monthly_report_page.dart';
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
 import '../tags/tags_page.dart';
@@ -85,6 +86,20 @@ class MorePage extends ConsumerWidget {
             onTap: () => Navigator.of(
               context,
             ).push(MaterialPageRoute<void>(builder: (_) => const TrendPage())),
+          ),
+          _MoreTile(
+            icon: Icons.summarize_rounded,
+            title: 'Laporan Bulanan',
+            subtitle: premium
+                ? 'Sorotan otomatis: kategori, anggaran, dan perbandingan'
+                : 'Fitur Premium',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => premium
+                    ? const MonthlyReportPage()
+                    : const SubscriptionPage(),
+              ),
+            ),
           ),
           _MoreTile(
             icon: Icons.event_note_rounded,

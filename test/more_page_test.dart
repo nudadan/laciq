@@ -33,6 +33,7 @@ void main() {
       expect(find.text('Transaksi berulang'), findsOneWidget);
       expect(find.text('Tag'), findsOneWidget);
       expect(find.text('Analisa Tren'), findsOneWidget);
+      expect(find.text('Laporan Bulanan'), findsOneWidget);
       expect(find.text('Agenda'), findsOneWidget);
       expect(find.text('Utang & Piutang'), findsOneWidget);
       expect(find.text('Target'), findsOneWidget);
@@ -62,7 +63,8 @@ void main() {
     await _openMore(tester);
     expect(find.textContaining('gratis 3 bulan terakhir'), findsOneWidget);
     expect(find.textContaining('gratis 3 item'), findsOneWidget);
-    expect(find.text('Fitur Premium'), findsOneWidget);
+    // Utang & Piutang dan Laporan Bulanan.
+    expect(find.text('Fitur Premium'), findsNWidgets(2));
 
     await tester.tap(find.text('Kategori'));
     await settle(tester);

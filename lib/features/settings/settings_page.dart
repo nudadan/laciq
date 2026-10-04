@@ -22,6 +22,7 @@ import '../security/lock_providers.dart';
 import '../security/pin_screens.dart';
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart';
+import 'excel_export_flow.dart';
 import 'restore_confirm.dart';
 import 'share_file.dart';
 
@@ -75,6 +76,16 @@ class SettingsPage extends ConsumerWidget {
             ]),
             const _Section('Data'),
             _Group([
+              ListTile(
+                leading: const Icon(Icons.grid_on_rounded),
+                title: const Text('Ekspor laporan (Excel)'),
+                subtitle: Text(
+                  (ref.watch(isPremiumProvider).value ?? false)
+                      ? 'Ringkasan, transaksi, per kategori, per bulan, per dompet (.xlsx)'
+                      : 'Fitur Premium',
+                ),
+                onTap: () => startExcelExport(context, ref),
+              ),
               ListTile(
                 leading: const Icon(Icons.table_chart_rounded),
                 title: const Text('Ekspor transaksi (CSV)'),

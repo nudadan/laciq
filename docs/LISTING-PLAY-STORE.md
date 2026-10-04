@@ -55,6 +55,8 @@ FITUR PREMIUM (BERLANGGANAN)
 • Proyeksi pengeluaran bulan ini dan simulasi apakah dana cukup sampai akhir bulan
 • Catatan utang dan piutang
 • Scan struk: foto struk dibaca langsung di HP Anda
+• Ekspor laporan ke Excel (.xlsx): ringkasan, per kategori, per bulan, per dompet
+• Laporan Bulanan: sorotan otomatis dari catatan Anda, dihitung di HP
 
 FITUR ULTIMATE (BERLANGGANAN)
 • Semua fitur Premium

@@ -77,3 +77,6 @@ Update 2026-10-01: layar persetujuan OAuth dipublikasikan ke **Production**. Sya
 aplikasi (mengunggah logo mewajibkan verifikasi), hanya scope non-sensitif (`drive.appdata`). Branding diisi: beranda
 `https://dompetku.hardan-ti.com`, kebijakan privasi `/privacy`, domain terotorisasi `hardan-ti.com`. Beranda dipasang di
 nginx (`location = /`, lihat `docs/situs-beranda/`). Bila suatu saat ingin menambah logo, ajukan verifikasi dulu.
+
+## Catatan 2026-10-04: ekspor Excel dan Laporan Bulanan
+Keduanya dihitung dan dibuat sepenuhnya di perangkat (tanpa jaringan, tanpa izin baru, tanpa SDK baru). Berkas Excel baru keluar dari HP bila pengguna membagikannya sendiri lewat lembar bagikan Android, sama seperti CSV dan backup berkas. **Tidak ada perubahan deklarasi Data Safety.** Kebijakan privasi bagian 7 hanya ditambah penyebutan ekspor Excel.

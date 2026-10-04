@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/notification_sender.dart';
@@ -10,6 +12,7 @@ import '../features/cloud_backup/cloud_backup_options.dart';
 import '../features/cloud_backup/cloud_backup_reminder_service.dart';
 import '../features/cloud_backup/cloud_backup_service.dart';
 import '../features/recurring/recurring_reminder_service.dart';
+import '../features/settings/share_file.dart';
 import '../features/security/lock_providers.dart' show keyValueStoreProvider;
 import '../features/subscription/subscription_plans.dart';
 import '../features/subscription/subscription_status.dart';
@@ -17,6 +20,7 @@ import '../features/transactions/receipt_scanner.dart';
 import '../features/trends/trend_settings.dart';
 import 'cash_flow.dart';
 import 'database.dart';
+import 'insights.dart';
 import 'recurrence.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -208,6 +212,44 @@ final monthTransactionsProvider = StreamProvider.autoDispose<List<TxView>>(
       ),
 );
 
+/// Transaksi bulan sebelum bulan terpilih (pembanding laporan bulanan).
+final previousMonthTransactionsProvider =
+    StreamProvider.autoDispose<List<TxView>>((ref) {
+      final m = ref.watch(selectedMonthProvider);
+      return ref
+          .watch(databaseProvider)
+          .watchTransactions(
+            DateTime(m.year, m.month - 1),
+            ledgerId: ref.watch(activeLedgerIdProvider),
+          );
+    });
+
+/// Laporan bulanan berbasis aturan untuk bulan terpilih (lihat insights.dart).
+/// Dihitung di perangkat dari data yang sudah ada; tanpa jaringan.
+final monthlyReportProvider = Provider.autoDispose<AsyncValue<MonthlyReport>>((
+  ref,
+) {
+  final month = ref.watch(selectedMonthProvider);
+  final current = ref.watch(monthTransactionsProvider);
+  final previous = ref.watch(previousMonthTransactionsProvider);
+  final budgets = ref.watch(budgetProgressProvider);
+  final error = current.error ?? previous.error ?? budgets.error;
+  if (error != null) return AsyncError(error, StackTrace.current);
+  final c = current.value;
+  final p = previous.value;
+  final b = budgets.value;
+  if (c == null || p == null || b == null) return const AsyncLoading();
+  return AsyncData(
+    buildMonthlyReport(
+      month: month,
+      current: c,
+      previous: p,
+      budgets: b,
+      today: DateTime.now(),
+    ),
+  );
+});
+
 final budgetProgressProvider = StreamProvider.autoDispose<List<BudgetProgress>>(
   (ref) => ref
       .watch(databaseProvider)
@@ -261,6 +303,17 @@ final transactionTagsProvider = StreamProvider.autoDispose
 final adEligibilityServiceProvider = Provider<AdEligibilityService>(
   (ref) => AdEligibilityService(ref.watch(keyValueStoreProvider)),
 );
+
+/// Pembagi berkas biner (lembar bagikan Android). Provider terpisah agar tes
+/// bisa menangkap berkas yang akan dibagikan tanpa menyentuh platform channel.
+typedef BinarySharer = Future<void> Function({
+  required String fileName,
+  required Uint8List bytes,
+  required String mimeType,
+  String? subject,
+});
+
+final binaryShareProvider = Provider<BinarySharer>((ref) => shareBinaryFile);
 
 final reviewLauncherProvider = Provider<ReviewLauncher>(
   (ref) => InAppReviewLauncher(),

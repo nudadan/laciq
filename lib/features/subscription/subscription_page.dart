@@ -194,6 +194,16 @@ class _TierCard extends StatelessWidget {
       'Scan struk: nominal, toko, dan tanggal terisi otomatis, foto struk '
           'tersimpan',
     ),
+    (
+      Icons.grid_on_rounded,
+      'Ekspor laporan ke Excel (.xlsx): ringkasan, per kategori, per bulan, '
+          'per dompet',
+    ),
+    (
+      Icons.summarize_rounded,
+      'Laporan Bulanan: sorotan otomatis, perbandingan bulan lalu, dan '
+          'peringatan anggaran',
+    ),
   ];
 
   static const _ultimateBenefits = [
