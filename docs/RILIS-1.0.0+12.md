@@ -1,4 +1,7 @@
-# Rilis 1.0.0+13 (disiapkan 2026-10-04; berkas ini semula untuk +12)
+# Rilis 1.0.0+14 (disiapkan 2026-10-04; berkas ini semula untuk +12)
+
+> **Update:** +13 sudah di uji internal (17:43). +14 = +13 + lembar panduan yang memuat suara, Laporan Bulanan, Excel, ringkasan AI
+> (commit 6d0c20b). Yang dipromosikan ke produksi = **build 14**.
 
 > **+12 DIBATALKAN sebelum dipublikasikan**: Play memperingatkan 8 perangkat tidak lagi didukung karena `RECORD_AUDIO` membuat
 > `android.hardware.microphone` wajib. +13 menambah `<uses-feature android:name="android.hardware.microphone" android:required="false"/>`
