@@ -19,7 +19,7 @@ previousExpense, projectedExpense, categories:[{name,total,previousTotal}] (maks
 (`REPORT_MONTHLY_LIMIT` 30, `REPORT_DAILY_LIMIT` 5; kunci KV `report-usage:`/`report-usage-day:`) dan hanya dihitung
 bila berhasil. Keluaran model dibersihkan dan DITOLAK bila memuat tautan atau nominal Rupiah yang tidak ada di data
 (`validateNarrative` di `report_prompt.ts`); model cadangan dicoba lalu 502. Log hanya `ai_usage kind=report ...`
-(jumlah token) dan `ai_report_result chars=... categories=...`, tanpa isi. **Belum di-deploy.**
+(jumlah token) dan `ai_report_result chars=... categories=...`, tanpa isi. **Sudah di-deploy 2026-10-04** (versi `cdbd022b`; uji asap: 400/403/405 sesuai, `/extract` tetap hidup; belum dicoba dengan Gemini sungguhan).
 
 ## Deploy (sekali, oleh pemilik)
 
