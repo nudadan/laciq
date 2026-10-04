@@ -20,7 +20,7 @@ Nama baru: LaciQ (sebelumnya DompetKu). Baru: Catat dengan Suara, ekspor laporan
 
 ## Urutan rilis (menunggu peninjauan produksi rilis 6 selesai)
 1. [x] Worker `/report-insight` di-deploy (versi `cdbd022b`), diuji di tablet.
-2. [ ] **Deploy kebijakan privasi baru** (`docs/kebijakan-privasi/index.html`, bagian 6a, 6b, tanggal berlaku 4 Okt 2026) ke
+2. [x] DIKERJAKAN 2026-10-04 17:27 (cadangan lama: `privacy/index.html.bak-20261004` di server, tidak terjangkau publik). **Deploy kebijakan privasi baru** (`docs/kebijakan-privasi/index.html`, bagian 6a, 6b, tanggal berlaku 4 Okt 2026) ke
        `https://laciq.solusimandiri.id/privacy` SEBELUM rilis tayang. (Situs lama `dompetku.hardan-ti.com/privacy` hanya diubah bila
        listing yang ditinjau masih merujuknya.)
 3. [ ] Play Console > Keamanan data: periksa ulang (lihat `DATA-SAFETY-PLAY.md`, catatan 2026-10-04): Audio dianggap tidak
