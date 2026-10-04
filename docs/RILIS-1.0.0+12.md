@@ -1,4 +1,9 @@
-# Rilis 1.0.0+12 (disiapkan 2026-10-04)
+# Rilis 1.0.0+13 (disiapkan 2026-10-04; berkas ini semula untuk +12)
+
+> **+12 DIBATALKAN sebelum dipublikasikan**: Play memperingatkan 8 perangkat tidak lagi didukung karena `RECORD_AUDIO` membuat
+> `android.hardware.microphone` wajib. +13 menambah `<uses-feature android:name="android.hardware.microphone" android:required="false"/>`
+> (terverifikasi di manifest gabungan). Yang dipromosikan ke produksi = **build 13**. Bundle +12 tinggal di pustaka bundle Play
+> (tidak apa-apa; jangan dipublikasikan).
 
 AAB: `build/app/outputs/bundle/release/app-release.aab` (87 MB, ditandatangani kunci unggah `CN=DompetKu`, SHA-1
 `86:E7:F6:D6:FD:67:0A:E4:D1:DC:AD:20:6E:01:30:F6:21:2E:A2:60`). Commit `383cc90` di `main`. 666 tes Flutter + 84 tes Worker lulus,

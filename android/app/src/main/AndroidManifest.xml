@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <!-- Hanya diminta saat pengguna menekan "Catat dengan Suara" (setelah dialog penjelasan). -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- RECORD_AUDIO membuat Play menganggap mikrofon wajib dan menyingkirkan perangkat tanpa mikrofon;
+         fitur suara hanya satu fitur opsional, jadi tandai tidak wajib. -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
     <application
         android:label="LaciQ"
         android:allowBackup="false"
