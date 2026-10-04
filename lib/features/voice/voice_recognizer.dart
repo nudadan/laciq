@@ -37,16 +37,98 @@ abstract interface class VoiceRecognizer {
   Future<void> cancel();
 }
 
-class SpeechToTextRecognizer implements VoiceRecognizer {
-  SpeechToTextRecognizer({SpeechToText? speech})
+/// Lapisan tipis di atas plugin `speech_to_text`, agar mesin status
+/// [SpeechToTextRecognizer] bisa diuji dengan mesin palsu.
+abstract interface class SpeechEngine {
+  /// Menyiapkan layanan; false bila tidak ada layanan atau izin ditolak.
+  Future<bool> initialize({
+    required void Function(String errorMsg) onError,
+    required void Function(String status) onStatus,
+  });
+
+  Future<bool> get hasPermission;
+
+  Future<void> listen({
+    required void Function(String words, bool isFinal) onResult,
+    required bool onDevice,
+    required String localeId,
+  });
+
+  Future<void> stop();
+  Future<void> cancel();
+}
+
+class PluginSpeechEngine implements SpeechEngine {
+  PluginSpeechEngine({SpeechToText? speech})
     : _speech = speech ?? SpeechToText();
 
   final SpeechToText _speech;
+
+  @override
+  Future<bool> initialize({
+    required void Function(String errorMsg) onError,
+    required void Function(String status) onStatus,
+  }) => _speech.initialize(
+    onError: (SpeechRecognitionError e) => onError(e.errorMsg),
+    onStatus: onStatus,
+    options: [SpeechToText.androidNoBluetooth],
+  );
+
+  @override
+  Future<bool> get hasPermission => _speech.hasPermission;
+
+  @override
+  Future<void> listen({
+    required void Function(String words, bool isFinal) onResult,
+    required bool onDevice,
+    required String localeId,
+  }) => _speech.listen(
+    onResult: (SpeechRecognitionResult r) =>
+        onResult(r.recognizedWords, r.finalResult),
+    listenOptions: SpeechListenOptions(
+      partialResults: true,
+      onDevice: onDevice,
+      cancelOnError: true,
+      listenMode: ListenMode.confirmation,
+      localeId: localeId,
+      listenFor: const Duration(seconds: 20),
+      pauseFor: const Duration(seconds: 3),
+    ),
+  );
+
+  @override
+  Future<void> stop() => _speech.stop();
+
+  @override
+  Future<void> cancel() => _speech.cancel();
+}
+
+class SpeechToTextRecognizer implements VoiceRecognizer {
+  SpeechToTextRecognizer({
+    SpeechEngine? engine,
+    this.restartDelay = const Duration(milliseconds: 500),
+  }) : _engine = engine ?? PluginSpeechEngine();
+
+  final SpeechEngine _engine;
+
+  /// Jeda sebelum mengulang tanpa mode di perangkat. Sesi yang gagal masih
+  /// dibereskan oleh plugin (`cancelOnError`); memulai sesi baru terlalu cepat
+  /// ikut dibatalkan olehnya dan hasilnya salah dikira "tidak ada suara"
+  /// (terbukti di Xiaomi Pad, 2026-10-04).
+  final Duration restartDelay;
+
   StreamController<VoiceUpdate>? _out;
   String _locale = 'id_ID';
   String _last = '';
-  bool _retriedOnline = false;
   bool _finalSent = false;
+
+  /// Layanan di perangkat tidak punya paket bahasa: lewati mode di perangkat
+  /// untuk sisa umur objek ini, supaya "Coba lagi" tidak gagal dulu tiap kali.
+  bool _onDeviceUnavailable = false;
+
+  /// Sedang berpindah dari mode di perangkat ke mode biasa: status dan galat
+  /// dari sesi lama diabaikan sampai sesi baru benar-benar mendengarkan.
+  bool _restarting = false;
 
   @override
   Stream<VoiceUpdate> listen({String localeId = 'id_ID'}) {
@@ -55,22 +137,21 @@ class SpeechToTextRecognizer implements VoiceRecognizer {
     _out = out;
     _locale = localeId;
     _last = '';
-    _retriedOnline = false;
     _finalSent = false;
+    _restarting = false;
     unawaited(_begin(out));
     return out.stream;
   }
 
   Future<void> _begin(StreamController<VoiceUpdate> out) async {
     try {
-      final ok = await _speech.initialize(
+      final ok = await _engine.initialize(
         onError: _onError,
         onStatus: _onStatus,
-        options: [SpeechToText.androidNoBluetooth],
       );
       if (out.isClosed) return;
       if (!ok) {
-        final granted = await _speech.hasPermission;
+        final granted = await _engine.hasPermission;
         _finish(
           failure: granted
               ? VoiceFailure.unavailable
@@ -78,52 +159,56 @@ class SpeechToTextRecognizer implements VoiceRecognizer {
         );
         return;
       }
-      await _startListening(onDevice: true);
+      await _startListening(onDevice: !_onDeviceUnavailable);
     } catch (_) {
       _finish(failure: VoiceFailure.other);
     }
   }
 
-  /// Utamakan pengenalan di perangkat (audio tidak keluar dari HP). Bila HP
-  /// tidak punya model offline untuk bahasa ini, [_onError] mengulang sekali
-  /// tanpa `onDevice`; pengguna sudah diberi tahu hal itu di dialog izin.
+  /// Utamakan pengenalan di perangkat (audio tidak keluar dari HP). Bila
+  /// layanan tidak punya paket bahasa Indonesia offline (galat bahasa),
+  /// [_onError] mengulang sekali tanpa `onDevice`; pengguna sudah diberi tahu
+  /// hal itu di dialog izin.
   Future<void> _startListening({required bool onDevice}) {
-    return _speech.listen(
+    return _engine.listen(
       onResult: _onResult,
-      listenOptions: SpeechListenOptions(
-        partialResults: true,
-        onDevice: onDevice,
-        cancelOnError: true,
-        listenMode: ListenMode.confirmation,
-        localeId: _locale,
-        listenFor: const Duration(seconds: 20),
-        pauseFor: const Duration(seconds: 3),
-      ),
+      onDevice: onDevice,
+      localeId: _locale,
     );
   }
 
-  void _onResult(SpeechRecognitionResult r) {
+  void _onResult(String words, bool isFinal) {
     final out = _out;
     if (out == null || out.isClosed) return;
-    _last = r.recognizedWords;
-    out.add(VoiceUpdate(_last, isFinal: r.finalResult));
-    if (r.finalResult) {
+    _restarting = false; // sesi baru sudah menghasilkan teks
+    _last = words;
+    out.add(VoiceUpdate(_last, isFinal: isFinal));
+    if (isFinal) {
       _finalSent = true;
       _finish();
     }
   }
 
   void _onStatus(String status) {
+    if (status == SpeechToText.listeningStatus) {
+      _restarting = false;
+      return;
+    }
+    if (_restarting) return;
     // 'done' tanpa hasil akhir: pakai teks terakhir bila ada.
     if (status != SpeechToText.doneStatus) return;
     _finish(failure: _last.trim().isEmpty ? VoiceFailure.noSpeech : null);
   }
 
-  void _onError(SpeechRecognitionError e) {
-    final msg = e.errorMsg;
-    if (!_retriedOnline && msg.contains('language')) {
-      _retriedOnline = true;
-      unawaited(_startListening(onDevice: false));
+  void _onError(String msg) {
+    if (_restarting) return;
+    final languageProblem =
+        msg == 'error_language_unavailable' ||
+        msg == 'error_language_not_supported';
+    if (languageProblem && !_onDeviceUnavailable) {
+      _onDeviceUnavailable = true;
+      _restarting = true;
+      unawaited(_restartOnline());
       return;
     }
     if (_last.trim().isNotEmpty) {
@@ -136,10 +221,25 @@ class SpeechToTextRecognizer implements VoiceRecognizer {
         'error_permission' => VoiceFailure.permissionDenied,
         'error_network' ||
         'error_network_timeout' ||
-        'error_server' => VoiceFailure.unavailable,
+        'error_server' ||
+        'error_language_unavailable' ||
+        'error_language_not_supported' => VoiceFailure.unavailable,
         _ => VoiceFailure.other,
       },
     );
+  }
+
+  Future<void> _restartOnline() async {
+    try {
+      await _engine.cancel();
+      await Future<void>.delayed(restartDelay);
+      final out = _out;
+      if (out == null || out.isClosed) return;
+      await _startListening(onDevice: false);
+    } catch (_) {
+      _restarting = false;
+      _finish(failure: VoiceFailure.other);
+    }
   }
 
   /// Menutup stream sekali saja; [failure] null = selesai normal (menyerahkan
@@ -159,7 +259,7 @@ class SpeechToTextRecognizer implements VoiceRecognizer {
   @override
   Future<void> stop() async {
     try {
-      await _speech.stop();
+      await _engine.stop();
     } catch (_) {}
     _finish(failure: _last.trim().isEmpty ? VoiceFailure.noSpeech : null);
   }
@@ -168,9 +268,10 @@ class SpeechToTextRecognizer implements VoiceRecognizer {
   Future<void> cancel() async {
     final out = _out;
     _out = null;
+    _restarting = false;
     if (out != null && !out.isClosed) await out.close();
     try {
-      await _speech.cancel();
+      await _engine.cancel();
     } catch (_) {}
   }
 }
