@@ -39,6 +39,21 @@ class CategoryLine {
   final int previousTotal;
 }
 
+/// Pemakaian satu anggaran bulan ini (hanya kategori yang punya batas).
+class BudgetUsage {
+  const BudgetUsage({
+    required this.name,
+    required this.spent,
+    required this.limit,
+  });
+  final String name;
+  final int spent;
+  final int limit;
+
+  /// Persen terpakai, bisa lebih dari 100.
+  int get percent => (spent * 100 / limit).round();
+}
+
 class MonthlyReport {
   const MonthlyReport({
     required this.month,
@@ -51,6 +66,7 @@ class MonthlyReport {
     required this.comparisonLabel,
     required this.categories,
     required this.insights,
+    this.budgets = const [],
     this.projectedExpense,
   });
 
@@ -67,6 +83,9 @@ class MonthlyReport {
   final String comparisonLabel;
   final List<CategoryLine> categories;
   final List<Insight> insights;
+
+  /// Anggaran yang punya batas, diurut dari yang paling terpakai.
+  final List<BudgetUsage> budgets;
 
   /// Perkiraan pengeluaran akhir bulan; null bila bulan sudah lewat atau data
   /// terlalu sedikit untuk ditaksir.
@@ -158,6 +177,11 @@ MonthlyReport buildMonthlyReport({
     comparisonLabel: comparisonLabel,
     categories: categories,
     insights: insights.take(_maxInsights).toList(),
+    budgets: [
+      for (final b in budgets)
+        if ((b.budget ?? 0) > 0)
+          BudgetUsage(name: b.category.name, spent: b.spent, limit: b.budget!),
+    ]..sort((a, b) => b.percent.compareTo(a.percent)),
     projectedExpense: projected,
   );
 }

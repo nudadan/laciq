@@ -1,11 +1,13 @@
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/notification_sender.dart';
 import '../features/ads/ad_eligibility_service.dart';
 import '../features/review/review_prompt_service.dart';
 import '../features/ai/ai_extraction_service.dart';
+import '../features/ai/ai_report_service.dart';
 import '../features/agenda/agenda_reminder_service.dart';
 import '../features/budget/budget_notification_service.dart';
 import '../features/cloud_backup/cloud_backup_options.dart';
@@ -17,6 +19,7 @@ import '../features/security/lock_providers.dart' show keyValueStoreProvider;
 import '../features/subscription/subscription_plans.dart';
 import '../features/subscription/subscription_status.dart';
 import '../features/transactions/receipt_scanner.dart';
+import '../features/voice/voice_recognizer.dart';
 import '../features/trends/trend_settings.dart';
 import 'cash_flow.dart';
 import 'database.dart';
@@ -315,6 +318,12 @@ typedef BinarySharer = Future<void> Function({
 
 final binaryShareProvider = Provider<BinarySharer>((ref) => shareBinaryFile);
 
+/// Pengenal suara bawaan Android (input transaksi dengan suara, Premium).
+/// Provider terpisah agar tes memakai pengenal palsu tanpa mikrofon.
+final voiceRecognizerProvider = Provider<VoiceRecognizer>(
+  (ref) => SpeechToTextRecognizer(),
+);
+
 final reviewLauncherProvider = Provider<ReviewLauncher>(
   (ref) => InAppReviewLauncher(),
 );
@@ -362,6 +371,34 @@ final ultimateAvailableProvider = FutureProvider<bool>((ref) async {
 /// Ekstraksi AI struk (fitur Ultimate) — lihat backend/receipt-extraction-worker/.
 final aiExtractionServiceProvider = Provider<AiExtractionService>(
   (ref) => HttpAiExtractionService(ref.watch(subscriptionStatusProvider)),
+);
+
+/// Ringkasan laporan bulanan dengan AI (fitur Ultimate): hanya angka agregat
+/// yang dikirim, lihat ai_report_service.dart.
+final aiReportServiceProvider = Provider<AiReportService>(
+  (ref) => HttpAiReportService(ref.watch(subscriptionStatusProvider)),
+);
+
+/// Ringkasan AI yang sudah dibuat selama sesi, supaya membuka ulang halaman
+/// (atau berpindah bulan lalu kembali) tidak memakai kuota lagi. Kuncinya memuat
+/// total bulan itu: ada transaksi baru = ringkasan lama dianggap basi.
+class AiNarrativeCache extends Notifier<Map<String, AiNarrative>> {
+  @override
+  Map<String, AiNarrative> build() => const {};
+
+  void put(String key, AiNarrative value) => state = {...state, key: value};
+}
+
+final aiNarrativeCacheProvider =
+    NotifierProvider<AiNarrativeCache, Map<String, AiNarrative>>(
+      AiNarrativeCache.new,
+    );
+
+/// Pembuka tautan eksternal (mis. draf email "Laporkan"). Provider terpisah
+/// agar tes tidak menyentuh platform channel.
+final externalLinkLauncherProvider = Provider<Future<bool> Function(Uri)>(
+  (ref) =>
+      (uri) => launchUrl(uri),
 );
 
 /// Scan struk (OCR + foto tersimpan, fitur Premium) — lihat

@@ -31,7 +31,7 @@
 <main>
 
 <h1>Kebijakan Privasi LaciQ</h1>
-<p class="meta">Berlaku sejak 1 Oktober 2026 · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
+<p class="meta">Berlaku sejak 4 Oktober 2026 · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
 
 <p>LaciQ adalah aplikasi pencatat keuangan pribadi untuk Android (nama paket <code>com.hardanti.lacipintar</code>), dikembangkan oleh <strong>hardan-ti</strong> ("kami"). Sebelumnya aplikasi ini bernama DompetKu; paket dan kebijakan ini sama. Dokumen ini menjelaskan data apa yang diproses aplikasi, ke mana data itu pergi, dan pilihan yang Anda miliki.</p>
 
@@ -39,7 +39,7 @@
   <strong>Ringkasnya:</strong>
   <ul>
     <li>Data keuangan Anda (transaksi, dompet, anggaran, dan lainnya) disimpan <strong>di HP Anda</strong>. Kami tidak punya server yang menampung data itu dan tidak dapat melihatnya.</li>
-    <li>Data hanya keluar dari HP jika Anda memakai fitur tertentu: iklan (paket gratis), langganan, Backup Cloud ke Google Drive Anda sendiri, atau Ekstraksi Struk dengan AI (paket Ultimate).</li>
+    <li>Data hanya keluar dari HP jika Anda memakai fitur tertentu: iklan (paket gratis), langganan, Backup Cloud ke Google Drive Anda sendiri, Catat dengan Suara (Premium; pengenalan suara oleh layanan bawaan Android), atau fitur AI (paket Ultimate: Ekstraksi Struk dan Ringkasan Laporan Bulanan).</li>
     <li>Kami tidak menjual data Anda dan tidak memakai layanan analitik atau pelaporan crash pihak ketiga.</li>
   </ul>
 </div>
@@ -58,8 +58,9 @@
   <tr><th>Izin</th><th>Untuk apa</th></tr>
   <tr><td>Kamera</td><td>Memotret struk pada fitur Scan Struk. Teks struk dibaca di perangkat dengan ML Kit (pengenalan teks Google) tanpa mengirim foto ke mana pun.</td></tr>
   <tr><td>Biometrik</td><td>Membuka kunci aplikasi dengan sidik jari/wajah. Pencocokan dilakukan sepenuhnya oleh sistem Android; aplikasi tidak menerima atau menyimpan data biometrik Anda.</td></tr>
+  <tr><td>Mikrofon</td><td>Hanya dipakai saat Anda menekan tombol "Catat dengan Suara" (Premium), setelah Anda menyetujui penjelasan di dalam aplikasi. Izin diminta saat itu, bukan saat aplikasi dibuka. Lihat bagian 6b.</td></tr>
   <tr><td>Notifikasi</td><td>Pengingat lokal (agenda, transaksi berulang, pengingat backup). Dijadwalkan di HP, tidak lewat server.</td></tr>
-  <tr><td>Internet</td><td>Diperlukan untuk iklan, langganan, Backup Cloud, dan Ekstraksi Struk dengan AI. Pencatatan keuangan dasar tetap berjalan tanpa internet.</td></tr>
+  <tr><td>Internet</td><td>Diperlukan untuk iklan, langganan, Backup Cloud, serta fitur AI (Ekstraksi Struk dan Ringkasan Laporan Bulanan). Pencatatan keuangan dasar tetap berjalan tanpa internet.</td></tr>
   <tr><td>ID Iklan</td><td>Dipakai oleh layanan iklan Google pada paket gratis (lihat bagian 3).</td></tr>
 </table></div>
 
@@ -93,6 +94,25 @@
   <li>Cloudflare dan Google memproses data sebagai penyedia layanan menurut kebijakan masing-masing (<a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>, <a href="https://policies.google.com/privacy">Google</a>). Cloudflare dapat mencatat data teknis koneksi seperti alamat IP.</li>
   <li>Kami memakai Gemini API <strong>berbayar</strong>. Menurut <a href="https://ai.google.dev/gemini-api/terms">ketentuan Gemini API</a>, pada layanan berbayar Google tidak memakai teks yang dikirim untuk melatih atau memperbaiki produknya. Google dapat menyimpan data itu untuk jangka terbatas semata-mata untuk mendeteksi penyalahgunaan dan memenuhi kewajiban hukum.</li>
   <li>Teks struk dapat memuat nama toko, daftar barang, atau informasi lain yang tercetak di struk. Hindari memindai struk yang memuat data pribadi sensitif jika Anda tidak ingin data itu diproses.</li>
+</ul>
+
+<h2>6a. Ringkasan Laporan Bulanan dengan AI (Ultimate)</h2>
+<p>Laporan Bulanan (Premium) dihitung seluruhnya di HP Anda dan tidak mengirim data apa pun. Pelanggan Ultimate dapat, secara opsional, menekan tombol "Buat ringkasan AI" untuk mendapat rangkuman beberapa kalimat. Aplikasi meminta persetujuan Anda satu kali sebelum tombol itu pertama kali dipakai, terpisah dari persetujuan Ekstraksi Struk.</p>
+<ul>
+  <li><strong>Yang dikirim:</strong> angka bulan itu saja: total pemasukan dan pengeluaran, pengeluaran periode pembanding, taksiran pengeluaran akhir bulan, nama kategori (maksimal 6) beserta totalnya, dan persen pemakaian anggaran. Ditambah ID pengguna anonim RevenueCat untuk verifikasi langganan dan kuota (30 ringkasan per bulan dan 5 per hari).</li>
+  <li><strong>Yang tidak dikirim:</strong> catatan transaksi, nama toko, tanggal transaksi, nama dompet, foto struk, dan transaksi individual.</li>
+  <li>Server kami (Cloudflare Workers) meneruskan angka itu ke <strong>Google</strong> lewat Gemini API berbayar untuk dirangkai menjadi kalimat, seperti pada bagian 6. Kami tidak menyimpan angka maupun ringkasannya; yang tersimpan hanya penghitung pemakaian yang kedaluwarsa otomatis.</li>
+  <li>Ringkasan <strong>dibuat oleh AI dan bisa keliru</strong>. Isinya hanya gambaran dari angka Anda dan bukan nasihat keuangan, investasi, pajak, atau hukum. Server menolak ringkasan yang menyebut nominal yang tidak ada di data Anda.</li>
+  <li>Tombol "Laporkan" di bawah ringkasan membuka draf email ke <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a> berisi ringkasan itu. Email baru terkirim bila Anda sendiri menekan kirim.</li>
+</ul>
+
+<h2>6b. Catat dengan Suara (Premium)</h2>
+<p>Fitur ini opsional. Saat pertama kali dipakai, aplikasi menampilkan penjelasan dan meminta izin mikrofon setelah Anda menyetujuinya.</p>
+<ul>
+  <li>Suara Anda diubah menjadi teks oleh <strong>layanan pengenalan suara bawaan Android</strong> di HP Anda. LaciQ <strong>tidak merekam, menyimpan, atau mengirim audio</strong> ke server kami; aplikasi hanya menerima teks hasilnya dan memakainya untuk mengisi formulir transaksi, yang tetap Anda periksa dan simpan sendiri.</li>
+  <li>Aplikasi meminta pengenalan di perangkat bila tersedia. Bila HP Anda tidak punya model suara offline untuk bahasa Indonesia, Android dapat mengirim suara ke layanan pengenalan suara Google untuk dikenali, sesuai pengaturan suara HP Anda dan <a href="https://policies.google.com/privacy">Kebijakan Privasi Google</a>. Hal itu terjadi di luar kendali LaciQ.</li>
+  <li>Teks ucapan ditafsirkan di HP Anda tanpa AI dan tanpa jaringan. Tebakan kategori memakai nama kategori dan catatan transaksi lama Anda yang tersimpan di HP.</li>
+  <li>Mikrofon hanya aktif saat tombol mikrofon ditekan. Anda dapat mencabut izin kapan saja di Pengaturan Android &gt; Aplikasi &gt; LaciQ &gt; Izin.</li>
 </ul>
 
 <h2>7. Berbagi dan ekspor oleh Anda</h2>

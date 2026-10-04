@@ -7,3 +7,12 @@ const kAiExtractionUrl = String.fromEnvironment(
   'AI_EXTRACTION_URL',
   defaultValue: 'https://dompetku-api.hardan-ti.com/extract',
 );
+
+/// Alamat ringkasan laporan AI di Worker yang sama (`/extract` -> `/report-insight`).
+/// Kosong bila `AI_EXTRACTION_URL` dikosongkan atau tidak berakhiran `/extract`.
+String aiReportUrlFrom(String extractionUrl) =>
+    extractionUrl.endsWith('/extract')
+    ? '${extractionUrl.substring(0, extractionUrl.length - '/extract'.length)}/report-insight'
+    : '';
+
+final kAiReportUrl = aiReportUrlFrom(kAiExtractionUrl);

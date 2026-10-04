@@ -19,6 +19,8 @@ import '../ledgers/ledgers_page.dart' show RecordingInLedgerBanner;
 import '../security/lock_providers.dart' show keyValueStoreProvider;
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
+import '../voice/voice_entry_sheet.dart';
+import '../voice/voice_parser.dart';
 import 'receipt_scanner.dart' show ScannedReceipt;
 import 'receipt_storage.dart' show deleteReceiptFile;
 import 'receipt_viewer_page.dart';
@@ -259,6 +261,70 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
       _receiptPath = scanned.photoPath;
     });
     await _enhanceWithAi(scanned);
+  }
+
+  /// Catat dengan suara (fitur Premium): pengenalan suara bawaan Android ->
+  /// teks -> penafsir lokal (tanpa AI) -> mengisi formulir. Pengguna tetap
+  /// memeriksa dan menekan Simpan sendiri.
+  Future<void> _voiceEntry() async {
+    final premium = ref.read(isPremiumProvider).value ?? false;
+    if (!premium) {
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()));
+      return;
+    }
+    if (!await ensureVoiceConsent(context, ref.read(keyValueStoreProvider)) ||
+        !mounted) {
+      return;
+    }
+
+    // Langsung ke database: provider autoDispose tanpa pendengar bisa
+    // dibuang saat masih memuat.
+    final db = ref.read(databaseProvider);
+    final ledgerId = ref.read(activeLedgerIdProvider);
+    final byType = <TxType, List<Category>>{
+      for (final t in [TxType.expense, TxType.income])
+        t: await db.watchCategories(t, ledgerId: ledgerId).first,
+    };
+    final names = {
+      for (final list in byType.values)
+        for (final c in list) c.id: c.name,
+    };
+    // Catatan lama (terbaru dulu) mengajari tebakan kategori.
+    final past = await db.getTransactions(
+      from: DateTime.now().subtract(const Duration(days: 180)),
+      ledgerId: ledgerId,
+    );
+    final history = [
+      for (final v in past.reversed.take(400))
+        if (v.tx.type != TxType.transfer &&
+            v.tx.categoryId != null &&
+            (v.tx.note ?? '').trim().isNotEmpty)
+          VoiceHistoryItem(note: v.tx.note!, categoryId: v.tx.categoryId!),
+    ];
+    if (!mounted) return;
+
+    final entry = await showVoiceEntrySheet(
+      context,
+      categoriesFor: (type) => [
+        for (final c in byType[type] ?? const <Category>[])
+          VoiceCategory(id: c.id, name: c.name),
+      ],
+      history: history,
+      categoryName: (id) => names[id] ?? '',
+    );
+    if (entry == null || !mounted) return;
+    setState(() {
+      if (entry.type != _type) {
+        _type = entry.type;
+        _categoryId = null;
+      }
+      if (entry.amount != null) _amountCtrl.text = groupedNumber(entry.amount!);
+      if (entry.note.isNotEmpty) _noteCtrl.text = entry.note;
+      _date = entry.date;
+      if (entry.categoryId != null) _categoryId = entry.categoryId;
+    });
   }
 
   static const _aiConsentKey = 'ai_extraction_consent';
@@ -644,6 +710,15 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
                 '— boleh disesuaikan untuk pembayaran sebagian.',
               ),
             if (mode == _Mode.create) ...[
+              FieldTile(
+                leading: Icons.mic_rounded,
+                title: 'Catat dengan Suara',
+                subtitle: !(ref.watch(isPremiumProvider).value ?? false)
+                    ? 'Fitur Premium'
+                    : 'Ucapkan, mis. "makan siang dua puluh lima ribu"',
+                onTap: _voiceEntry,
+              ),
+              const SizedBox(height: 8),
               FieldTile(
                 leading: Icons.document_scanner_rounded,
                 title: 'Scan Struk',

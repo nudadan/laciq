@@ -6,7 +6,9 @@ import 'package:dompet_pintar/app.dart';
 import 'package:dompet_pintar/data/database.dart';
 import 'package:dompet_pintar/data/providers.dart';
 import 'package:dompet_pintar/core/notification_sender.dart';
+import 'package:dompet_pintar/data/insights.dart';
 import 'package:dompet_pintar/features/ai/ai_extraction_service.dart';
+import 'package:dompet_pintar/features/ai/ai_report_service.dart';
 import 'package:dompet_pintar/features/cloud_backup/cloud_backup_service.dart';
 import 'package:dompet_pintar/features/onboarding/onboarding_providers.dart';
 import 'package:dompet_pintar/features/review/review_prompt_service.dart';
@@ -15,6 +17,7 @@ import 'package:dompet_pintar/features/security/lock_providers.dart';
 import 'package:dompet_pintar/features/subscription/subscription_plans.dart';
 import 'package:dompet_pintar/features/subscription/subscription_status.dart';
 import 'package:dompet_pintar/features/transactions/receipt_scanner.dart';
+import 'package:dompet_pintar/features/voice/voice_recognizer.dart';
 import 'package:image_picker/image_picker.dart' show ImageSource;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -301,6 +304,29 @@ class FakeAiExtractionService implements AiExtractionService {
   }
 }
 
+/// Ringkasan laporan AI palsu: mengembalikan [result] tanpa jaringan.
+class FakeAiReportService implements AiReportService {
+  FakeAiReportService({
+    this.result = const AiNarrative(
+      summary: 'Ringkasan palsu bulan ini.',
+      remaining: 20,
+    ),
+  });
+
+  AiNarrative? result;
+  bool quotaExceeded = false;
+  int calls = 0;
+  MonthlyReport? lastReport;
+
+  @override
+  Future<AiNarrative?> narrate(MonthlyReport report) async {
+    calls++;
+    lastReport = report;
+    if (quotaExceeded) throw const AiQuotaExceeded();
+    return result;
+  }
+}
+
 /// Peluncur ulasan palsu: tidak menyentuh Play Store, hanya mencatat panggilan.
 class FakeReviewLauncher implements ReviewLauncher {
   FakeReviewLauncher({this.available = true});
@@ -316,6 +342,33 @@ class FakeReviewLauncher implements ReviewLauncher {
   Future<void> openStoreListing() async => listingOpens++;
 }
 
+/// Pengenal suara palsu: mengirim [updates] lalu (bila ada) [failure], tanpa
+/// menyentuh mikrofon atau plugin `speech_to_text`.
+class FakeVoiceRecognizer implements VoiceRecognizer {
+  FakeVoiceRecognizer({this.updates = const [], this.failure});
+
+  List<VoiceUpdate> updates;
+  VoiceFailure? failure;
+  int listens = 0;
+  int stops = 0;
+  int cancels = 0;
+
+  @override
+  Stream<VoiceUpdate> listen({String localeId = 'id_ID'}) async* {
+    listens++;
+    for (final u in updates) {
+      yield u;
+    }
+    if (failure != null) throw VoiceException(failure!);
+  }
+
+  @override
+  Future<void> stop() async => stops++;
+
+  @override
+  Future<void> cancel() async => cancels++;
+}
+
 class AppHarness {
   AppHarness({
     required this.db,
@@ -327,6 +380,8 @@ class AppHarness {
     required this.receiptScanner,
     required this.aiExtraction,
     required this.review,
+    required this.voice,
+    required this.aiReport,
   });
   final AppDatabase db;
   final MemoryKeyValueStore store;
@@ -337,6 +392,8 @@ class AppHarness {
   final FakeReceiptScanner receiptScanner;
   final FakeAiExtractionService aiExtraction;
   final FakeReviewLauncher review;
+  final FakeVoiceRecognizer voice;
+  final FakeAiReportService aiReport;
   AppLockService get lock => AppLockService(store);
 }
 
@@ -354,6 +411,8 @@ void appTest(
   FakeCloudBackupService? cloudBackup,
   FakeReceiptScanner? receiptScanner,
   FakeAiExtractionService? aiExtraction,
+  FakeVoiceRecognizer? voice,
+  FakeAiReportService? aiReport,
   List<Override> extraOverrides = const [],
   Duration grace = const Duration(seconds: 30),
   // Kebanyakan tes tidak menguji alur onboarding itu sendiri, jadi lewati
@@ -376,6 +435,8 @@ void appTest(
     final scanner = receiptScanner ?? FakeReceiptScanner();
     final ai = aiExtraction ?? FakeAiExtractionService();
     final reviewLauncher = FakeReviewLauncher();
+    final voiceRecognizer = voice ?? FakeVoiceRecognizer();
+    final aiReportService = aiReport ?? FakeAiReportService();
     if (seenOnboarding) await store.write(onboardingSeenKey, '1');
     if (preset != null) await preset(AppLockService(store));
     // Drift butuh async sungguhan: jalankan di luar jam palsu.
@@ -394,6 +455,8 @@ void appTest(
           receiptScannerProvider.overrideWithValue(scanner),
           aiExtractionServiceProvider.overrideWithValue(ai),
           reviewLauncherProvider.overrideWithValue(reviewLauncher),
+          voiceRecognizerProvider.overrideWithValue(voiceRecognizer),
+          aiReportServiceProvider.overrideWithValue(aiReportService),
           ...extraOverrides,
         ],
         child: const DompetPintarApp(),
@@ -413,6 +476,8 @@ void appTest(
           receiptScanner: scanner,
           aiExtraction: ai,
           review: reviewLauncher,
+          voice: voiceRecognizer,
+          aiReport: aiReportService,
         ),
       );
     } finally {

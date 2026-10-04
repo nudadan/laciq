@@ -226,9 +226,10 @@ void main() {
         await settle(tester);
 
         expect(find.text('Ingatkan saya'), findsOneWidget);
-        // 2: tile "Ingatkan saya" ini DAN tile "Scan Struk" (selalu tampil di
-        // mode create) sama-sama premium-gated dan berbagi subtitle ini.
-        expect(find.text('Fitur Premium'), findsNWidgets(2));
+        // 3: tile "Ingatkan saya" ini, "Scan Struk", dan "Catat dengan Suara"
+        // (dua terakhir selalu tampil di mode create) sama-sama premium-gated
+        // dan berbagi subtitle ini.
+        expect(find.text('Fitur Premium'), findsNWidgets(3));
         expect(find.byType(SwitchListTile), findsNothing);
       },
       subscription: FakeSubscriptionStatus(),

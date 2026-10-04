@@ -14,6 +14,11 @@ MONTHLY_LIMIT = "300"
 # satu ID pengguna bocor.
 DAILY_LIMIT = "15"
 
+# Ringkasan laporan bulanan dengan AI (/report-insight), kuota TERPISAH dari scan.
+# Biaya per ringkasan kecil (perkiraan Rp30), jadi batasnya longgar tetapi tetap ada.
+REPORT_MONTHLY_LIMIT = "30"
+REPORT_DAILY_LIMIT = "5"
+
 # Penyedia dan model AI. Penyedia: "gemini" (satu-satunya yang didukung).
 # ID model SENGAJA di sini, bukan di kode, supaya ganti model tidak perlu rilis.
 # Pilih model lewat evaluasi (eval/), lihat docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md B3.

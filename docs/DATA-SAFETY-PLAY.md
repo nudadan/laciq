@@ -80,3 +80,11 @@ nginx (`location = /`, lihat `docs/situs-beranda/`). Bila suatu saat ingin menam
 
 ## Catatan 2026-10-04: ekspor Excel dan Laporan Bulanan
 Keduanya dihitung dan dibuat sepenuhnya di perangkat (tanpa jaringan, tanpa izin baru, tanpa SDK baru). Berkas Excel baru keluar dari HP bila pengguna membagikannya sendiri lewat lembar bagikan Android, sama seperti CSV dan backup berkas. **Tidak ada perubahan deklarasi Data Safety.** Kebijakan privasi bagian 7 hanya ditambah penyebutan ekspor Excel.
+
+## Pembaruan 2026-10-04 (tahap 3 dan 4): input suara dan ringkasan laporan AI
+**PERIKSA ULANG di Play Console sebelum merilis.** Poin di bawah adalah pemahaman saya, bukan keputusan Google.
+
+1. **Ringkasan laporan AI (Ultimate)** mengirim angka agregat (total, nama kategori beserta total, persen anggaran) ke Worker lalu Gemini, sama jalurnya dengan Ekstraksi Struk. Deklarasi yang sudah ada mencakupnya: **Info keuangan > Info keuangan lainnya**, dikumpulkan, dibagikan = ya (penyedia AI sebagai pemroses), opsional, tujuan Fungsi aplikasi. Tidak ada tipe data baru. Kebijakan privasi bagian 6a diperbarui.
+2. **Input suara (Premium)**: aplikasi hanya meminta izin `RECORD_AUDIO` dan menerima TEKS dari layanan pengenalan suara Android; audio tidak diterima, disimpan, atau dikirim oleh aplikasi/server kita. Sikap konservatif yang disarankan: **jawab "tidak dikumpulkan" untuk Audio (Rekaman suara atau bunyi)** karena diproses oleh layanan sistem pada perangkat, dan jelaskan di kebijakan privasi (bagian 6b, sudah ditulis) bahwa Android dapat memakai layanan Google bila model offline tidak ada. Bila ragu, deklarasikan Audio > "Rekaman suara" sebagai **dikumpulkan = tidak** terlebih dahulu dan baca panduan resmi Google tentang data yang diproses di perangkat (data yang hanya diproses di perangkat dan tidak dikirim keluar tidak perlu dideklarasikan).
+3. **Izin baru di manifest: `RECORD_AUDIO`.** Cek halaman Konten aplikasi/Izin apakah Play meminta deklarasi tambahan. Izin ini tidak termasuk izin sensitif yang dibatasi (SMS, log panggilan, lokasi latar belakang).
+4. Jangan menulis "tidak ada data yang dikirim" secara mutlak di listing untuk fitur suara; gunakan kalimat dari kebijakan privasi.

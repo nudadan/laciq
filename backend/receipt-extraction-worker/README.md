@@ -12,6 +12,15 @@ Penyedia: **Google Gemini** (paid tier); Claude dipertimbangkan lalu tidak dipak
 `total` (Rupiah bulat, 1–1.000.000.000) dan `date` (`YYYY-MM-DD`, maks 5 tahun ke belakang dan 1 hari ke
 depan) divalidasi di server; nilai yang tidak wajar dikirim sebagai `null`.
 
+`POST /report-insight` (2026-10-04) — body `{appUserId, report:{month, daysElapsed, daysInMonth, income, expense,
+previousExpense, projectedExpense, categories:[{name,total,previousTotal}] (maks 8), budgets:[{name,percent}] (maks 6)}}`
+→ `200 {summary, remaining}` · `403 not_ultimate` · `429 quota_exceeded` / `daily_limit_exceeded` / `rate_limited` ·
+`502 narration_failed`. Hanya ANGKA agregat yang diterima (tanpa catatan/toko/tanggal/foto). Kuota terpisah dari scan
+(`REPORT_MONTHLY_LIMIT` 30, `REPORT_DAILY_LIMIT` 5; kunci KV `report-usage:`/`report-usage-day:`) dan hanya dihitung
+bila berhasil. Keluaran model dibersihkan dan DITOLAK bila memuat tautan atau nominal Rupiah yang tidak ada di data
+(`validateNarrative` di `report_prompt.ts`); model cadangan dicoba lalu 502. Log hanya `ai_usage kind=report ...`
+(jumlah token) dan `ai_report_result chars=... categories=...`, tanpa isi. **Belum di-deploy.**
+
 ## Deploy (sekali, oleh pemilik)
 
 Prasyarat untuk Gemini: kunci API dari **project Google Cloud terpisah** (bukan project OAuth aplikasi)

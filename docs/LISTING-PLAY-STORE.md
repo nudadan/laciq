@@ -57,10 +57,12 @@ FITUR PREMIUM (BERLANGGANAN)
 • Scan struk: foto struk dibaca langsung di HP Anda
 • Ekspor laporan ke Excel (.xlsx): ringkasan, per kategori, per bulan, per dompet
 • Laporan Bulanan: sorotan otomatis dari catatan Anda, dihitung di HP
+• Catat dengan Suara: ucapkan "makan siang dua puluh lima ribu", formulir terisi. Pengenalan suara oleh layanan bawaan Android; LaciQ tidak menyimpan rekaman
 
 FITUR ULTIMATE (BERLANGGANAN)
 • Semua fitur Premium
 • Multi buku kas: pisahkan pembukuan pribadi dan bisnis, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri (sampai 5 buku)
+• Ringkasan AI untuk Laporan Bulanan: rangkuman beberapa kalimat dari angka bulan ini (hanya total dan nama kategori yang dikirim, bukan catatan atau foto). Dibuat AI dan bisa keliru; bukan nasihat keuangan
 • Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis (300 scan per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke server AI kami untuk diproses, dan tidak disimpan
 
 Paket gratis menampilkan iklan banner dan sudah mencakup pencatatan, dompet, anggaran, target tabungan, serta sebagian fitur Agenda dan Analisa Tren. Langganan dapat dibatalkan kapan saja lewat Google Play.

@@ -204,6 +204,10 @@ class _TierCard extends StatelessWidget {
       'Laporan Bulanan: sorotan otomatis, perbandingan bulan lalu, dan '
           'peringatan anggaran',
     ),
+    (
+      Icons.mic_rounded,
+      'Catat dengan suara: ucapkan transaksi, formulir terisi otomatis',
+    ),
   ];
 
   static const _ultimateBenefits = [
@@ -217,6 +221,10 @@ class _TierCard extends StatelessWidget {
       Icons.auto_awesome_rounded,
       'Ekstraksi struk dengan AI: nama toko, kategori, total, dan tanggal '
           'terisi otomatis (300 scan/bulan)',
+    ),
+    (
+      Icons.auto_awesome_motion_rounded,
+      'Ringkasan AI untuk Laporan Bulanan (30 ringkasan/bulan)',
     ),
   ];
 
