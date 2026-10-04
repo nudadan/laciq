@@ -172,6 +172,49 @@ void main() {
       expect(cat('beli baju 150 ribu'), 'belanja');
     });
 
+    test('contoh nyata dari uji di tablet: "Beli Martabak 35 ribu"', () {
+      final e = _p('Beli Martabak 35 ribu', categories: _cats);
+      expect(e.amount, 35000);
+      expect(e.note, 'Beli martabak');
+      expect(e.categoryId, 'makan');
+    });
+
+    test('makanan, merek, dan transportasi umum dikenali', () {
+      String? cat(String s) => _p(s, categories: _cats).categoryId;
+      for (final s in [
+        'sate ayam 30 ribu',
+        'bakso 15 ribu',
+        'beli gorengan 10 ribu',
+        'es teh manis 5 ribu',
+        'gofood 45 ribu',
+      ]) {
+        expect(cat(s), 'makan', reason: s);
+      }
+      for (final s in [
+        'isi pertalite 100 ribu',
+        'naik grab 25 ribu',
+        'bayar tol 20 ribu',
+        'tiket kereta 150 ribu',
+      ]) {
+        expect(cat(s), 'transport', reason: s);
+      }
+      expect(cat('beli kuota 60 ribu'), 'tagihan');
+      expect(cat('belanja di indomaret 80 ribu'), 'belanja');
+      expect(cat('beli sepatu 300 ribu'), 'belanja');
+    });
+
+    test('urutan ucapan menentukan: kata kunci pertama menang', () {
+      // "langganan internet" tidak boleh jatuh ke Hiburan.
+      expect(
+        _p('bayar internet 300 ribu', categories: _cats).categoryId,
+        'tagihan',
+      );
+      expect(
+        _p('rumah sakit 500 ribu', categories: _cats).categoryId,
+        'kesehatan',
+      );
+    });
+
     test('"beli" saja tidak menentukan kategori', () {
       expect(
         _p('beli bensin 50 ribu', categories: _cats).categoryId,
