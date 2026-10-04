@@ -88,7 +88,17 @@ const _slides = [
         Icons.document_scanner_rounded,
         'Scan struk',
         'Foto struk dibaca di HP Anda: nominal, toko, dan tanggal terisi '
-            'otomatis, dan foto struk tersimpan bersama transaksi.',
+            'otomatis. Foto tersimpan bersama transaksi dan tampil sebagai '
+            'miniatur yang bisa dibuka kembali.',
+        _Plan.premium,
+      ),
+      _Feature(
+        Icons.mic_rounded,
+        'Catat dengan suara',
+        'Ucapkan, mis. "makan siang dua puluh lima ribu": jenis, nominal, '
+            'catatan, tanggal, dan kategori terisi di formulir, tinggal Anda '
+            'periksa lalu simpan. Pengenalan suara memakai layanan bawaan '
+            'Android; LaciQ tidak menyimpan rekaman.',
         _Plan.premium,
       ),
     ],
@@ -121,6 +131,22 @@ const _slides = [
         'Target tabungan',
         'Dana darurat, liburan, atau HP baru: pantau progresnya hingga '
             'tercapai.',
+      ),
+      _Feature(
+        Icons.summarize_rounded,
+        'Laporan Bulanan',
+        'Sorotan otomatis tiap bulan: naik atau turunnya pengeluaran '
+            'dibanding bulan lalu, kategori terbesar, anggaran yang hampir '
+            'habis, dan taksiran akhir bulan. Dihitung di HP Anda. Ada di '
+            'menu Lainnya.',
+        _Plan.premium,
+      ),
+      _Feature(
+        Icons.grid_on_rounded,
+        'Ekspor laporan ke Excel',
+        'Berkas .xlsx berisi ringkasan, transaksi, serta rekap per kategori, '
+            'bulan, dan dompet. Ada di Pengaturan > Data.',
+        _Plan.premium,
       ),
       _Feature(
         Icons.file_download_rounded,
@@ -196,7 +222,7 @@ const _slides = [
   _Slide(
     Icons.workspace_premium_rounded,
     'Ultimate untuk pembukuan serius',
-    'Semua fitur Premium, ditambah dua fitur khusus.',
+    'Semua fitur Premium, ditambah tiga fitur khusus.',
     features: [
       _Feature(
         Icons.menu_book_rounded,
@@ -214,6 +240,15 @@ const _slides = [
             'per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke '
             'server AI dan tidak disimpan. Anda diminta menyetujuinya '
             'sebelum pertama kali dipakai.',
+        _Plan.ultimate,
+      ),
+      _Feature(
+        Icons.auto_awesome_motion_rounded,
+        'Ringkasan AI untuk Laporan Bulanan',
+        'Rangkuman beberapa kalimat dari angka bulan ini (30 per bulan). '
+            'Hanya total dan nama kategori yang dikirim, bukan catatan atau '
+            'foto. Dibuat AI dan bisa keliru; Anda bisa melaporkannya. Anda '
+            'diminta menyetujuinya sebelum pertama kali dipakai.',
         _Plan.ultimate,
       ),
     ],
@@ -240,12 +275,14 @@ const _slides = [
           'Proyeksi bulanan dan simulasi arus kas',
           'Utang dan Piutang beserta cicilan',
           'Scan struk dengan foto tersimpan, pengingat transaksi berulang',
+          'Catat dengan suara, Laporan Bulanan, dan ekspor Excel',
         ],
       ),
       _PlanCard('Ultimate', 'Untuk yang mengelola lebih dari satu pembukuan.', [
         'Semua fitur Premium',
         'Multi buku kas, sampai 5 buku',
         'Scan struk dengan AI: toko, kategori, total, dan tanggal',
+        'Ringkasan AI untuk Laporan Bulanan',
       ]),
     ],
     footer:

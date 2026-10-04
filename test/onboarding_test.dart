@@ -52,15 +52,25 @@ void main() {
     // Halaman 1: fitur dasar dan fitur Premium berlabel.
     expect(find.text('Banyak dompet'), findsOneWidget);
     expect(find.text('Scan struk'), findsOneWidget);
+    expect(find.text('Catat dengan suara'), findsOneWidget);
     expect(find.text('Premium'), findsWidgets);
 
+    // Halaman 2: Laporan Bulanan dan ekspor Excel.
+    await tester.tap(find.text('Lanjut'));
+    await settle(tester);
+    expect(find.text('Laporan Bulanan'), findsOneWidget);
+    expect(find.text('Ekspor laporan ke Excel'), findsOneWidget);
+    expect(find.text('Ekspor CSV'), findsOneWidget);
+
     // Halaman Ultimate: kedua fitur khusus berlabel Ultimate.
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 3; i++) {
       await tester.tap(find.text('Lanjut'));
       await settle(tester);
     }
     expect(find.text('Multi buku kas'), findsOneWidget);
     expect(find.text('Scan struk dengan AI'), findsOneWidget);
+    expect(find.text('Ringkasan AI untuk Laporan Bulanan'), findsOneWidget);
+    expect(find.textContaining('tiga fitur khusus'), findsOneWidget);
     expect(find.text('Ultimate'), findsWidgets);
 
     // Halaman paket: perbandingan Gratis, Premium, Ultimate.
