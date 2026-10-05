@@ -173,6 +173,10 @@ section{padding:88px 0}
 .show-img{display:flex;justify-content:center}
 .show-img .phone{position:relative;width:290px;transform:none}
 .show-img .phone.tilt{transform:rotate(-3deg)}
+.show-img.duo{gap:18px;align-items:flex-start}
+.show-img.duo .phone{width:232px}
+.show-img.duo .phone+.phone{margin-top:40px}
+@media(max-width:560px){.show-img.duo{gap:10px}.show-img.duo .phone{width:calc(50vw - 30px);max-width:232px}.show-img.duo .phone+.phone{margin-top:24px}}
 .show-text h3{font-size:clamp(26px,3.4vw,36px);margin:14px 0 16px}
 .show-text p{color:var(--muted)}
 .ticks{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px}
@@ -618,7 +622,25 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
         </div>
       </div>
     </div>
-    <div class="neg reveal"><svg><use href="#i-x"/></svg><span><b>Tidak ada akun LaciQ dan tidak ada server kami yang menyimpan transaksi Anda.</b> Paket gratis menampilkan iklan lewat Google AdMob; rincian lengkapnya ada di <a href="/privacy">Kebijakan Privasi</a>.</span></div>
+
+    <div class="show" style="margin-top:56px;margin-bottom:0">
+      <div class="show-img duo reveal">
+        <div class="phone"><img src="/img/persetujuan-suara.webp" alt="Dialog penjelasan Catat dengan suara: suara diubah menjadi teks oleh layanan bawaan Android dan tidak direkam LaciQ" width="560" height="1131" loading="lazy"></div>
+        <div class="phone"><img src="/img/persetujuan-ai.webp" alt="Dialog persetujuan ringkasan AI: daftar data yang dikirim dan yang tidak dikirim" width="560" height="1131" loading="lazy"></div>
+      </div>
+      <div class="show-text reveal">
+        <span class="badge b-free" style="margin:0">Anda yang memutuskan</span>
+        <h3>Diberi tahu dulu sebelum data apa pun diproses</h3>
+        <p>Fitur yang menyentuh suara atau memakai AI selalu meminta persetujuan Anda lebih dulu, dengan bahasa yang jelas tentang apa yang terjadi.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Catat dengan suara: penjelasan dan izin mikrofon baru muncul saat pertama dipakai</li>
+          <li><svg><use href="#i-check"/></svg>Ringkasan AI: daftar yang dikirim dan yang tidak dikirim, sebelum Anda setuju</li>
+          <li><svg><use href="#i-check"/></svg>Menolak tidak menghilangkan fitur lain; laporan bulanan tetap jalan di HP</li>
+          <li><svg><use href="#i-check"/></svg>Izin mikrofon bisa dicabut kapan saja di Pengaturan Android</li>
+        </ul>
+      </div>
+    </div>
+    <div class="neg reveal" style="margin-top:56px"><svg><use href="#i-x"/></svg><span><b>Tidak ada akun LaciQ dan tidak ada server kami yang menyimpan transaksi Anda.</b> Paket gratis menampilkan iklan lewat Google AdMob; rincian lengkapnya ada di <a href="/privacy">Kebijakan Privasi</a>.</span></div>
   </div>
 </section>
 
