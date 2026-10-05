@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LaciQ: Catatan Keuangan tanpa akun, data tetap di HP</title>
-<meta name="description" content="LaciQ adalah aplikasi pencatat keuangan pribadi dan usaha untuk Android. Tanpa akun, data tersimpan di HP Anda. Anggaran, target tabungan, utang piutang, scan struk dengan AI, dan multi buku kas.">
+<meta name="description" content="LaciQ adalah aplikasi pencatat keuangan pribadi dan usaha untuk Android. Tanpa akun, data tersimpan di HP Anda. Anggaran, target tabungan, utang piutang, catat dengan suara, laporan bulanan, ekspor Excel, scan struk dengan AI, dan multi buku kas.">
 <meta name="theme-color" content="#0b0f1e">
 <link rel="canonical" href="https://laciq.solusimandiri.id/">
 <link rel="icon" type="image/png" href="/img/favicon.png">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LaciQ">
 <meta property="og:title" content="LaciQ: Catatan Keuangan tanpa akun, data tetap di HP">
-<meta property="og:description" content="Catat pemasukan dan pengeluaran, atur anggaran, scan struk dengan AI, pisahkan keuangan pribadi dan usaha. Tanpa akun.">
+<meta property="og:description" content="Catat pemasukan dan pengeluaran dengan suara atau scan struk, atur anggaran, lihat laporan bulanan, pisahkan keuangan pribadi dan usaha. Tanpa akun.">
 <meta property="og:url" content="https://laciq.solusimandiri.id/">
 <meta property="og:image" content="https://laciq.solusimandiri.id/img/og.jpg">
 <meta property="og:locale" content="id_ID">
@@ -29,11 +29,24 @@
   "inLanguage": "id",
   "url": "https://laciq.solusimandiri.id/",
   "description": "Aplikasi pencatat keuangan pribadi dan usaha untuk Android. Tanpa akun, data tersimpan di HP.",
+  "featureList": [
+    "Catat pemasukan, pengeluaran, dan transfer antar dompet",
+    "Catat transaksi dengan suara (Premium)",
+    "Anggaran bulanan dengan pemberitahuan",
+    "Laporan Bulanan dengan sorotan otomatis (Premium)",
+    "Ekspor laporan ke Excel .xlsx dan CSV",
+    "Scan struk, dengan AI untuk pelanggan Ultimate",
+    "Ringkasan AI untuk Laporan Bulanan (Ultimate)",
+    "Multi buku kas untuk keuangan pribadi dan usaha (Ultimate)",
+    "Backup Cloud terenkripsi ke Google Drive pengguna (Premium)"
+  ],
   "publisher": {"@type": "Organization", "name": "hardan-ti", "email": "support@hardan-ti.com"},
   "offers": [
     {"@type": "Offer", "name": "Gratis", "price": "0", "priceCurrency": "IDR"},
     {"@type": "Offer", "name": "Premium bulanan", "price": "7500", "priceCurrency": "IDR"},
-    {"@type": "Offer", "name": "Ultimate bulanan", "price": "12500", "priceCurrency": "IDR"}
+    {"@type": "Offer", "name": "Premium tahunan", "price": "75000", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Ultimate bulanan", "price": "12500", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Ultimate tahunan", "price": "125000", "priceCurrency": "IDR"}
   ]
 }
 </script>
@@ -295,6 +308,9 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
     <symbol id="i-text" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M5 6h14M5 11h14M5 16h9"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM18.5 16l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
     <symbol id="i-save" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5 4h11l3 3v13H5zM8 4v5h7M8 20v-6h8v6"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M4 9.5h16M4 14.5h16M10 4v16"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M6 3.5h9l3 3v14H6zM9 8h3M9 11.5h6M9 15h6"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3.6v16.8c0 .6.7 1 1.2.7l14-8.4c.5-.3.5-1.1 0-1.4l-14-8.4C5.7 2.6 5 3 5 3.6z"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 48 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5" d="M2 12h38"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M34 5l9 7-9 7"/></symbol>
   </defs>
@@ -370,8 +386,11 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
       <article class="card reveal"><div class="ico"><svg><use href="#i-cal"/></svg></div><h3>Agenda tagihan<span class="badge b-free">Gratis</span><span class="badge b-pro">Premium</span></h3><p>Servis kendaraan, tagihan tahunan, biaya sekolah. Gratis 3 item aktif; Premium tanpa batas dan dengan pengingat.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-hand"/></svg></div><h3>Utang &amp; piutang<span class="badge b-pro">Premium</span></h3><p>Catat siapa berutang ke siapa, lunas sebagian atau penuh, lengkap dengan riwayat cicilannya.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-trend"/></svg></div><h3>Analisa tren &amp; proyeksi<span class="badge b-pro">Premium</span></h3><p>Lihat pengeluaran per kategori 6 dan 12 bulan, serta simulasi apakah dana cukup sampai akhir bulan.</p></article>
-      <article class="card reveal"><div class="ico"><svg><use href="#i-scan"/></svg></div><h3>Scan struk<span class="badge b-pro">Premium</span><span class="badge b-ult">Ultimate: AI</span></h3><p>Foto struk dibaca langsung di HP Anda. Dengan AI (Ultimate), nama toko, kategori, total, dan tanggal terisi otomatis.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-scan"/></svg></div><h3>Scan struk<span class="badge b-pro">Premium</span><span class="badge b-ult">Ultimate: AI</span></h3><p>Foto struk dibaca langsung di HP Anda dan tampil sebagai miniatur di daftar transaksi. Dengan AI (Ultimate), nama toko, kategori, total, dan tanggal terisi otomatis.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-book"/></svg></div><h3>Multi buku kas<span class="badge b-ult">Ultimate</span></h3><p>Pisahkan pembukuan pribadi dan usaha, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri. Sampai 5 buku.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-mic"/></svg></div><h3>Catat dengan suara<span class="badge b-pro">Premium</span></h3><p>Ucapkan, mis. &quot;makan siang dua puluh lima ribu&quot;. Jenis, nominal, tanggal, dan kategori terisi di formulir, tinggal Anda periksa lalu simpan. Pengenalan suara memakai layanan bawaan Android.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-report"/></svg></div><h3>Laporan Bulanan<span class="badge b-pro">Premium</span><span class="badge b-ult">Ultimate: ringkasan AI</span></h3><p>Sorotan otomatis tiap bulan: naik atau turunnya pengeluaran dibanding bulan lalu, kategori terbesar, dan anggaran yang hampir habis. Dihitung di HP Anda. Ultimate menambah ringkasan AI beberapa kalimat.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-sheet"/></svg></div><h3>Ekspor ke Excel<span class="badge b-free">CSV gratis</span><span class="badge b-pro">Excel Premium</span></h3><p>Berkas .xlsx rapi berisi ringkasan, daftar transaksi, serta rekap per kategori, bulan, dan dompet. Dibuat di HP Anda dan dibagikan sendiri. CSV tetap tersedia untuk semua paket.</p></article>
     </div>
   </div>
 </section>
@@ -435,7 +454,8 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
         <p>Grafik pengeluaran per kategori membantu menemukan kebocoran dengan cepat, tanpa spreadsheet dan tanpa rumus.</p>
         <ul class="ticks">
           <li><svg><use href="#i-check"/></svg>Grafik donat dan daftar kategori</li>
-          <li><svg><use href="#i-check"/></svg>Ekspor ke CSV untuk Excel atau Google Sheets</li>
+          <li><svg><use href="#i-check"/></svg>Ekspor ke CSV, atau laporan Excel (.xlsx) berformat rapi (Premium)</li>
+          <li><svg><use href="#i-check"/></svg>Laporan Bulanan dengan sorotan otomatis (Premium)</li>
         </ul>
       </div>
     </div>
@@ -517,7 +537,12 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
         <div class="node">
           <div class="ico"><svg><use href="#i-spark"/></svg></div>
           <h3>Server AI (hanya Ultimate)</h3>
-          <p>Hanya teks hasil scan struk, bukan fotonya, dan hanya setelah Anda setuju. Tidak disimpan di server.</p>
+          <p>Hanya teks hasil scan struk (bukan fotonya), atau angka total dan nama kategori untuk ringkasan Laporan Bulanan (bukan catatan, toko, atau tanggal), dan hanya setelah Anda setuju. Tidak disimpan di server.</p>
+        </div>
+        <div class="node">
+          <div class="ico"><svg><use href="#i-mic"/></svg></div>
+          <h3>Layanan suara Android (Catat dengan suara)</h3>
+          <p>Suara diubah menjadi teks oleh layanan pengenalan suara bawaan Android. LaciQ tidak merekam, menyimpan, atau mengirim suara Anda ke server kami. Bila HP tidak punya model suara offline, Android dapat memakai layanan Google, sesuai pengaturan HP Anda.</p>
         </div>
       </div>
     </div>
@@ -571,6 +596,9 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
           <li><svg><use href="#i-check"/></svg>Proyeksi dan simulasi arus kas</li>
           <li><svg><use href="#i-check"/></svg>Utang &amp; piutang</li>
           <li><svg><use href="#i-check"/></svg>Scan struk (dibaca di HP)</li>
+          <li><svg><use href="#i-check"/></svg>Catat dengan suara</li>
+          <li><svg><use href="#i-check"/></svg>Laporan Bulanan dengan sorotan otomatis</li>
+          <li><svg><use href="#i-check"/></svg>Ekspor laporan ke Excel (.xlsx)</li>
         </ul>
         <a class="btn btn-ghost play-cta" href="#unduh">Pilih Premium</a>
       </div>
@@ -585,6 +613,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
           <li><svg><use href="#i-check"/></svg>Multi buku kas, sampai 5 buku</li>
           <li><svg><use href="#i-check"/></svg>Scan struk dengan AI: toko, kategori, total, tanggal</li>
           <li><svg><use href="#i-check"/></svg>300 scan AI per bulan</li>
+          <li><svg><use href="#i-check"/></svg>Ringkasan AI untuk Laporan Bulanan (30 per bulan)</li>
           <li><svg><use href="#i-check"/></svg>Dompet, anggaran, dan laporan terpisah per buku</li>
         </ul>
         <a class="btn btn-primary play-cta" href="#unduh">Pilih Ultimate</a>
@@ -603,11 +632,13 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
     </div>
     <div class="faq reveal">
       <details open><summary>Apakah saya harus membuat akun?</summary><p>Tidak. LaciQ tidak memiliki akun. Pasang, buka, dan langsung catat. Anda hanya masuk dengan akun Google bila ingin memakai Backup Cloud (Premium), dan itu untuk menyimpan cadangan di Drive Anda sendiri.</p></details>
-      <details><summary>Di mana data saya disimpan?</summary><p>Di HP Anda. Kami tidak menyimpan transaksi, dompet, atau anggaran Anda di server. Satu-satunya data yang keluar dari HP adalah cadangan ke Drive Anda (jika Anda memakai Backup Cloud) dan teks struk untuk diproses AI (jika Anda memakai Scan struk AI dan menyetujuinya).</p></details>
+      <details><summary>Di mana data saya disimpan?</summary><p>Di HP Anda. Kami tidak menyimpan transaksi, dompet, atau anggaran Anda di server. Satu-satunya data yang keluar dari HP adalah cadangan ke Drive Anda (jika Anda memakai Backup Cloud) serta data untuk fitur AI Ultimate bila Anda menyetujuinya: teks struk untuk Scan struk AI, atau angka total dan nama kategori untuk ringkasan Laporan Bulanan. Fitur Catat dengan suara memakai layanan pengenalan suara bawaan Android; LaciQ tidak menerima rekamannya.</p></details>
       <details><summary>Bagaimana jika saya ganti HP atau menghapus aplikasi?</summary><p>Data lokal ikut hilang bila aplikasi dihapus. Karena itu tersedia Backup data ke file dan Backup Cloud terenkripsi (Premium) yang dapat dipulihkan di HP baru dengan akun Google yang sama. Foto struk ikut dipulihkan bila opsi foto aktif.</p></details>
-      <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, dan scan struk di HP. Ultimate mencakup semua itu, ditambah multi buku kas (pribadi dan usaha terpisah) dan scan struk dengan AI.</p></details>
+      <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, scan struk di HP, Catat dengan suara, Laporan Bulanan, dan ekspor Excel. Ultimate mencakup semua itu, ditambah multi buku kas (pribadi dan usaha terpisah), scan struk dengan AI, dan ringkasan AI untuk Laporan Bulanan.</p></details>
       <details><summary>Bagaimana cara berhenti berlangganan?</summary><p>Buka Google Play, pilih Pembayaran &amp; langganan, lalu Langganan, dan batalkan LaciQ. Fitur berbayar tetap aktif sampai akhir periode yang sudah dibayar.</p></details>
       <details><summary>Seberapa akurat scan struk?</summary><p>Cukup baik untuk struk yang jelas, tetapi hasilnya bergantung pada kualitas foto dan format struk. Karena itu Anda selalu memeriksa dan dapat mengubah isi form sebelum menyimpan.</p></details>
+      <details><summary>Apakah suara saya direkam saat memakai Catat dengan suara?</summary><p>Tidak oleh LaciQ. Suara diubah menjadi teks oleh layanan pengenalan suara bawaan Android, dan hanya teksnya yang dipakai untuk mengisi formulir, yang tetap Anda periksa sebelum menyimpan. Mikrofon aktif hanya saat Anda menekan tombol mikrofon. Jika HP Anda tidak punya model suara offline untuk bahasa Indonesia, Android dapat mengirim suara ke layanan pengenalan suara Google untuk dikenali, sesuai pengaturan HP Anda.</p></details>
+      <details><summary>Seberapa bisa dipercaya ringkasan AI di Laporan Bulanan?</summary><p>Ringkasan dibuat AI dari angka bulan itu, dan server kami menolak ringkasan yang menyebut nominal yang tidak ada di data Anda. Meski begitu AI bisa keliru, jadi anggap ini gambaran, bukan nasihat keuangan. Ada tombol &quot;Laporkan&quot; di bawah ringkasan. Hanya angka total dan nama kategori yang dikirim, bukan catatan, toko, tanggal, atau foto.</p></details>
       <details><summary>Apakah LaciQ menyarankan investasi atau memindahkan uang?</summary><p>Tidak. LaciQ adalah alat pencatat. Aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p></details>
       <details><summary>Bagaimana jika saya butuh bantuan?</summary><p>Tulis ke <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a>. Sertakan versi aplikasi dan penjelasan singkat masalahnya.</p></details>
     </div>
