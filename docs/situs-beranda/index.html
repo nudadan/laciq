@@ -786,7 +786,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
 
   // Setelah aplikasi tayang di Play, isi PLAY_URL dengan tautan toko:
   // https://play.google.com/store/apps/details?id=com.hardanti.lacipintar
-  var PLAY_URL = null;
+  var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.hardanti.lacipintar';
   if (PLAY_URL) {
     document.querySelectorAll('.play-cta').forEach(function(a){ a.href = PLAY_URL; a.target = '_blank'; a.rel = 'noopener'; });
     document.querySelectorAll('.play-label').forEach(function(s){ s.textContent = 'Dapatkan di Google Play'; });
