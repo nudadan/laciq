@@ -78,6 +78,29 @@ Selalu ada dialog persetujuan lebih dulu. Menolak tidak mematikan fitur lain. Da
 #privasi #datapribadi #catatankeuangan #aplikasiandroid #laciq
 ```
 
+### 2.3b Karusel "Laporan Bulanan dan Excel" (6 slide)
+Gambar: `gambar/karusel-laporan-excel-1.png` … `-6.png`. Cocok untuk Hari 10 di kalender, atau akhir/awal bulan saat orang
+sedang menengok pengeluarannya.
+```
+Akhir bulan, saatnya cek: uangnya habis ke mana? 👀
+
+Laporan Bulanan di LaciQ merangkum bulanmu otomatis:
+• pemasukan vs pengeluaran, sisa atau defisit
+• anggaran yang sudah lewat atau hampir habis
+• perbandingan dengan bulan lalu di tanggal yang sama
+• kategori pengeluaran terbesar
+
+Dihitung di HP-mu, tanpa internet. Mau diolah sendiri? Ekspor ke Excel (.xlsx) dengan 5 lembar: ringkasan, transaksi, per kategori, per bulan, per dompet. Angka dan tanggalnya asli, jadi bisa dijumlah dan difilter.
+
+Laporan Bulanan dan Excel ada di paket Premium. Ringkasan AI beberapa kalimat khusus Ultimate (hanya angka total dan nama kategori yang dikirim, setelah kamu setuju; AI bisa keliru, bukan nasihat keuangan). Ekspor CSV tetap gratis.
+
+Link Google Play di bio. 📲
+
+#laporankeuangan #catatankeuangan #excel #anggaranbulanan #kelolauang #aplikasikeuangan #laciq
+```
+Catatan: layar di slide 1, 3, dan 4 berasal dari HP pemilik dengan catatan yang sudah dikaburkan (lihat bagian 7).
+Teks ringkasan AI di dalam screenshot memakai kata "Anda" karena itu isi aplikasi saat ini; akan ikut berubah di rilis berikutnya.
+
 ### 2.4 Story (3 frame)
 | Frame | Gambar | Stiker yang ditambahkan di Instagram |
 |---|---|---|

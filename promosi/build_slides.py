@@ -60,6 +60,12 @@ h1 em{font-style:normal;background:linear-gradient(135deg,#7f93ff,#b07bff);-webk
 .yes h3{color:#34d399}
 .no{background:rgba(251,113,133,.09);border:2px solid rgba(251,113,133,.35)}
 .no h3{color:#fb7185}
+.items{list-style:none;margin-top:40px}
+.items li{display:flex;gap:22px;align-items:flex-start;font-size:40px;line-height:1.3;font-weight:600;margin-bottom:30px;
+  background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:30px;padding:28px 32px}
+.items li b{flex:none;width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#4f6bff,#8a4dff);
+  display:flex;align-items:center;justify-content:center;font-family:"SG";font-size:32px;color:#fff;margin-top:2px}
+.items li span{color:#a1a9c7;font-weight:500;display:block;font-size:30px;margin-top:6px}
 .note{margin-top:34px;font-size:30px;color:#a1a9c7;line-height:1.45;font-weight:500}
 """
 
@@ -110,9 +116,41 @@ def privacy_body(n, total):
             '<div class="swipe">Geser →</div>')
 
 
+def list_slide(kind, n, total, badge, bcls, title, items, note=None, swipe=True):
+    lis = "".join(f'<li><b>{i + 1}</b><div>{t}<span>{d}</span></div></li>' for i, (t, d) in enumerate(items))
+    nt = f'<p class="note">{note}</p>' if note else ""
+    sw = '<div class="swipe">Geser →</div>' if swipe else ""
+    return page(kind, f'{top(n, total)}<div class="copy"><span class="badge {bcls}">{badge}</span><br><h1>{title}</h1>'
+                      f'<ul class="items">{lis}</ul>{nt}</div>{sw}')
+
+
 def slides():
     F, S = "feed", "story"
     out = {}
+    # Karusel C: Laporan Bulanan dan Excel (6 slide)
+    C = "karusel-laporan-excel"
+    out[f"{C}-1"] = feature(F, 1, 6, "Premium", "b-pro", "Akhir bulan, <em>uangnya ke mana</em>?",
+                            "Laporan Bulanan merangkum bulanmu dalam satu layar, tanpa kamu hitung sendiri.", "laporan")
+    out[f"{C}-2"] = list_slide(F, 2, 6, "Laporan Bulanan · Premium", "b-pro", "Sorotan otomatis tiap bulan",
+                               [("Pemasukan vs pengeluaran", "Sisa atau defisit, sekali lihat"),
+                                ("Anggaran yang lewat", "Kategori yang sudah jebol atau hampir habis"),
+                                ("Dibanding bulan lalu", "Di tanggal yang sama, jadi adil"),
+                                ("Kategori terbesar", "Ketahuan bocornya di mana")],
+                               "Dihitung di HP-mu, tanpa internet.")
+    out[f"{C}-3"] = feature(F, 3, 6, "Ultimate", "b-ult", "Mau <em>rangkuman</em> beberapa kalimat?",
+                            "Ringkasan AI hanya menerima angka total dan nama kategori, setelah kamu setuju. Bisa keliru, bukan nasihat keuangan.",
+                            "ringkasan-ai")
+    out[f"{C}-4"] = feature(F, 4, 6, "Premium", "b-pro", "Satu ketukan, <em>jadi Excel</em>",
+                            "Pilih bulan ini, 3 bulan terakhir, atau seluruh riwayat. Berkas dibuat di HP-mu dan kamu yang membagikannya.",
+                            "excel")
+    out[f"{C}-5"] = list_slide(F, 5, 6, "Isi berkas .xlsx", "b-pro", "Lima lembar, <em>siap diolah</em>",
+                               [("Ringkasan", "Total periode dan 5 pengeluaran terbesar"),
+                                ("Transaksi", "Angka dan tanggal asli, bisa dijumlah dan difilter"),
+                                ("Per kategori", "Jumlah transaksi, total, dan porsinya"),
+                                ("Per bulan dan per dompet", "Selisih bulanan dan arus tiap dompet")],
+                               "CSV tetap gratis untuk semua paket.")
+    out[f"{C}-6"] = cta(F, 6, 6, "Laporanmu, <em>tanpa ribet</em>",
+                        "Laporan Bulanan dan ekspor Excel ada di paket Premium. Paket gratis ada ekspor CSV.")
     # Karusel A: kenalan (7 slide)
     A = "karusel-kenalan"
     out[f"{A}-1"] = feature(F, 1, 7, None, "", "Gaji habis, tapi <em>ke mana</em>?",
