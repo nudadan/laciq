@@ -1,6 +1,6 @@
 # Rencana Implementasi dan Optimasi LaciQ (`com.hardanti.lacipintar`), Versi 2
 
-> **Versi 2, 2026-10-09.** Menggantikan versi 1 (tersimpan di git, commit `1d5711e`). Perubahan utama dari versi 1 ada di bagian
+> **Versi 2, diperbarui 2026-10-09 setelah memeriksa Play Console.** Menggantikan versi 1 (tersimpan di git, commit `1d5711e`). Perubahan utama dari versi 1 ada di bagian
 > 8. Rencana ini sudah diselaraskan dengan `docs/RENCANA-RILIS-BERIKUTNYA.md` (satu rilis berikutnya memuat CMP/UMP, sapaan "kamu",
 > dan butir kode di sini) dan dengan batasan kebijakan Google Play.
 
@@ -17,16 +17,17 @@ dan tanpa melanggar kebijakan Play.
 | Hal | Kondisi |
 |---|---|
 | Versi produksi | 1.0.0 (14), tayang sejak 2026-10-07 |
-| Judul listing | `LaciQ: Catatan Keuangan` (23 karakter), tayang |
-| Deskripsi singkat | `Catat pemasukan & pengeluaran, atur anggaran. Data tersimpan di HP Anda.` (72 dari 80) |
+| Judul listing | `LaciQ: Catatan Keuangan Harian` (30 karakter), **tayang** (diterapkan pemilik 2026-10-08) |
+| Deskripsi singkat | `Catat keuangan harian praktis tanpa login. Scan struk AI & laporan rapi.` (72 dari 80), **tayang** (2026-10-08) |
 | Screenshot ponsel | 7 sudah terpasang (maks. Play: 8), termasuk 4 screenshot Ultimate bercaption |
 | Paket dan harga | Gratis; Premium Rp7.500/bln atau Rp75.000/thn; Ultimate Rp12.500/bln atau Rp125.000/thn |
 | Produk Play | `dompetku_premium`, `dompetku_ultimate`, masing-masing base plan `monthly` dan `yearly` (ID produk tetap walau nama berubah) |
 | Penagihan | RevenueCat (`purchases_flutter`), paywall di `lib/features/subscription/` |
-| Penawaran uji coba | Belum ada |
+| Penawaran uji coba | **Sudah aktif** (2026-10-08): `trial-15d-tahunan` pada `yearly` di `dompetku_premium` **dan** `dompetku_ultimate`; kelayakan pelanggan baru, belum pernah berlangganan produk itu; hanya Indonesia; fase uji coba gratis 15 hari |
 | Ulasan dalam aplikasi | Sudah ada (`in_app_review`), dimunculkan setelah 10 transaksi (`review_prompt_service.dart`) |
 | Notifikasi lokal | Ada untuk Agenda (`flutter_local_notifications`, `zonedSchedule`); belum ada pengingat harian |
 | Iklan | Paket gratis menampilkan banner AdMob setelah masa tenggang iklan 30 hari sejak pemakaian pertama |
+| Masa tenggang pembayaran | **Sudah diatur** (diperiksa 2026-10-09): `monthly` 7 hari (penangguhan akun 53 hari), `yearly` 14 hari (penangguhan 46 hari), keduanya di Premium dan Ultimate |
 | Peninjauan AdMob | Aplikasi terverifikasi 2026-10-08, menunggu persetujuan (2-3 hari) |
 | Fitur per paket | Suara, scan struk di HP, Laporan Bulanan, Excel = Premium. Scan struk AI, ringkasan AI, multi buku kas = Ultimate |
 
@@ -38,20 +39,21 @@ dan tanpa melanggar kebijakan Play.
 ## Bagian 1: Play Console (tanpa ubah kode aplikasi)
 Dikerjakan bertahap. Perubahan listing memicu peninjauan lagi; penawaran langganan tidak.
 
-### 1.1 Masa tenggang pembayaran (grace period) 7 hari
+### 1.1 Masa tenggang pembayaran (grace period): SELESAI
+* **Status 2026-10-09:** sudah diatur di keempat paket dasar (bulanan 7 hari, tahunan 14 hari, penangguhan akun otomatis). Nilainya
+  mengikuti anjuran Google per periode; **tidak perlu diubah**. Yang tersisa hanya memastikan RevenueCat memberi akses selama masa
+  tenggang (di bawah).
 * **Lokasi:** Play Console > Monetisasi > Produk > Langganan > `dompetku_premium` dan `dompetku_ultimate` > base plan `monthly` dan
   `yearly`, bagian pemulihan pembayaran yang gagal (masa tenggang dan penahanan akun). Nama menu dapat berubah; cari setelan itu.
-* **Tindakan:** pastikan masa tenggang aktif **7 hari** (periksa dulu nilai saat ini, jangan menimpa tanpa melihat), dan penahanan
-  akun aktif.
 * **Periksa di RevenueCat:** akses entitlement tetap aktif selama masa tenggang (pengaturan Google Play di proyek RevenueCat), dan
   aplikasi tidak langsung menurunkan pengguna ke Gratis.
 * **Manfaat:** pembayaran gagal (saldo e-wallet, kartu) tidak langsung memutus langganan.
 
-### 1.2 Penawaran "uji coba gratis 15 hari" pada paket tahunan
+### 1.2 Penawaran "uji coba gratis 15 hari" pada paket tahunan: SELESAI
+* **Status 2026-10-09:** `trial-15d-tahunan` aktif di Premium **dan** Ultimate tahunan (lebih cepat dari rencana yang menunda Ultimate).
+  Karena Ultimate trial memakai kuota AI berbiaya, **pantau pemakaian dan biayanya**; jangan menambah penawaran lain sebelum ada data.
+* Parameter yang berlaku (untuk referensi):
 * **Lokasi:** Monetisasi > Produk > Langganan > pilih langganan > base plan `yearly` > Tambahkan penawaran.
-* **Mulai dari satu produk saja: `dompetku_premium` `yearly`** (Rp75.000/thn). Ultimate menyusul setelah data pertama (bagian 6),
-  karena trial Ultimate memakai kuota AI berbiaya.
-* **Parameter:**
   1. Offer ID: `trial-15d-tahunan`
   2. Kelayakan: **pelanggan baru** (belum pernah berlangganan produk ini)
   3. Fase penagihan: **uji coba gratis**, 15 hari, lalu harga normal tahunan
@@ -68,10 +70,10 @@ Dikerjakan bertahap. Perubahan listing memicu peninjauan lagi; penawaran langgan
   untuk kepatuhan; teks di aplikasi menambah konversi.
 
 ### 1.3 Listing: pertahankan judul, uji deskripsi singkat
-* **Judul `LaciQ: Catatan Keuangan`: jangan diubah sekarang.** Nama baru saja tayang dan lolos tinjauan. Menambah "Harian" belum
-  terbukti menaikkan pencarian dan memicu peninjauan lagi. Tinjau ulang setelah 4 minggu data (Statistik > Akuisisi dan kata kunci
-  pencarian).
-* **Deskripsi singkat:** kandidat yang hanya berisi fitur yang benar untuk semua pengunjung (tidak menyebut AI):
+* **Judul `LaciQ: Catatan Keuangan Harian` sudah tayang.** Jangan diubah lagi sekarang. Ukur dulu dampaknya 4 minggu (Statistik >
+  Akuisisi dan kata kunci pencarian) sebelum memutuskan apa pun.
+* **Deskripsi singkat yang tayang** menyebut "Scan struk AI", padahal AI hanya Ultimate; pengunjung gratis bisa mengira AI gratis.
+  Kandidat pengganti yang hanya berisi fitur yang benar untuk semua pengunjung (tidak menyebut AI), bila eksperimen mendukung:
   `Catat uang tanpa akun. Suara, scan struk, anggaran, dan laporan bulanan.` (72 karakter)
   Bandingkan dengan versi sekarang lewat **eksperimen listing Play** bila tersedia untuk deskripsi singkat (verifikasi di Console).
   Samakan sapaan dengan rencana "kamu" (hindari kata "Anda" di teks baru).
@@ -191,13 +193,13 @@ Catat di Play Console (Statistik) dan RevenueCat. Baseline diambil dari 14 hari 
 | Pemasangan dan sumber (utm referrer) | Play Console | Efek promosi |
 | Konversi listing (kunjungan ke pasang) | Play Console | Efek eksperimen deskripsi |
 | Retensi hari-1, 7, 30 | Play Console | Efek pengingat dan shortcut |
-| Mulai uji coba, trial-to-paid | RevenueCat | Memperluas trial atau tidak |
+| Mulai uji coba, trial-to-paid, pemakaian kuota AI selama trial Ultimate | RevenueCat, log Worker | Mengubah atau menghentikan trial |
 | Pelanggan berbayar per pemasangan aktif | RevenueCat | Target proyeksi (1-3%) |
 | Rating dan jumlah ulasan | Play Console | Kualitas, bukan jumlah |
 | Persentase opt-in pengingat | Analitik lokal tidak ada; ukur dengan survei kecil atau retensi | Ubah posisi tawaran |
 
 **Aturan keputusan (awal, sesuaikan dengan data):**
-* Ekspansi trial ke Ultimate bila trial-to-paid Premium ≥ 30% dengan minimal 30 trial yang selesai.
+* Pertahankan trial Ultimate bila trial-to-paid ≥ 30% dengan minimal 30 trial yang selesai dan biaya AI per trial wajar (< Rp2.300).
 * Tinjau ulang judul bila pencarian merek tinggi tetapi pencarian kata kunci rendah selama 4 minggu.
 * Hentikan atau ubah trial bila trial-to-paid < 15% dan biaya dukungan naik.
 
@@ -206,7 +208,7 @@ Catat di Play Console (Statistik) dan RevenueCat. Baseline diambil dari 14 hari 
 ## Bagian 6: Matriks prioritas dan jadwal
 | Fase | Waktu | Pekerjaan | Syarat |
 |---|---|---|---|
-| **0. Sekarang** | Hari 1-2 | Periksa dan aktifkan grace period 7 hari; pasang penawaran trial 15 hari pada `dompetku_premium` `yearly`; uji dengan license tester | Tidak perlu rilis aplikasi |
+| **0. Selesai** | 2026-10-08 | Grace period, trial 15 hari (Premium dan Ultimate tahunan), judul dan deskripsi singkat baru sudah diterapkan pemilik; sisa: uji pembelian trial dengan license tester dan cek akses RevenueCat saat masa tenggang | Tidak perlu rilis aplikasi |
 | **1. Pengamatan** | Minggu 1-2 | Promosi sosial sesuai `promosi/`; ajak 15-20 orang memberi masukan jujur; kumpulkan baseline | Hindari perubahan listing selama peninjauan AdMob |
 | **2. Eksperimen listing** | Minggu 2-4 | Uji deskripsi singkat baru lewat eksperimen listing | Data cukup (minimal beberapa ratus kunjungan) |
 | **3. Rilis v1.1** | Minggu 3-5 | Paywall trial, percobaan gratis (suara, scan HP), pengingat harian opt-in, App Shortcuts, CMP/UMP, sapaan "kamu"; satu build, satu peninjauan | AdMob selesai ditinjau; tes lulus; Data Safety dicek |
@@ -227,9 +229,9 @@ Catat di Play Console (Statistik) dan RevenueCat. Baseline diambil dari 14 hari 
 | 2 | Kode ditulis untuk Android native (`BillingClient`, `DataStore`, `WorkManager`, Gradle) | Disesuaikan dengan Flutter, RevenueCat, `flutter_local_notifications`, `quick_actions` |
 | 3 | In-App Review "ditambahkan", ambang 5 | Sudah ada, ambang 10 dipertahankan |
 | 4 | Kurasi 22 screenshot | Sudah selesai (7, maks. 8); tidak ada tindakan |
-| 5 | Judul diganti ke `... Harian`; deskripsi singkat menyebut "Scan struk AI" | Judul dipertahankan; deskripsi hanya fitur yang benar untuk semua pengunjung, diuji lewat eksperimen |
+| 5 | Judul diganti ke `... Harian`; deskripsi singkat menyebut "Scan struk AI" | Sudah diterapkan pemilik; judul dipertahankan dan diukur; deskripsi dikaji ulang lewat eksperimen karena menyebut AI |
 | 6 | Kuota gratis scan AI dan suara (Ultimate terkunci) dengan counter lokal | Hanya fitur HP (suara, scan OCR) yang diberi percobaan; AI tidak digratiskan (biaya dan penyalahgunaan) |
-| 7 | Trial pada Premium dan Ultimate sekaligus | Mulai dari Premium tahunan; Ultimate setelah data |
+| 7 | Trial pada Premium dan Ultimate sekaligus | Sudah diterapkan pada keduanya (2026-10-08); pantau biaya AI Ultimate |
 | 8 | Pengingat harian default aktif | Opt-in, dengan pilihan jam |
 | 9 | Widget layar utama | Ditunda; diganti App Shortcuts |
 | 10 | Rilis v1.1 berdiri sendiri | Digabung dengan CMP/UMP dan sapaan "kamu" |
