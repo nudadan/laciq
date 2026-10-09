@@ -28,7 +28,7 @@ dan tanpa melanggar kebijakan Play.
 | Notifikasi lokal | Ada untuk Agenda (`flutter_local_notifications`, `zonedSchedule`); belum ada pengingat harian |
 | Iklan | Paket gratis menampilkan banner AdMob setelah masa tenggang iklan 30 hari sejak pemakaian pertama |
 | Masa tenggang pembayaran | **Sudah diatur** (diperiksa 2026-10-09): `monthly` 7 hari (penangguhan akun 53 hari), `yearly` 14 hari (penangguhan 46 hari), keduanya di Premium dan Ultimate |
-| RevenueCat (diperiksa 2026-10-09) | Kredensial akun layanan valid; empat produk Play terbit dan terhubung ke entitlement (Ultimate = 2 entitlement); offering `dompetku` berisi 4 paket yang benar. **Notifikasi pengembang Google (RTDN) BELUM tersambung** (tombol "Connect to Google" nonaktif, daftar topik kosong). Offering `default` lama (3 paket) masih ada |
+| RevenueCat (diperiksa 2026-10-09) | Kredensial akun layanan valid; empat produk Play terbit dan terhubung ke entitlement (Ultimate = 2 entitlement); offering `dompetku` berisi 4 paket yang benar. **RTDN TERSAMBUNG 2026-10-09** (topik `projects/dompetku-509508/topics/Play-Store-Notifications`; notifikasi uji diterima RevenueCat). Offering `default` lama (3 paket) masih ada |
 | Peninjauan AdMob | Aplikasi terverifikasi 2026-10-08, menunggu persetujuan (2-3 hari) |
 | Fitur per paket | Suara, scan struk di HP, Laporan Bulanan, Excel = Premium. Scan struk AI, ringkasan AI, multi buku kas = Ultimate |
 
@@ -70,7 +70,12 @@ Dikerjakan bertahap. Perubahan listing memicu peninjauan lagi; penawaran langgan
 * **Sebelum aplikasi menampilkan teks trial** (bagian 2.1), lembar pembayaran Google Play sudah menampilkan syarat trial. Itu cukup
   untuk kepatuhan; teks di aplikasi menambah konversi.
 
-### 1.5 Notifikasi pengembang real-time (RTDN) ke RevenueCat: BELUM
+### 1.5 Notifikasi pengembang real-time (RTDN) ke RevenueCat: SELESAI (2026-10-09)
+* **Hasil:** Pub/Sub API aktif di `dompetku-509508`; `revenuecat@dompetku-509508.iam.gserviceaccount.com` berperan Pub/Sub Admin; RevenueCat membuat
+  topik `Play-Store-Notifications`; Play Console > Penyiapan monetisasi: notifikasi real-time dicentang, topik diisi manual, konten
+  "Hanya langganan dan pembelian yang dibatalkan"; notifikasi uji diterima RevenueCat. Tersisa: bukti dengan pembelian uji (trial).
+* Catatan: RevenueCat tidak mengisi Play Console otomatis; isian topik di Play Console dilakukan manual.
+* Langkah awal (referensi):
 * Tanpa RTDN, RevenueCat baru tahu perubahan langganan (mulai trial, konversi trial ke berbayar, pembatalan, masa tenggang, penangguhan,
   pengembalian dana) lewat sinkron berkala atau saat aplikasi dibuka, jadi data dan status bisa terlambat. RevenueCat sendiri "sangat
   menyarankan" menyambungkannya. Ini terutama penting sekarang karena trial 15 hari aktif.
@@ -219,7 +224,7 @@ Catat di Play Console (Statistik) dan RevenueCat. Baseline diambil dari 14 hari 
 ## Bagian 6: Matriks prioritas dan jadwal
 | Fase | Waktu | Pekerjaan | Syarat |
 |---|---|---|---|
-| **0. Selesai** | 2026-10-08 | Grace period, trial 15 hari (Premium dan Ultimate tahunan), judul dan deskripsi singkat baru sudah diterapkan pemilik; sisa: **sambungkan RTDN di RevenueCat** (lihat bagian 1.5), uji pembelian trial dengan license tester, dan cek akses saat masa tenggang | Tidak perlu rilis aplikasi |
+| **0. Selesai** | 2026-10-08 | Grace period, trial 15 hari (Premium dan Ultimate tahunan), judul dan deskripsi singkat baru sudah diterapkan pemilik; RTDN sudah tersambung; sisa: uji pembelian trial dengan license tester, dan cek akses saat masa tenggang | Tidak perlu rilis aplikasi |
 | **1. Pengamatan** | Minggu 1-2 | Promosi sosial sesuai `promosi/`; ajak 15-20 orang memberi masukan jujur; kumpulkan baseline | Hindari perubahan listing selama peninjauan AdMob |
 | **2. Eksperimen listing** | Minggu 2-4 | Uji deskripsi singkat baru lewat eksperimen listing | Data cukup (minimal beberapa ratus kunjungan) |
 | **3. Rilis v1.1** | Minggu 3-5 | Paywall trial, percobaan gratis (suara, scan HP), pengingat harian opt-in, App Shortcuts, CMP/UMP, sapaan "kamu"; satu build, satu peninjauan | AdMob selesai ditinjau; tes lulus; Data Safety dicek |
