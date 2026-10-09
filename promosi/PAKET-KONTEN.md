@@ -196,7 +196,7 @@ Pakai Reels yang sama tanpa watermark, caption pendek + 3–5 tagar (`#catatanke
 | Pertanyaan | Balasan |
 |---|---|
 | Ada untuk iPhone? | Saat ini baru Android. Kalau banyak yang minta iOS, kami pertimbangkan. |
-| Gratis? | Ada paket gratis (mencatat, dompet, anggaran, target tabungan) dengan iklan banner. Premium mulai Rp7.500/bulan, Ultimate Rp12.500/bulan. Bisa dibatalkan kapan saja lewat Google Play. |
+| Gratis? | Ada paket gratis (mencatat, dompet, anggaran, target tabungan) dengan iklan banner. Premium mulai Rp7.500/bulan, Ultimate Rp12.500/bulan, belum termasuk PPN 11% yang ditambahkan Google (total Rp8.325 dan Rp13.875). Bisa dibatalkan kapan saja lewat Google Play. |
 | Datanya aman? | Data tersimpan di HP-mu, bukan di server kami, dan tidak perlu akun. Backup (Premium) ke Google Drive-mu sendiri, terenkripsi. Rinciannya di laciq.solusimandiri.id/privacy. |
 | Suara saya direkam? | Tidak oleh LaciQ. Suara diubah jadi teks oleh layanan pengenalan suara bawaan Android; yang dipakai hanya teksnya. Kalau HP tidak punya model suara offline, Android bisa memakai layanan Google sesuai pengaturan HP. |
 | AI-nya baca semua catatan saya? | Tidak. Ringkasan AI hanya menerima total dan nama kategori, dan hanya setelah kamu setuju. Scan struk AI mengirim teks hasil scan, bukan fotonya. |
