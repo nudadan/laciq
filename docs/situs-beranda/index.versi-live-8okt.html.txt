@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LaciQ: Catatan Keuangan Anti-Boncos &amp; 100% Privat di HP-mu</title>
+<meta name="description" content="Kendalikan uangmu tanpa stres. Catat otomatis pakai suara &amp; scan struk AI, kelola multi buku kas pribadi &amp; usaha, tanpa daftar akun, 100% data tersimpan aman di HP-mu.">
+<meta name="theme-color" content="#0b0f1e">
+<link rel="canonical" href="https://laciq.solusimandiri.id/">
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LaciQ">
+<meta property="og:title" content="LaciQ: Catatan Keuangan Anti-Boncos &amp; 100% Privat di HP-mu">
+<meta property="og:description" content="Catat otomatis pakai suara atau scan struk AI, atur anggaran, kelola multi buku kas pribadi &amp; usaha tanpa daftar akun. Datamu tetap di HP-mu.">
+<meta property="og:url" content="https://laciq.solusimandiri.id/">
+<meta property="og:image" content="https://laciq.solusimandiri.id/img/og.jpg">
+<meta property="og:locale" content="id_ID">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LaciQ: Catatan Keuangan",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Android",
+  "inLanguage": "id",
+  "url": "https://laciq.solusimandiri.id/",
+  "description": "Aplikasi pencatat keuangan pribadi dan usaha untuk Android. Tanpa akun, data tersimpan di HP.",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1250"
+  },
+  "featureList": [
+    "Catat pemasukan, pengeluaran, dan transfer antar dompet",
+    "Catat transaksi dengan suara (Premium)",
+    "Anggaran bulanan dengan pemberitahuan",
+    "Laporan Bulanan dengan sorotan otomatis (Premium)",
+    "Ekspor laporan ke Excel .xlsx dan CSV",
+    "Scan struk, dengan AI untuk pelanggan Ultimate",
+    "Ringkasan AI untuk Laporan Bulanan (Ultimate)",
+    "Multi buku kas untuk keuangan pribadi dan usaha (Ultimate)",
+    "Backup Cloud terenkripsi ke Google Drive pengguna (Premium)"
+  ],
+  "publisher": {"@type": "Organization", "name": "hardan-ti", "email": "support@hardan-ti.com"},
+  "offers": [
+    {"@type": "Offer", "name": "Gratis", "price": "0", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Premium bulanan", "price": "7500", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Premium tahunan", "price": "75000", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Ultimate bulanan", "price": "12500", "priceCurrency": "IDR"},
+    {"@type": "Offer", "name": "Ultimate tahunan", "price": "125000", "priceCurrency": "IDR"}
+  ]
+}
+</script>
+
+<link rel="preload" href="/fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Space Grotesk";src:url(/fonts/SpaceGrotesk.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Plus Jakarta Sans";src:url(/fonts/PlusJakartaSans.woff2) format("woff2");font-weight:200 800;font-display:swap}
+
+:root{
+  --bg:#0b0f1e; --bg2:#0f1530; --surface:#141a38; --surface2:#1a2144;
+  --line:rgba(255,255,255,.09); --line-hl:rgba(157,176,255,.3); --text:#e9ecf8; --muted:#a1a9c7;
+  --a1:#4f6bff; --a2:#8a4dff; --cyan:#00f2fe; --ok:#34d399; --warn:#fbbf24;
+  --grad:linear-gradient(135deg,var(--a1),var(--a2));
+  --grad-cyan:linear-gradient(135deg,#00f2fe,#4f6bff);
+  --radius:22px; --max:1140px;
+  --head:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:#9db0ff}
+h1,h2,h3,h4{font-family:var(--head);line-height:1.15;margin:0;letter-spacing:-.02em}
+p{margin:0}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+.skip{position:absolute;left:-999px;top:8px;background:#fff;color:#000;padding:8px 14px;border-radius:8px;z-index:100}
+.skip:focus{left:8px}
+:focus-visible{outline:3px solid #9db0ff;outline-offset:3px;border-radius:8px}
+
+/* ---------- Tombol ---------- */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;font:600 16px/1 var(--body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 30px -8px rgba(99,102,255,.75)}
+.btn-primary:hover{box-shadow:0 14px 38px -8px rgba(138,77,255,.9)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border-color:var(--line)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:var(--line-hl)}
+.btn-qr{background:rgba(0,242,254,.08);color:#a5f3fc;border-color:rgba(0,242,254,.3)}
+.btn-qr:hover{background:rgba(0,242,254,.15);border-color:#00f2fe}
+.btn svg{width:20px;height:20px;flex:none}
+
+/* ---------- Navigasi ---------- */
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,15,30,.82);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font:700 20px/1 var(--head)}
+.brand img{width:34px;height:34px;border-radius:9px}
+.nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;align-items:center}
+.nav ul a{display:block;padding:9px 14px;color:var(--muted);text-decoration:none;border-radius:999px;font-weight:500;font-size:15px;transition:color .15s,background .15s}
+.nav ul a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.nav .btn{padding:10px 18px;font-size:14px}
+.menu-btn{display:none;background:none;border:1px solid var(--line);color:var(--text);width:44px;height:44px;border-radius:12px;cursor:pointer}
+@media (max-width:860px){
+  .menu-btn{display:grid;place-items:center}
+  .nav ul{position:absolute;left:0;right:0;top:68px;background:var(--bg2);flex-direction:column;align-items:stretch;padding:12px 20px 20px;border-bottom:1px solid var(--line);display:none}
+  .nav ul.open{display:flex}
+  .nav ul a{padding:14px}
+}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;padding:72px 0 44px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto -10%;height:90%;background:radial-gradient(60% 60% at 25% 20%,rgba(79,107,255,.32),transparent 70%),radial-gradient(50% 50% at 85% 10%,rgba(138,77,255,.28),transparent 70%);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.08fr .92fr;gap:40px;align-items:center}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 16px;border:1px solid rgba(0,242,254,.35);border-radius:999px;background:rgba(0,242,254,.08);color:#a5f3fc;font-size:13.5px;font-weight:600;margin-bottom:22px;letter-spacing:.02em}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:#00f2fe;box-shadow:0 0 0 4px rgba(0,242,254,.25);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
+.hero h1{font-size:clamp(38px,5.8vw,62px);font-weight:700}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#00f2fe 0%,#8a4dff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{margin-top:22px;font-size:18.5px;color:var(--muted);max-width:34em;line-height:1.6}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px;align-items:center}
+.hero-meta{display:flex;flex-wrap:wrap;gap:20px;margin-top:28px;color:var(--muted);font-size:14.5px}
+.hero-meta span{display:flex;align-items:center;gap:7px}
+.hero-meta svg{width:18px;height:18px;color:var(--ok)}
+.hero-meta .star-rating{color:#fbbf24;font-weight:700}
+
+.phones{position:relative;height:620px}
+.phone{position:absolute;border-radius:38px;padding:9px;background:linear-gradient(160deg,#2a3260,#141a38);box-shadow:0 30px 70px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.08) inset;transition:transform .3s ease}
+.phone img{border-radius:30px;width:100%}
+.phones .p1{width:268px;left:50%;top:0;transform:translateX(-4%) rotate(4deg);z-index:2}
+.phones .p2{width:236px;left:2%;top:70px;transform:rotate(-7deg);z-index:1;opacity:.95}
+.phones:hover .p1{transform:translateX(-4%) rotate(2deg) translateY(-6px)}
+.phones:hover .p2{transform:rotate(-5deg) translateY(-4px)}
+.phones .chip{position:absolute;z-index:3;background:rgba(20,26,56,.94);backdrop-filter:blur(10px);border:1px solid var(--line-hl);border-radius:16px;padding:11px 16px;font-size:13.5px;font-weight:600;display:flex;gap:9px;align-items:center;box-shadow:0 14px 34px -10px rgba(0,0,0,.75)}
+.chip svg{width:20px;height:20px;color:var(--ok)}
+.chip.c1{left:0;bottom:90px}
+.chip.c2{left:0;top:6px}
+.chip.c3{right:-10px;bottom:20px;background:linear-gradient(135deg,rgba(0,242,254,.15),rgba(79,107,255,.2));border-color:rgba(0,242,254,.4);color:#e0f2fe}
+
+@media (max-width:900px){
+  .hero{padding-top:44px}
+  .hero .wrap{grid-template-columns:1fr}
+  .phones{height:min(560px,130vw);max-width:440px;margin:10px auto 0;width:100%}
+  .phones .p1{width:min(250px,58%);left:auto;right:2%;top:6%;transform:rotate(3deg)}
+  .phones .p2{width:min(220px,52%);left:2%;top:12%;transform:rotate(-6deg)}
+  .chip.c1{bottom:4%}
+  .chip.c3{display:none}
+}
+
+/* ---------- Bagian umum ---------- */
+section{padding:88px 0}
+.sec-head{max-width:740px;margin:0 auto 54px;text-align:center}
+.sec-head .tag{color:#9db0ff;font:600 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase}
+.sec-head h2{font-size:clamp(30px,4.4vw,46px);margin-top:14px}
+.sec-head p{color:var(--muted);margin-top:16px;font-size:18px}
+.alt{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+
+/* ---------- Angka / Stat Bar ---------- */
+.stats{padding:10px 0 0}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{padding:26px 22px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));transition:transform .2s,border-color .2s}
+.stat:hover{transform:translateY(-3px);border-color:var(--line-hl)}
+.stat b{display:block;font:700 38px/1 var(--head);background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{display:block;margin-top:10px;color:var(--muted);font-size:15px;line-height:1.4}
+@media (max-width:760px){.stats .wrap{grid-template-columns:repeat(2,1fr)}.stat b{font-size:32px}}
+
+/* ---------- Dual Persona: Dua Dunia ---------- */
+.dual-box{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
+.dual-card{padding:34px 30px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.dual-card:hover{transform:translateY(-4px);border-color:var(--line-hl)}
+.dual-card.pribadi::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad-cyan)}
+.dual-card.usaha::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--grad)}
+.dual-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.dual-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.06);color:#00f2fe}
+.dual-card.usaha .dual-icon{color:#8a4dff}
+.dual-card h3{font-size:22px}
+.dual-card p{color:var(--muted);font-size:15.5px;margin-bottom:20px}
+.dual-list{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:15px}
+.dual-list li{display:flex;align-items:center;gap:10px;color:var(--text)}
+.dual-list svg{width:18px;height:18px;color:var(--ok);flex:none}
+@media (max-width:860px){.dual-box{grid-template-columns:1fr}}
+
+/* ---------- Kalkulator Boncos Interaktif ---------- */
+.calc-wrap{max-width:840px;margin:0 auto;padding:36px;border-radius:28px;background:linear-gradient(160deg,#151c3d,#111630);border:1px solid rgba(0,242,254,.3);box-shadow:0 24px 60px -20px rgba(0,0,0,.7)}
+.calc-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:center}
+.calc-controls{display:grid;gap:24px}
+.calc-group label{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:600;margin-bottom:10px}
+.calc-val{color:#00f2fe;font-family:var(--head);font-size:18px;font-weight:700}
+input[type=range]{-webkit-appearance:none;width:100%;height:8px;background:rgba(255,255,255,.1);border-radius:999px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#00f2fe;cursor:pointer;box-shadow:0 0 14px #00f2fe}
+.calc-result{background:rgba(11,15,30,.8);border:1px solid var(--line);border-radius:20px;padding:26px 22px;text-align:center}
+.calc-result h4{font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:8px}
+.calc-amt{font:700 36px/1.1 var(--head);background:linear-gradient(135deg,#00f2fe,#34d399);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:8px}
+.calc-desc{font-size:14.5px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+@media (max-width:760px){.calc-grid{grid-template-columns:1fr}.calc-wrap{padding:24px 18px}}
+
+/* ---------- Fitur ---------- */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:var(--line-hl)}
+.ico{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:var(--grad);margin-bottom:20px;color:#fff}
+.ico svg{width:26px;height:26px}
+.card h3{font-size:21px;margin-bottom:10px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.card p{color:var(--muted);font-size:16px}
+.badge{display:inline-block;margin:0;padding:3px 10px;border-radius:999px;font:600 12px/1.4 var(--body);vertical-align:middle;letter-spacing:.02em}
+.b-free{background:rgba(52,211,153,.14);color:#6ee7b7}
+.b-pro{background:rgba(79,107,255,.2);color:#b4c0ff}
+.b-ult{background:rgba(251,191,36,.15);color:#fcd34d}
+@media (max-width:900px){.grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.grid3{grid-template-columns:1fr}}
+
+/* ---------- Tampilan / showcase ---------- */
+.show{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-bottom:96px}
+.show:last-child{margin-bottom:0}
+.show.rev .show-img{order:2}
+.show-img{display:flex;justify-content:center}
+.show-img .phone{position:relative;width:290px;transform:none}
+.show-img .phone.tilt{transform:rotate(-3deg)}
+.show-img.duo{gap:18px;align-items:flex-start}
+.show-img.duo .phone{width:232px}
+.show-img.duo .phone+.phone{margin-top:40px}
+@media(max-width:560px){.show-img.duo{gap:10px}.show-img.duo .phone{width:calc(50vw - 30px);max-width:232px}.show-img.duo .phone+.phone{margin-top:24px}}
+.show-text h3{font-size:clamp(26px,3.4vw,36px);margin:14px 0 16px}
+.show-text p{color:var(--muted)}
+.ticks{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px}
+.ticks li{display:flex;gap:12px;color:var(--text);font-size:16px}
+.ticks svg{width:22px;height:22px;flex:none;color:var(--ok);margin-top:2px}
+@media (max-width:860px){
+  .show{grid-template-columns:1fr;gap:34px;margin-bottom:72px}
+  .show.rev .show-img{order:0}
+  .show-img .phone{width:250px}
+}
+
+/* ---------- Infografis: alur scan ---------- */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.step{position:relative;padding:0 14px;text-align:center}
+.step .n{width:64px;height:64px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--line);position:relative;z-index:1;color:#c7d0ff}
+.step .n svg{width:28px;height:28px}
+.step.hl .n{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 12px 30px -8px rgba(110,100,255,.8)}
+.step::after{content:"";position:absolute;top:32px;left:calc(50% + 40px);right:calc(-50% + 40px);border-top:2px dashed rgba(157,176,255,.35)}
+.step:last-child::after{display:none}
+.step h3{font-size:18px;margin-bottom:8px}
+.step p{color:var(--muted);font-size:15px}
+.flow-note{margin:38px auto 0;max-width:640px;text-align:center;color:var(--muted);font-size:15px}
+.receipt-demo{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:56px;align-items:center}
+@media (max-width:860px){
+  .flow{grid-template-columns:1fr;gap:26px}
+  .step::after{display:none}
+  .step{display:grid;grid-template-columns:64px 1fr;gap:16px;text-align:left;align-items:center;padding:0}
+  .step .n{margin:0}
+}
+
+/* ---------- Infografis: privasi ---------- */
+.map{display:grid;grid-template-columns:1fr 70px 1fr;gap:0;align-items:stretch}
+.node{padding:30px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.node.center{background:linear-gradient(160deg,rgba(79,107,255,.22),rgba(138,77,255,.18));border-color:rgba(157,176,255,.4)}
+.node h3{font-size:22px;margin:14px 0 8px}
+.node p,.node li{color:var(--muted);font-size:15.5px}
+.node ul{margin:14px 0 0;padding-left:20px}
+.node .ico{margin:0}
+.link{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9db0ff;gap:6px;font-size:12px;text-align:center}
+.link svg{width:48px;height:24px}
+.map-stack{display:grid;gap:18px}
+.neg{display:flex;align-items:center;gap:12px;margin-top:22px;padding:16px 20px;border-radius:16px;border:1px dashed rgba(251,113,133,.5);background:rgba(251,113,133,.06);color:#fecdd3;font-size:15.5px}
+.neg svg{width:24px;height:24px;flex:none;color:#fb7185}
+@media (max-width:860px){
+  .map{grid-template-columns:1fr}
+  .link{flex-direction:row;padding:12px 0}
+  .link svg{transform:rotate(90deg)}
+}
+
+/* ---------- Testimoni Section ---------- */
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.review-card{padding:28px 24px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s,border-color .2s}
+.review-card:hover{transform:translateY(-4px);border-color:var(--line-hl)}
+.review-stars{color:#fbbf24;display:flex;gap:4px;margin-bottom:14px}
+.review-text{font-size:15px;color:var(--text);line-height:1.6;font-style:italic;margin-bottom:20px}
+.review-author{display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px solid var(--line)}
+.review-avatar{width:40px;height:40px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff}
+.review-name{font-weight:700;font-size:15px}
+.review-role{font-size:12.5px;color:var(--muted)}
+@media (max-width:860px){.reviews-grid{grid-template-columns:1fr}}
+
+/* ---------- Paket ---------- */
+.toggle{display:flex;width:max-content;margin:0 auto 38px;padding:5px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.toggle button{border:0;background:none;color:var(--muted);font:600 15px/1 var(--body);padding:12px 22px;border-radius:999px;cursor:pointer}
+.toggle button[aria-pressed=true]{background:var(--grad);color:#fff}
+.toggle small{font-weight:600;color:var(--ok);margin-left:6px}
+.toggle button[aria-pressed=true] small{color:#d1fae5}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+.plan{display:flex;flex-direction:column;padding:32px 28px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);position:relative}
+.plan.pop{background:linear-gradient(170deg,#1c2455,#171c42);border-color:rgba(157,176,255,.55);box-shadow:0 30px 60px -30px rgba(100,90,255,.7);position:relative}
+.plan.pop::before{content:"Paling Populer & Lengkap";position:absolute;top:-13px;left:28px;background:linear-gradient(135deg,#00f2fe,#8a4dff);color:#fff;font:700 12px/1 var(--body);padding:7px 14px;border-radius:999px;letter-spacing:.04em;box-shadow:0 4px 14px rgba(0,242,254,.4)}
+.daily-calc{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px;background:rgba(0,242,254,.12);color:#a5f3fc;border:1px solid rgba(0,242,254,.25)}
+.plan h3{font-size:24px}
+.plan .desc{color:var(--muted);font-size:15px;margin-top:6px;min-height:46px}
+.price{margin:22px 0 4px;font:700 40px/1 var(--head)}
+.price small{font:500 16px/1 var(--body);color:var(--muted)}
+.price-sub{color:var(--muted);font-size:14px;min-height:21px;margin-bottom:14px}
+.plan ul{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:11px;font-size:15.5px;flex:1;align-content:start}
+.plan li{display:flex;gap:11px}
+.plan li svg{width:20px;height:20px;flex:none;color:var(--ok);margin-top:3px}
+.plan li.off{color:#6b7497}
+.plan li.off svg{color:#4a5275}
+.plan li.inh{color:var(--muted);font-weight:600}
+.plan .btn{justify-content:center;width:100%}
+.fine{max-width:760px;margin:30px auto 0;text-align:center;color:var(--muted);font-size:14px}
+@media (max-width:960px){.plans{grid-template-columns:1fr;max-width:480px;margin:0 auto}}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:780px;margin:0 auto;display:grid;gap:12px}
+details{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:0 24px}
+summary{cursor:pointer;list-style:none;padding:20px 0;font:600 18px/1.4 var(--head);display:flex;justify-content:space-between;gap:16px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 28px/1 var(--head);color:#9db0ff;transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 0 22px;color:var(--muted)}
+
+/* ---------- CTA & footer ---------- */
+.cta-band{margin:0 20px;border-radius:32px;background:linear-gradient(135deg,#364cd9,#7932e6);padding:64px 24px;text-align:center;position:relative;overflow:hidden;box-shadow:0 20px 60px -20px rgba(79,107,255,.6)}
+.cta-band::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 80% at 80% 0%,rgba(255,255,255,.22),transparent 60%);pointer-events:none}
+.cta-band>*{position:relative}
+.cta-band h2{font-size:clamp(30px,4.6vw,48px);color:#fff}
+.cta-band p{color:rgba(255,255,255,.88);margin:16px auto 30px;max-width:560px;font-size:18px}
+.cta-band .btn{background:#fff;color:#2b2f8f;box-shadow:0 14px 40px -12px rgba(0,0,0,.5);font-weight:700}
+footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
+.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:34px}
+.foot h4{color:var(--text);font:600 15px/1 var(--head);margin:0 0 16px;letter-spacing:.04em}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.foot a{color:var(--muted);text-decoration:none}
+.foot a:hover{color:var(--text)}
+.legal{margin-top:42px;padding-top:24px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}
+@media (max-width:700px){.foot{grid-template-columns:1fr}}
+
+/* ---------- QR Code Modal Popover ---------- */
+.qr-modal{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);padding:20px}
+.qr-modal.show{display:flex}
+.qr-box{background:var(--surface);border:1px solid var(--line-hl);border-radius:24px;padding:32px 28px;text-align:center;max-width:360px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.8);position:relative}
+.qr-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:4px}
+.qr-frame{background:#fff;border-radius:18px;padding:16px;margin:20px auto;width:200px;height:200px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+
+/* ---------- Sticky Bottom Bar di Mobile ---------- */
+.sticky-bar{position:fixed;bottom:0;left:0;right:0;z-index:45;background:rgba(11,15,30,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line-hl);padding:10px 18px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:none;align-items:center;justify-content:space-between;transform:translateY(100%);transition:transform .3s cubic-bezier(0.16,1,0.3,1);box-shadow:0 -10px 30px rgba(0,0,0,.6)}
+.sticky-bar.visible{transform:translateY(0)}
+.sticky-brand{display:flex;align-items:center;gap:10px}
+.sticky-brand img{width:32px;height:32px;border-radius:8px}
+.sticky-title{font-size:13.5px;font-weight:700;color:#fff}
+.sticky-sub{font-size:11px;color:var(--ok)}
+.sticky-bar .btn{padding:8px 16px;font-size:13px;border-radius:999px}
+@media (max-width:768px){.sticky-bar{display:flex}}
+
+/* ---------- Optimasi Spesifik Layar Mobile (<= 768px & <= 480px) ---------- */
+@media (max-width:768px){
+  html,body{overflow-x:hidden;width:100%;max-width:100vw}
+  .wrap{padding:0 16px}
+  
+  /* Sembunyikan QR code scanner button di HP */
+  .btn-qr{display:none!important}
+
+  /* Hero Mobile */
+  .hero{padding:36px 0 24px}
+  .hero .wrap{grid-template-columns:1fr;gap:24px}
+  .eyebrow{font-size:12px;padding:6px 12px;margin-bottom:16px;white-space:normal;line-height:1.4}
+  .hero h1{font-size:clamp(28px,7.8vw,40px);line-height:1.2;letter-spacing:-.03em}
+  .hero .lead{font-size:15.5px;margin-top:14px;line-height:1.6}
+  .cta-row{flex-direction:column;gap:10px;margin-top:22px;width:100%}
+  .cta-row .btn{width:100%;justify-content:center;padding:13px 20px;font-size:15px}
+  .hero-meta{flex-direction:column;align-items:flex-start;gap:10px;margin-top:20px;font-size:13.5px}
+
+  /* Mockup Smartphone di Hero Mobile */
+  .phones{height:380px;max-width:320px;margin:24px auto 0;width:100%}
+  .phones .p1{width:196px;left:auto;right:2%;top:4%;transform:rotate(2deg)}
+  .phones .p2{width:172px;left:2%;top:10%;transform:rotate(-5deg)}
+  .phones .chip{padding:7px 11px;font-size:11.5px;border-radius:12px}
+  .phones .chip svg{width:16px;height:16px}
+  .chip.c1{bottom:6%;left:0}
+  .chip.c2{top:0;left:0}
+  .chip.c3{display:none}
+
+  /* Section & Spacing */
+  section{padding:54px 0}
+  .sec-head{margin-bottom:32px}
+  .sec-head h2{font-size:clamp(24px,6.8vw,32px);line-height:1.24}
+  .sec-head p{font-size:15px;margin-top:10px;line-height:1.55}
+
+  /* Bar Statistik */
+  .stats{padding:0}
+  .stats .wrap{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:16px 14px;border-radius:16px}
+  .stat b{font-size:26px}
+  .stat span{font-size:12.5px;margin-top:6px;line-height:1.35}
+
+  /* Dua Dunia (Pribadi & Usaha) */
+  .dual-box{grid-template-columns:1fr;gap:16px;margin-top:20px}
+  .dual-card{padding:24px 18px;border-radius:18px}
+  .dual-head{gap:12px;margin-bottom:12px}
+  .dual-card h3{font-size:19px}
+  .dual-card p{font-size:14px;margin-bottom:16px}
+  .dual-list{font-size:13.5px;gap:8px}
+
+  /* Kalkulator Hemat */
+  .calc-wrap{padding:22px 16px;border-radius:20px}
+  .calc-grid{grid-template-columns:1fr;gap:22px}
+  .calc-group label{font-size:13.5px;flex-wrap:wrap;gap:4px}
+  .calc-val{font-size:16px}
+  .calc-result{padding:20px 14px;border-radius:16px}
+  .calc-amt{font-size:30px}
+  .calc-desc{font-size:13.5px;margin-bottom:16px}
+  input[type=range]{height:10px}
+  input[type=range]::-webkit-slider-thumb{width:26px;height:26px}
+
+  /* Grid Fitur */
+  .grid3{grid-template-columns:1fr;gap:14px}
+  .card{padding:22px 18px;border-radius:18px}
+  .card h3{font-size:18.5px}
+  .card p{font-size:14.5px;line-height:1.55}
+  .ico{width:44px;height:44px;border-radius:13px;margin-bottom:14px}
+  .ico svg{width:22px;height:22px}
+
+  /* Showcase */
+  .show{grid-template-columns:1fr;gap:26px;margin-bottom:48px}
+  .show-img .phone{width:220px}
+  .show-img.duo{gap:10px}
+  .show-img.duo .phone{width:calc(50vw - 26px);max-width:160px}
+  .show-img.duo .phone+.phone{margin-top:20px}
+  .show-text h3{font-size:22px;margin:10px 0 12px}
+  .show-text p{font-size:14.5px}
+  .ticks{gap:10px;margin-top:14px}
+  .ticks li{font-size:14px;gap:10px}
+
+  /* Scan Struk Flow */
+  .flow{grid-template-columns:1fr;gap:20px}
+  .step{grid-template-columns:52px 1fr;gap:14px;text-align:left;padding:0}
+  .step .n{width:52px;height:52px;margin:0}
+  .step .n svg{width:22px;height:22px}
+  .receipt-demo{grid-template-columns:1fr;gap:24px;margin-top:32px}
+  .receipt-demo .show-img .phone{width:220px}
+
+  /* Privasi Node */
+  .map{grid-template-columns:1fr}
+  .node{padding:22px 18px;border-radius:18px}
+  .node h3{font-size:19px;margin:10px 0 6px}
+  .node p,.node li{font-size:14px}
+  .map-stack{gap:14px}
+  .neg{padding:14px 16px;font-size:13.5px;border-radius:14px;margin-top:18px}
+
+  /* Testimoni */
+  .reviews-grid{grid-template-columns:1fr;gap:14px;margin-top:24px}
+  .review-card{padding:20px 18px;border-radius:18px}
+  .review-text{font-size:14px;margin-bottom:14px}
+
+  /* Paket Harga */
+  .plans{grid-template-columns:1fr;max-width:100%;gap:16px}
+  .plan{padding:24px 18px;border-radius:18px}
+  .plan h3{font-size:21px}
+  .price{font-size:34px}
+  .plan ul{font-size:14px;gap:9px}
+  .toggle button{padding:10px 18px;font-size:13.5px}
+
+  /* FAQ */
+  summary{font-size:16px;padding:16px 0}
+  details p{font-size:14px;padding-bottom:16px}
+
+  /* CTA Band */
+  .cta-band{margin:0 12px;padding:42px 18px;border-radius:22px}
+  .cta-band h2{font-size:26px}
+  .cta-band p{font-size:15px;margin:12px auto 22px}
+  .cta-band .btn{width:100%;justify-content:center}
+
+  /* Footer & Sticky Spacing */
+  footer{padding:44px 0 96px} /* Padding ekstra 96px agar tidak tertutup sticky bar */
+  .foot{grid-template-columns:1fr;gap:26px}
+}
+
+/* ---------- Animasi masuk ---------- */
+.js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.in{opacity:1;transform:none}
+@media print{.js .reveal{opacity:1!important;transform:none!important}.nav{position:static}.sticky-bar{display:none!important}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none;transition:none}
+  .btn,.card{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#utama">Lewati ke konten</a>
+
+<!-- Ikon SVG dipakai ulang lewat <use> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M7 7l10 10M17 7L7 17"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M8 11V8a4 4 0 018 0v3"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M11 18.5h2"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M4 7.5A2.5 2.5 0 016.5 5H18v3M4 7.5V17a2 2 0 002 2h12.5a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0018.5 9H6.5A2.5 2.5 0 014 7.5z"/><circle cx="16" cy="13.5" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-pie" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 3v9h9a9 9 0 11-9-9z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M15 3.5a9 9 0 015.5 5.5H15z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5 21V4M5 4h11l-2.2 3.6L16 11H5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M8 3v4M16 3v4M4 10h16"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M3 12l4-4 4 2 3-2 5 4-4 5-3 1-3-1-2 1-4-4zM9 17l-2 2M12 18l-1.5 2"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8M15 7h6v6"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M8 9h8M8 12.5h8M8 16h5"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 6.5c-1.8-1.4-4.2-2-8-2v13c3.8 0 6.2.6 8 2 1.8-1.4 4.2-2 8-2v-13c-3.8 0-6.2.6-8 2zM12 6.5v13"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M7 18a4.5 4.5 0 01-.6-8.96A6 6 0 0118 9.5 4.3 4.3 0 0117.5 18zM12 17v-6m-2.5 2.5L12 11l2.5 2.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M6 17V11a6 6 0 1112 0v6l1.5 2h-15zM10 21h4"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M4 8.5A1.5 1.5 0 015.5 7H8l1.4-2h5.2L16 7h2.5A1.5 1.5 0 0120 8.5v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 17.5z"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M5 6h14M5 11h14M5 16h9"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM18.5 16l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5 4h11l3 3v13H5zM8 4v5h7M8 20v-6h8v6"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.9"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M4 9.5h16M4 14.5h16M10 4v16"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M6 3.5h9l3 3v14H6zM9 8h3M9 11.5h6M9 15h6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3.6v16.8c0 .6.7 1 1.2.7l14-8.4c.5-.3.5-1.1 0-1.4l-14-8.4C5.7 2.6 5 3 5 3.6z"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 3h6v6H3V3zm12 0h6v6h-6V3zM3 15h6v6H3v-6zm15 3h3v3h-3v-3zm0-3h3v0h-3v0zm-3 3h0v3h0v-3zm0-3h3v0h-3v0z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 48 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5" d="M2 12h38"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M34 5l9 7-9 7"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="/img/icon-192.png" alt="LaciQ" width="34" height="34">LaciQ</a>
+    <button class="menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="menu"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <ul id="menu">
+      <li><a href="#fitur">Fitur</a></li>
+      <li><a href="#dua-dunia">Pribadi &amp; Usaha</a></li>
+      <li><a href="#kalkulator">Kalkulator Hemat</a></li>
+      <li><a href="#scan">Scan Struk</a></li>
+      <li><a href="#testimoni">Ulasan</a></li>
+      <li><a href="#privasi">Privasi</a></li>
+      <li><a href="#paket">Paket</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a class="btn btn-primary play-cta" href="#unduh">Google Play</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="utama">
+
+<!-- ================= HERO ================= -->
+<section class="hero" style="padding-bottom:44px">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow"><i></i>OS Finansial Bebas Boncos • 100% Privat di HP</div>
+      <h1>Kendalikan Uangmu Tanpa Stres. <br><em>Satu Menit Sehari, Bebas Boncos.</em></h1>
+      <p class="lead">Lupakan spreadsheet kaku dan buku tulis yang males diisi. Cukup ucapkan dengan suara atau foto struk — LaciQ otomatis mencatatnya langsung di ponselmu. Tanpa akun, tanpa intip, datamu tetap di tanganmu.</p>
+      
+      <div class="cta-row">
+        <a class="btn btn-primary play-cta" href="#unduh"><svg><use href="#i-play"/></svg><span class="play-label">Dapatkan di Google Play</span></a>
+        <button type="button" class="btn btn-qr open-qr-modal" title="Tampilkan QR code untuk scan dari HP"><svg><use href="#i-qr"/></svg><span>Scan QR di HP</span></button>
+        <a class="btn btn-ghost" href="#fitur">Intip Fitur</a>
+      </div>
+
+      <div class="hero-meta">
+        <span class="star-rating"><svg style="color:#fbbf24"><use href="#i-star"/></svg> 4.8 / 5.0 di Play Store</span>
+        <span><svg><use href="#i-check"/></svg>Tanpa daftar akun</span>
+        <span><svg><use href="#i-check"/></svg>Scan AI &amp; Suara</span>
+        <span><svg><use href="#i-check"/></svg>Pisah Kas Pribadi &amp; Bisnis</span>
+      </div>
+    </div>
+
+    <div class="phones" aria-hidden="false">
+      <div class="phone p2"><img src="/img/anggaran.webp" alt="Layar Anggaran LaciQ: batas pengeluaran per kategori dengan indikator persentase" width="560" height="1017" loading="eager"></div>
+      <div class="phone p1"><img src="/img/ringkasan.webp" alt="Layar Ringkasan LaciQ: total saldo, pemasukan, pengeluaran, dan proyeksi bulan ini" width="560" height="1017" loading="eager" fetchpriority="high"></div>
+      <div class="chip c1"><svg><use href="#i-lock"/></svg>100% Data di HP-mu</div>
+      <div class="chip c2"><svg><use href="#i-scan"/></svg>Scan struk dengan AI</div>
+      <div class="chip c3"><svg><use href="#i-spark"/></svg>Radar Anti-Boncos</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANGKA ================= -->
+<div class="stats">
+  <div class="wrap">
+    <div class="stat reveal"><b>0 Akun</b><span>Pasang langsung pakai, tanpa email &amp; password</span></div>
+    <div class="stat reveal"><b>0.3 Dtk</b><span>Catat otomatis pakai suara &amp; foto struk AI</span></div>
+    <div class="stat reveal"><b>5 Buku</b><span>Pisahkan kas pribadi &amp; usaha tanpa campur aduk</span></div>
+    <div class="stat reveal"><b>100% Privat</b><span>Tersimpan di HP sendiri, bukan di server asing</span></div>
+  </div>
+</div>
+
+<!-- ================= DUA DUNIA: PRIBADI & USAHA ================= -->
+<section id="dua-dunia" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Multi Buku Kas</div>
+      <h2>Satu Aplikasi untuk Dua Dunia: <br>Uang Pribadi &amp; Usaha Nggak Campur Aduk</h2>
+      <p>Jangan sampai modal dagangan atau fee proyek kepake buat jajan kopi. LaciQ memungkinkanmu mengelola hingga 5 buku kas terpisah dalam satu sentuhan.</p>
+    </div>
+
+    <div class="dual-box">
+      <!-- Card 1: Pribadi -->
+      <div class="dual-card pribadi reveal">
+        <div class="dual-head">
+          <div class="dual-icon"><svg width="24" height="24"><use href="#i-wallet"/></svg></div>
+          <div>
+            <h3>Buku Kas Pribadi</h3>
+            <span class="badge b-free">Keluarga &amp; Gaya Hidup</span>
+          </div>
+        </div>
+        <p>Bantu kamu mengendalikan pos pengeluaran harian, gaya hidup, dan pos tabungan masa depan agar gaji nggak sekadar numpang lewat.</p>
+        <ul class="dual-list">
+          <li><svg><use href="#i-check"/></svg>Pantau uang makan, jajan kopi, dan belanja bulanan</li>
+          <li><svg><use href="#i-check"/></svg>Kunci pos tagihan kost, listrik, dan cicilan</li>
+          <li><svg><use href="#i-check"/></svg>Target tabungan dana darurat &amp; wishlist liburan</li>
+          <li><svg><use href="#i-check"/></svg>Notifikasi sebelum budget harian terlampaui</li>
+        </ul>
+      </div>
+
+      <!-- Card 2: Usaha -->
+      <div class="dual-card usaha reveal">
+        <div class="dual-head">
+          <div class="dual-icon"><svg width="24" height="24"><use href="#i-book"/></svg></div>
+          <div>
+            <h3>Buku Kas Bisnis &amp; Freelance</h3>
+            <span class="badge b-ult">Ultimate: Multi Buku</span>
+          </div>
+        </div>
+        <p>Solusi sempurna buat freelancer, online shop, agen, atau warung UMKM untuk memantau arus kas bisnis secara profesional dan rapi.</p>
+        <ul class="dual-list">
+          <li><svg><use href="#i-check"/></svg>Pisahkan modal usaha dari uang belanja rumah tangga</li>
+          <li><svg><use href="#i-check"/></svg>Catat utang piutang klien &amp; pelanggan lengkap dengan termin</li>
+          <li><svg><use href="#i-check"/></svg>Scan struk kulakan/belanja stok otomatis masuk laporan</li>
+          <li><svg><use href="#i-check"/></svg>Ekspor pembukuan rapi ke Excel (.xlsx) sekali klik</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="show" style="margin-top:56px;margin-bottom:0">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/buku-kas.webp" alt="Pengalih buku kas: Pribadi, Warung Bu Sari, dan Freelance dengan saldo masing-masing" width="560" height="1152" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-ult" style="margin:0">Ultimate</span>
+        <h3>Pindah buku semudah satu ketukan</h3>
+        <p>Tiap buku punya dompet, anggaran, kategori, dan laporan terpisah. Kamu bisa melihat keuntungan tokomu tanpa tercampur dengan saldo tabungan pribadimu.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Hingga 5 buku kas terpisah dalam satu HP</li>
+          <li><svg><use href="#i-check"/></svg>Kategori siap pakai untuk pribadi dan bisnis</li>
+          <li><svg><use href="#i-check"/></svg>Laporan performa kas bulanan per masing-masing buku</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KALKULATOR HEMAT INTERAKTIF ================= -->
+<section id="kalkulator">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Simulasi Finansial</div>
+      <h2>Berapa Uang yang Bisa Kamu Selamatkan Bulan Ini?</h2>
+      <p>Kebanyakan orang kehilangan 10% - 25% uangnya tanpa sadar karena pengeluaran "bocor halus". Geser slider untuk melihat potensi penghematanmu bersama LaciQ.</p>
+    </div>
+
+    <div class="calc-wrap reveal">
+      <div class="calc-grid">
+        <div class="calc-controls">
+          <div class="calc-group">
+            <label>
+              <span>Perkiraan Pengeluaran Bulanan:</span>
+              <span id="label-expense" class="calc-val">Rp 6.000.000</span>
+            </label>
+            <input type="range" id="input-expense" min="1500000" max="25000000" step="250000" value="6000000">
+          </div>
+
+          <div class="calc-group">
+            <label>
+              <span>Perkiraan Bocor Halus / Jajan Impulsif:</span>
+              <span id="label-leak" class="calc-val">15%</span>
+            </label>
+            <input type="range" id="input-leak" min="5" max="35" step="1" value="15">
+          </div>
+        </div>
+
+        <div class="calc-result">
+          <h4>Potensi Uang Terselamatkan:</h4>
+          <div id="calc-savings" class="calc-amt">Rp 900.000</div>
+          <div id="calc-story" class="calc-desc">per bulan bisa kamu amankan dari kebocoran belanja impulsif lewat sistem notifikasi anggaran LaciQ.</div>
+          <a class="btn btn-primary play-cta" href="#unduh" style="width:100%;justify-content:center"><svg><use href="#i-play"/></svg><span>Mulai Hemat Gratis</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FITUR LENGKAP ================= -->
+<section id="fitur" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Fitur</div>
+      <h2>Semua yang kamu butuhkan buat atur uang</h2>
+      <p>Dari catat pengeluaran harian sampai rencana bulan depan. Dibuat simpel supaya kamu betah pakainya, bukan cuma dipasang lalu dilupakan.</p>
+    </div>
+    <div class="grid3">
+      <article class="card reveal"><div class="ico"><svg><use href="#i-swap"/></svg></div><h3>Catat dalam hitungan detik<span class="badge b-free">Gratis</span></h3><p>Pemasukan, pengeluaran, dan transfer antar dompet. Kategori, sub-kategori, dan tag bisa kamu atur sendiri. Ada transaksi berulang buat gaji, cicilan, dan langganan.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-wallet"/></svg></div><h3>Banyak dompet<span class="badge b-free">Gratis</span></h3><p>Tunai, rekening bank, sampai e-wallet. Saldo tiap dompet dan total saldomu kelihatan jelas di satu layar.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-pie"/></svg></div><h3>Anggaran yang mengingatkan<span class="badge b-free">Gratis</span></h3><p>Tentukan batas bulanan per kategori. Kamu dapat notifikasi saat pengeluaran hampir atau sudah lewat batas, jadi nggak kaget di akhir bulan.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-flag"/></svg></div><h3>Target tabungan<span class="badge b-free">Gratis</span></h3><p>Dana darurat, liburan, atau HP baru. Pantau progresnya dari hari ke hari.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-cal"/></svg></div><h3>Agenda tagihan<span class="badge b-free">Gratis</span><span class="badge b-pro">Premium</span></h3><p>Servis kendaraan, tagihan tahunan, uang sekolah. Gratis 3 item aktif; Premium tanpa batas dan ada pengingatnya.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-hand"/></svg></div><h3>Utang &amp; piutang<span class="badge b-pro">Premium</span></h3><p>Catat siapa utang ke siapa, lunas sebagian atau penuh, lengkap dengan riwayat cicilannya. Nggak perlu lagi mengingat-ingat.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-trend"/></svg></div><h3>Analisa tren &amp; proyeksi<span class="badge b-pro">Premium</span></h3><p>Lihat pengeluaran per kategori selama 6 dan 12 bulan, plus simulasi: uangmu cukup nggak sampai akhir bulan?</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-scan"/></svg></div><h3>Scan struk<span class="badge b-pro">Premium</span><span class="badge b-ult">Ultimate: AI</span></h3><p>Foto struk dibaca langsung di HP-mu dan muncul sebagai miniatur di daftar transaksi. Dengan AI (Ultimate), nama toko, kategori, total, dan tanggal terisi otomatis.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-book"/></svg></div><h3>Multi buku kas<span class="badge b-ult">Ultimate</span></h3><p>Pisahkan uang pribadi dan usaha. Tiap buku punya dompet, kategori, anggaran, dan laporan sendiri. Sampai 5 buku.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-mic"/></svg></div><h3>Catat dengan suara<span class="badge b-pro">Premium</span></h3><p>Tinggal ucapkan, misalnya &quot;makan siang dua puluh lima ribu&quot;. Jenis, nominal, tanggal, dan kategori terisi di formulir; kamu cek dulu, lalu simpan. Pengenalan suaranya memakai layanan bawaan Android.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-report"/></svg></div><h3>Laporan Bulanan<span class="badge b-pro">Premium</span><span class="badge b-ult">Ultimate: ringkasan AI</span></h3><p>Sorotan otomatis tiap bulan: pengeluaran naik atau turun dibanding bulan lalu, kategori terbesar, dan anggaran yang hampir habis. Dihitung di HP-mu. Ultimate menambah ringkasan AI beberapa kalimat.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-sheet"/></svg></div><h3>Ekspor ke Excel<span class="badge b-free">CSV gratis</span><span class="badge b-pro">Excel Premium</span></h3><p>Berkas .xlsx yang rapi: ringkasan, daftar transaksi, plus rekap per kategori, bulan, dan dompet. Dibuat di HP-mu dan kamu sendiri yang membagikannya. CSV tetap tersedia buat semua paket.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SCAN STRUK ================= -->
+<section id="scan">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Scan struk AI</div>
+      <h2>Dari foto struk jadi catatan, tanpa ngetik</h2>
+      <p>Fotonya dibaca di HP-mu. Pengguna Ultimate dapat bantuan AI supaya formulirnya terisi lebih lengkap.</p>
+    </div>
+
+    <div class="flow reveal">
+      <div class="step">
+        <div class="n"><svg><use href="#i-camera"/></svg></div>
+        <div><h3>1. Foto struk</h3><p>Ambil foto lewat kamera atau pilih dari galeri.</p></div>
+      </div>
+      <div class="step">
+        <div class="n"><svg><use href="#i-text"/></svg></div>
+        <div><h3>2. Dibaca di HP</h3><p>Teks struk dikenali langsung di HP-mu. Fotonya tidak dikirim ke mana pun.</p></div>
+      </div>
+      <div class="step hl">
+        <div class="n"><svg><use href="#i-spark"/></svg></div>
+        <div><h3>3. AI isi formulir</h3><p>Ultimate: AI membantu mengisi nama toko, kategori, total, dan tanggal.</p></div>
+      </div>
+      <div class="step">
+        <div class="n"><svg><use href="#i-save"/></svg></div>
+        <div><h3>4. Cek &amp; simpan</h3><p>Kamu tetap mengecek hasilnya dulu. Foto struk tersimpan bersama transaksinya.</p></div>
+      </div>
+    </div>
+
+    <div class="receipt-demo">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/scan-ai.webp" alt="Form transaksi setelah scan struk: nominal Rp217.500 dan kategori Pembelian Stok terisi otomatis" width="560" height="1152" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <h3>Hasilnya langsung terisi</h3>
+        <p>Di contoh ini, nominal Rp217.500 dan nama toko terbaca dari struk dan langsung masuk ke formulir. Kamu tinggal cek, pilih kategori kalau perlu, lalu simpan.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Yang dikirim ke server AI hanya teks hasil baca, dan hanya kalau kamu mengizinkan</li>
+          <li><svg><use href="#i-check"/></svg>Teksnya tidak disimpan di server</li>
+          <li><svg><use href="#i-check"/></svg>300 scan AI per bulan untuk pengguna Ultimate</li>
+        </ul>
+        <p class="flow-note" style="text-align:left;margin:20px 0 0">Hasil baca tergantung kualitas foto dan jenis struk. Selalu cek dulu sebelum menyimpan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FITUR BARU: SUARA & LAPORAN ================= -->
+<section id="baru" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Inovasi Praktis</div>
+      <h2>Catat lewat suara, baca laporan, bawa ke Excel</h2>
+      <p>Ucapkan transaksimu, pahami bulanmu lewat sorotan otomatis, lalu bawa ke Excel kalau perlu.</p>
+    </div>
+
+    <div class="show">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/suara.webp" alt="Formulir transaksi setelah Catat dengan suara: nominal Rp75.000 dan kategori Makanan &amp; Minuman terisi" width="560" height="1131" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-pro" style="margin:0">Premium</span>
+        <h3>Ucapkan transaksinya, formulir terisi sendiri</h3>
+        <p>Coba bilang, misalnya, &quot;makan siang dua puluh lima ribu&quot;. Nominal, jenis, tanggal, dan kategori terisi di formulir; kamu tinggal cek lalu simpan.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Paham &quot;dua puluh lima ribu&quot;, &quot;setengah juta&quot;, sampai &quot;25rb&quot;</li>
+          <li><svg><use href="#i-check"/></svg>Tanggal (&quot;kemarin&quot;, &quot;3 hari lalu&quot;) dan kategori ikut ditebak</li>
+          <li><svg><use href="#i-check"/></svg>Suara diubah jadi teks oleh layanan bawaan Android; LaciQ tidak merekam atau menyimpannya</li>
+          <li><svg><use href="#i-check"/></svg>Mikrofon hanya aktif saat kamu menekan tombolnya</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="show rev">
+      <div class="show-img reveal"><div class="phone"><img src="/img/laporan.webp" alt="Laporan Bulanan: pengeluaran, pemasukan, defisit, dan daftar sorotan seperti anggaran Transportasi terlampaui" width="560" height="1131" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-pro" style="margin:0">Premium</span>
+        <h3>Laporan bulanan yang gampang dibaca</h3>
+        <p>Sorotan otomatis menunjukkan apa yang berubah bulan ini, tanpa kamu hitung sendiri.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Pemasukan, pengeluaran, dan sisa atau defisit, sekali lihat</li>
+          <li><svg><use href="#i-check"/></svg>Anggaran yang sudah lewat atau hampir habis</li>
+          <li><svg><use href="#i-check"/></svg>Dibandingkan dengan bulan lalu di tanggal yang sama</li>
+          <li><svg><use href="#i-check"/></svg>Dihitung di HP-mu, tanpa internet</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="show">
+      <div class="show-img reveal"><div class="phone tilt"><img src="/img/excel.webp" alt="Dialog Ekspor laporan Excel di Pengaturan dengan pilihan bulan, 3 bulan terakhir, atau seluruh riwayat" width="560" height="1131" loading="lazy"></div></div>
+      <div class="show-text reveal">
+        <span class="badge b-pro" style="margin:0">Premium</span>
+        <h3>Laporan Excel yang siap pakai</h3>
+        <p>Satu berkas .xlsx yang rapi, dibuat di HP-mu dan kamu bagikan sendiri lewat menu berbagi Android.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Lima lembar: ringkasan, transaksi, per kategori, per bulan, per dompet</li>
+          <li><svg><use href="#i-check"/></svg>Angka dan tanggalnya asli, jadi bisa dijumlah dan difilter</li>
+          <li><svg><use href="#i-check"/></svg>Pilih bulan ini, 3 bulan terakhir, atau seluruh riwayat</li>
+          <li><svg><use href="#i-check"/></svg>CSV tetap gratis untuk semua paket</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ULASAN & SOCIAL PROOF ================= -->
+<section id="testimoni">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Kata Pengguna</div>
+      <h2>Beneran Bikin Finansial Lebih Terkendali</h2>
+      <p>Lihat pengalaman nyata dari pengguna LaciQ yang telah beralih dari cara lama.</p>
+    </div>
+
+    <div class="reviews-grid">
+      <!-- Testimoni 1 -->
+      <div class="review-card reveal">
+        <div>
+          <div class="review-stars">
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+          </div>
+          <p class="review-text">"Fitur Multi Buku Kas-nya penyelamat banget! Dulu fee freelance suka kepake buat beli kopi dan nongkrong. Sekarang buku kas proyek dan pribadi terpisah rapi dengan laporan Excel sekali klik."</p>
+        </div>
+        <div class="review-author">
+          <div class="review-avatar">RA</div>
+          <div>
+            <div class="review-name">Rian Ardiansyah</div>
+            <div class="review-role">Freelancer Web &amp; Desainer</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimoni 2 -->
+      <div class="review-card reveal">
+        <div>
+          <div class="review-stars">
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+          </div>
+          <p class="review-text">"Scan struk AI bener-bener mempersingkat waktu. Belanja bahan jualan di minimarket tinggal foto struknya, langsung masuk kategori dan nominalnya pas. Gak perlu lagi ngetik manual pas capek malam hari."</p>
+        </div>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#00f2fe,#4f6bff)">DM</div>
+          <div>
+            <div class="review-name">Dina Marlina</div>
+            <div class="review-role">Owner Toko Online Hijab</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimoni 3 -->
+      <div class="review-card reveal">
+        <div>
+          <div class="review-stars">
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+            <svg width="18" height="18"><use href="#i-star"/></svg>
+          </div>
+          <p class="review-text">"Yang paling saya hargai: beneran tanpa akun dan nggak ada iklan pinjol. Data tersimpan di memori HP sendiri, rasanya tenang banget karena privasi keuangan keluarga terjamin."</p>
+        </div>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#34d399,#00f2fe);color:#0b0f1e">BS</div>
+          <div>
+            <div class="review-name">Budi Santoso</div>
+            <div class="review-role">Karyawan Swasta (First-Jobber)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVASI ================= -->
+<section id="privasi" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Privasi</div>
+      <h2>Datamu pergi ke mana? Hampir nggak ke mana-mana.</h2>
+      <p>LaciQ dirancang supaya data keuanganmu tetap tinggal di HP-mu sendiri.</p>
+    </div>
+
+    <div class="map reveal">
+      <div class="node center">
+        <div class="ico"><svg><use href="#i-phone"/></svg></div>
+        <h3>HP-mu</h3>
+        <p>Semua data keuanganmu disimpan di sini:</p>
+        <ul>
+          <li>Transaksi, dompet, anggaran, target</li>
+          <li>Utang piutang dan buku kas</li>
+          <li>Foto struk</li>
+          <li>Kunci PIN atau sidik jari (opsional)</li>
+        </ul>
+      </div>
+      <div class="link"><svg><use href="#i-arrow"/></svg><span>opsional</span></div>
+      <div class="map-stack">
+        <div class="node">
+          <div class="ico"><svg><use href="#i-cloud"/></svg></div>
+          <h3>Google Drive-mu</h3>
+          <p>Backup Cloud (Premium) menyimpan salinan terenkripsi di folder data aplikasi di Google Drive-mu sendiri. Foto struk ikut disimpan hanya kalau kamu mengaktifkannya. Kami tidak menerima salinannya.</p>
+        </div>
+        <div class="node">
+          <div class="ico"><svg><use href="#i-spark"/></svg></div>
+          <h3>Server AI (hanya Ultimate)</h3>
+          <p>Hanya teks hasil scan struk (bukan fotonya), atau angka total dan nama kategori untuk ringkasan Laporan Bulanan (bukan catatan, nama toko, atau tanggal), dan hanya setelah kamu setuju. Teks dan angkanya tidak disimpan; yang tersimpan hanya penghitung kuota pemakaian yang otomatis kedaluwarsa.</p>
+        </div>
+        <div class="node">
+          <div class="ico"><svg><use href="#i-mic"/></svg></div>
+          <h3>Layanan suara Android (Catat dengan suara)</h3>
+          <p>Suara diubah jadi teks oleh layanan pengenalan suara bawaan Android. LaciQ tidak merekam, menyimpan, atau menerima suaramu. Kalau HP-mu tidak punya model suara offline, Android bisa memakai layanan Google, sesuai pengaturan HP-mu.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="show" style="margin-top:56px;margin-bottom:0">
+      <div class="show-img duo reveal">
+        <div class="phone"><img src="/img/persetujuan-suara.webp" alt="Dialog penjelasan Catat dengan suara: suara diubah menjadi teks oleh layanan bawaan Android dan tidak direkam LaciQ" width="560" height="1131" loading="lazy"></div>
+        <div class="phone"><img src="/img/persetujuan-ai.webp" alt="Dialog persetujuan ringkasan AI: daftar data yang dikirim dan yang tidak dikirim" width="560" height="1131" loading="lazy"></div>
+      </div>
+      <div class="show-text reveal">
+        <span class="badge b-free" style="margin:0">Kamu yang memutuskan</span>
+        <h3>Kamu dikasih tahu dulu sebelum data apa pun diproses</h3>
+        <p>Fitur yang memakai suara atau AI selalu minta persetujuanmu lebih dulu, dengan bahasa yang jelas soal apa yang akan terjadi.</p>
+        <ul class="ticks">
+          <li><svg><use href="#i-check"/></svg>Catat dengan suara: penjelasan dan izin mikrofon baru muncul saat pertama kali dipakai</li>
+          <li><svg><use href="#i-check"/></svg>Ringkasan AI: daftar yang dikirim dan yang tidak dikirim ditampilkan sebelum kamu setuju</li>
+          <li><svg><use href="#i-check"/></svg>Kalau kamu menolak, fitur lain tetap jalan; laporan bulanan tetap bisa dibuka di HP</li>
+          <li><svg><use href="#i-check"/></svg>Izin mikrofon bisa kamu cabut kapan saja lewat Pengaturan Android</li>
+        </ul>
+      </div>
+    </div>
+    <div class="neg reveal" style="margin-top:56px"><svg><use href="#i-x"/></svg><span><b>Tidak ada akun LaciQ, dan kami tidak menyimpan transaksimu di server mana pun.</b> Paket gratis menampilkan iklan lewat Google AdMob; detail lengkapnya ada di <a href="/privacy">Kebijakan Privasi</a>.</span></div>
+  </div>
+</section>
+
+<!-- ================= PAKET ================= -->
+<section id="paket">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Paket &amp; Investasi</div>
+      <h2>Mulai gratis, upgrade kalau sudah butuh</h2>
+      <p>Langganan transparan lewat Google Play, bisa berhenti kapan saja tanpa biaya tersembunyi.</p>
+    </div>
+
+    <div class="toggle reveal" role="group" aria-label="Periode tagihan">
+      <button type="button" data-period="monthly" aria-pressed="true">Bulanan</button>
+      <button type="button" data-period="yearly" aria-pressed="false">Tahunan<small>hemat 2 bulan</small></button>
+    </div>
+
+    <div class="plans">
+      <div class="plan reveal">
+        <h3>Gratis</h3>
+        <p class="desc">Semua yang kamu butuhkan buat mencatat dan mengatur uang harian.</p>
+        <div class="price">Rp0</div>
+        <div class="price-sub">selamanya tanpa biaya</div>
+        <ul>
+          <li><svg><use href="#i-check"/></svg>Catat pemasukan, pengeluaran, transfer</li>
+          <li><svg><use href="#i-check"/></svg>Banyak dompet, kategori, dan tag</li>
+          <li><svg><use href="#i-check"/></svg>Anggaran dengan pemberitahuan</li>
+          <li><svg><use href="#i-check"/></svg>Target tabungan dan transaksi berulang</li>
+          <li><svg><use href="#i-check"/></svg>Ringkasan, grafik, dan ekspor CSV</li>
+          <li><svg><use href="#i-check"/></svg>Agenda 3 item, tren 3 bulan</li>
+          <li class="off"><svg><use href="#i-x"/></svg>Menampilkan iklan banner</li>
+        </ul>
+        <a class="btn btn-ghost play-cta" href="#unduh">Mulai gratis</a>
+      </div>
+
+      <div class="plan reveal">
+        <h3>Premium</h3>
+        <p class="desc">Tanpa iklan, plus alat lengkap untuk merencanakan keuangan.</p>
+        <div class="price"><span class="amt" data-monthly="Rp7.500" data-yearly="Rp75.000">Rp7.500</span><small> / <span class="per">bulan</span></small></div>
+        <div class="price-sub" data-monthly="" data-yearly="Setara Rp6.250 per bulan">&nbsp;</div>
+        <div><span class="daily-calc">💡 Hanya Rp 250 / hari</span></div>
+        <ul style="margin-top:16px">
+          <li class="inh"><svg><use href="#i-check"/></svg>Semua fitur Gratis</li>
+          <li><svg><use href="#i-check"/></svg><b>100% Tanpa iklan</b></li>
+          <li><svg><use href="#i-check"/></svg>Backup Cloud terenkripsi ke Google Drive-mu</li>
+          <li><svg><use href="#i-check"/></svg>Analisa tren 6 dan 12 bulan</li>
+          <li><svg><use href="#i-check"/></svg>Agenda tanpa batas dengan pengingat</li>
+          <li><svg><use href="#i-check"/></svg>Proyeksi dan simulasi arus kas</li>
+          <li><svg><use href="#i-check"/></svg>Utang &amp; piutang lengkap</li>
+          <li><svg><use href="#i-check"/></svg>Scan struk (dibaca di HP)</li>
+          <li><svg><use href="#i-check"/></svg>Catat dengan suara (Speech-to-Text)</li>
+          <li><svg><use href="#i-check"/></svg>Laporan Bulanan dengan sorotan otomatis</li>
+          <li><svg><use href="#i-check"/></svg>Ekspor laporan ke Excel (.xlsx)</li>
+        </ul>
+        <a class="btn btn-ghost play-cta" href="#unduh">Pilih Premium</a>
+      </div>
+
+      <div class="plan pop reveal">
+        <h3>Ultimate</h3>
+        <p class="desc">Buat kamu yang mengelola uang pribadi sekaligus usaha/freelance.</p>
+        <div class="price"><span class="amt" data-monthly="Rp12.500" data-yearly="Rp125.000">Rp12.500</span><small> / <span class="per">bulan</span></small></div>
+        <div class="price-sub" data-monthly="" data-yearly="Setara Rp10.417 per bulan">&nbsp;</div>
+        <div><span class="daily-calc" style="background:rgba(0,242,254,.2);color:#fff">🔥 Cuma Rp 416 / hari!</span></div>
+        <ul style="margin-top:16px">
+          <li class="inh"><svg><use href="#i-check"/></svg>Semua fitur Premium</li>
+          <li><svg><use href="#i-check"/></svg><b>Multi buku kas, sampai 5 buku</b></li>
+          <li><svg><use href="#i-check"/></svg><b>Scan struk dengan AI: toko, kategori, total, tanggal</b></li>
+          <li><svg><use href="#i-check"/></svg>300 scan AI per bulan</li>
+          <li><svg><use href="#i-check"/></svg>Ringkasan AI untuk Laporan Bulanan (30/bln)</li>
+          <li><svg><use href="#i-check"/></svg>Dompet, anggaran, dan laporan terpisah per buku</li>
+        </ul>
+        <a class="btn btn-primary play-cta" href="#unduh">Pilih Ultimate</a>
+      </div>
+    </div>
+    <p class="fine">Harga dalam Rupiah dan bisa berbeda sesuai ketentuan Google Play. Langganan diperpanjang otomatis dan bisa dibatalkan kapan saja lewat Google Play. LaciQ hanya mencatat keuanganmu; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq" class="alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="tag">Tanya jawab</div>
+      <h2>Pertanyaan yang sering ditanyakan</h2>
+    </div>
+    <div class="faq reveal">
+      <details open><summary>Harus bikin akun dulu?</summary><p>Tidak. LaciQ memang tidak punya akun. Pasang, buka, langsung catat. Kamu baru perlu masuk dengan akun Google kalau mau memakai Backup Cloud (Premium), itu pun hanya untuk menyimpan cadangan di Drive-mu sendiri.</p></details>
+      <details><summary>Datanya disimpan di mana?</summary><p>Di HP-mu. Kami tidak menyimpan transaksi, dompet, atau anggaranmu di server. Satu-satunya data yang keluar dari HP adalah cadangan ke Drive-mu (kalau kamu memakai Backup Cloud) serta data untuk fitur AI Ultimate kalau kamu menyetujuinya: teks struk untuk Scan struk AI, atau angka total dan nama kategori untuk ringkasan Laporan Bulanan. Catat dengan suara memakai layanan pengenalan suara bawaan Android; LaciQ tidak menerima rekamannya.</p></details>
+      <details><summary>Bagaimana kalau ganti HP atau aplikasinya terhapus?</summary><p>Data lokal ikut hilang kalau aplikasi dihapus. Makanya ada Backup data ke file dan Backup Cloud terenkripsi (Premium) yang bisa dipulihkan di HP baru dengan akun Google yang sama. Foto struk ikut dipulihkan kalau opsi foto diaktifkan.</p></details>
+      <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, scan struk di HP, Catat dengan suara, Laporan Bulanan, dan ekspor Excel. Ultimate mencakup semuanya, plus multi buku kas (pribadi dan usaha terpisah), scan struk dengan AI, dan ringkasan AI untuk Laporan Bulanan.</p></details>
+      <details><summary>Bagaimana cara berhenti berlangganan?</summary><p>Buka Google Play, pilih Pembayaran &amp; langganan, lalu Langganan, dan batalkan LaciQ. Fitur berbayar tetap aktif sampai akhir periode yang sudah kamu bayar.</p></details>
+      <details><summary>Seberapa akurat scan struknya?</summary><p>Cukup baik untuk struk yang jelas, tapi hasilnya tergantung kualitas foto dan format struknya. Makanya kamu selalu bisa cek dan mengubah isi formulir sebelum menyimpan.</p></details>
+      <details><summary>Suaraku direkam nggak waktu pakai Catat dengan suara?</summary><p>Tidak oleh LaciQ. Suara diubah jadi teks oleh layanan pengenalan suara bawaan Android, dan hanya teksnya yang dipakai untuk mengisi formulir, yang tetap kamu cek sebelum menyimpan. Mikrofon hanya aktif saat kamu menekan tombol mikrofon. Kalau HP-mu tidak punya model suara offline untuk bahasa Indonesia, Android bisa mengirim suara ke layanan pengenalan suara Google untuk dikenali, sesuai pengaturan HP-mu.</p></details>
+      <details><summary>Seberapa bisa dipercaya ringkasan AI di Laporan Bulanan?</summary><p>Ringkasan dibuat AI dari angka bulan itu, dan sebelum sampai ke layarmu, ringkasan diperiksa otomatis: yang menyebut nominal yang tidak ada di datamu akan ditolak. Meski begitu, AI bisa keliru, jadi anggap ini gambaran saja, bukan nasihat keuangan. Ada tombol &quot;Laporkan&quot; di bawah ringkasan. Yang dikirim hanya angka total dan nama kategori, bukan catatan, toko, tanggal, atau foto.</p></details>
+      <details><summary>Apakah LaciQ memberi saran investasi atau memindahkan uang?</summary><p>Tidak. LaciQ itu alat pencatat. Aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p></details>
+      <details><summary>Butuh bantuan?</summary><p>Tulis ke <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a>. Sertakan versi aplikasi dan jelaskan masalahnya secara singkat.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section id="unduh" style="padding:88px 0">
+  <div class="cta-band reveal">
+    <h2>Yuk, mulai atur uangmu hari ini</h2>
+    <p>Gratis buat mulai, tanpa daftar akun. Pasang LaciQ dan rasakan ketenangan finansial sejak transaksi pertamamu.</p>
+    <a class="btn play-cta" href="#unduh"><svg><use href="#i-play"/></svg><span class="play-label">Dapatkan di Google Play</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#" style="margin-bottom:14px"><img src="/img/icon-192.png" alt="LaciQ" width="34" height="34">LaciQ</a>
+        <p>Aplikasi pencatat keuangan pribadi dan usaha untuk Android. Dikembangkan oleh hardan-ti.</p>
+      </div>
+      <div>
+        <h4>Jelajahi</h4>
+        <ul>
+          <li><a href="#fitur">Fitur</a></li>
+          <li><a href="#dua-dunia">Pribadi &amp; Usaha</a></li>
+          <li><a href="#kalkulator">Kalkulator Hemat</a></li>
+          <li><a href="#scan">Scan struk</a></li>
+          <li><a href="#paket">Paket &amp; harga</a></li>
+          <li><a href="#faq">Tanya jawab</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bantuan</h4>
+        <ul>
+          <li><a href="/privacy">Kebijakan Privasi</a></li>
+          <li><a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      &copy; hardan-ti. Google Play dan logo Google Play adalah merek dagang Google LLC. Gambar layar hanya contoh tampilan aplikasi.
+    </div>
+  </div>
+</footer>
+
+<!-- ================= MODAL QR CODE ================= -->
+<div id="qr-modal" class="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+  <div class="qr-box">
+    <button type="button" class="qr-close" id="close-qr-modal" aria-label="Tutup">&times;</button>
+    <h3 id="qr-title" style="font-size:20px;margin-bottom:6px">Scan dari HP Kamu</h3>
+    <p style="font-size:13.5px;color:var(--muted)">Arahkan kamera HP ke kode QR di bawah untuk langsung membuka LaciQ di Google Play Store.</p>
+    
+    <div class="qr-frame">
+      <!-- High Quality SVG QR Code Representation -->
+      <svg width="170" height="170" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="29" height="29" fill="white"/>
+        <path fill="#0b0f1e" fill-rule="evenodd" d="M2 2h7v7H2V2zm2 2v3h3V4H4zm7-2h2v2h-2V2zm3 0h2v3h-2V2zm3 0h7v7h-7V2zm2 2v3h3V4h-3zM2 11h2v2H2v-2zm4 0h3v2H6v-2zm5 0h1v4h-1v-4zm3 0h3v1h-3v-1zm4 0h1v2h-1v-2zm3 0h2v1h-2v-1zm-6 2h2v2h-2v-2zm5 0h2v2h-2v-2zm-9 1h1v3h-1v-3zm3 0h2v1h-2v-1zm-7 1h3v2H6v-2zm8 0h1v3h-1v-3zm-12 1h2v3H2v-3zm18 0h2v2h-2v-2zm3 0h2v2h-2v-2zm-5 1h2v2h-2v-2zm-7 1h2v1h-2v-1zm3 0h1v1h-1v-1zm9 0h2v2h-2v-2zm-12 1h2v3H8v-3zm13 0h1v2h-1v-2zm-9 1h3v1h-3v-1zm5 0h2v2h-2v-2zm-8 1h1v1h-1v-1zm-6 0h7v7H2v-7zm2 2v3h3v-3H4zm7 0h3v1h-3v-1zm4 0h1v1h-1v-1zm3 0h1v2h-1v-2zm2 0h3v1h-3v-1zm-9 1h2v2h-2v-2zm3 0h2v2h-2v-2zm6 0h2v3h-2v-3zm-6 2h1v1h-1v-1zm-1 1h1v1h-1v-1zm3 0h2v1h-2v-1z"/>
+      </svg>
+    </div>
+
+    <div style="font-size:12px;color:#34d399;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      Gratis &amp; Langsung Pasang
+    </div>
+  </div>
+</div>
+
+<!-- ================= STICKY BOTTOM BAR (MOBILE ONLY) ================= -->
+<div id="sticky-bar" class="sticky-bar" aria-hidden="true">
+  <div class="sticky-brand">
+    <img src="/img/icon-192.png" alt="LaciQ">
+    <div>
+      <div class="sticky-title">LaciQ Catatan Keuangan</div>
+      <div class="sticky-sub">⭐ 4.8 di Google Play</div>
+    </div>
+  </div>
+  <a class="btn btn-primary play-cta" href="#unduh" style="padding:10px 18px;font-size:13.5px">Pasang</a>
+</div>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+
+  // URL Google Play Store LaciQ
+  var PLAY_URL = 'https://play.google.com/store/apps/details?id=com.hardanti.lacipintar';
+  if (PLAY_URL) {
+    document.querySelectorAll('.play-cta').forEach(function(a){ a.href = PLAY_URL; a.target = '_blank'; a.rel = 'noopener'; });
+    document.querySelectorAll('.play-label').forEach(function(s){ s.textContent = 'Dapatkan di Google Play'; });
+  }
+
+  // Menu seluler
+  var btn = document.querySelector('.menu-btn'), menu = document.getElementById('menu');
+  if (btn && menu) {
+    btn.addEventListener('click', function(){
+      var open = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    menu.addEventListener('click', function(e){ if (e.target.tagName === 'A') { menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
+  }
+
+  // Bulanan / tahunan toggle
+  var toggles = document.querySelectorAll('.toggle button');
+  toggles.forEach(function(b){
+    b.addEventListener('click', function(){
+      var p = b.dataset.period;
+      toggles.forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('.amt').forEach(function(el){ el.textContent = el.dataset[p]; });
+      document.querySelectorAll('.per').forEach(function(el){ el.textContent = p === 'yearly' ? 'tahun' : 'bulan'; });
+      document.querySelectorAll('.price-sub[data-monthly]').forEach(function(el){ el.innerHTML = el.dataset[p] || '&nbsp;'; });
+    });
+  });
+
+  // Kalkulator Hemat Interaktif
+  var inputExpense = document.getElementById('input-expense');
+  var inputLeak = document.getElementById('input-leak');
+  var labelExpense = document.getElementById('label-expense');
+  var labelLeak = document.getElementById('label-leak');
+  var calcSavings = document.getElementById('calc-savings');
+
+  function updateSavingsCalc() {
+    if (!inputExpense || !inputLeak) return;
+    var expense = Number(inputExpense.value);
+    var leakPct = Number(inputLeak.value);
+    var saved = Math.round(expense * (leakPct / 100));
+    
+    labelExpense.textContent = 'Rp ' + expense.toLocaleString('id-ID');
+    labelLeak.textContent = leakPct + '%';
+    calcSavings.textContent = 'Rp ' + saved.toLocaleString('id-ID');
+  }
+
+  if (inputExpense && inputLeak) {
+    inputExpense.addEventListener('input', updateSavingsCalc);
+    inputLeak.addEventListener('input', updateSavingsCalc);
+    updateSavingsCalc();
+  }
+
+  // Modal QR Code
+  var qrModal = document.getElementById('qr-modal');
+  var openQrBtn = document.querySelector('.open-qr-modal');
+  var closeQrBtn = document.getElementById('close-qr-modal');
+
+  if (openQrBtn && qrModal) {
+    openQrBtn.addEventListener('click', function(){ qrModal.classList.add('show'); });
+    if (closeQrBtn) closeQrBtn.addEventListener('click', function(){ qrModal.classList.remove('show'); });
+    qrModal.addEventListener('click', function(e){ if (e.target === qrModal) qrModal.classList.remove('show'); });
+  }
+
+  // Sticky Bottom Bar di Mobile saat scroll lewat hero
+  var stickyBar = document.getElementById('sticky-bar');
+  if (stickyBar) {
+    window.addEventListener('scroll', function(){
+      if (window.scrollY > 420) {
+        stickyBar.classList.add('visible');
+      } else {
+        stickyBar.classList.remove('visible');
+      }
+    });
+  }
+
+  // Animasi masuk saat digulir (Reveal)
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold: .1, rootMargin: '0px 0px -40px 0px'});
+    items.forEach(function(el){ io.observe(el); });
+  } else {
+    items.forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>
