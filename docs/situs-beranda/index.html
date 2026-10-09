@@ -240,7 +240,7 @@ section{padding:88px 0}
 .plan .desc{color:var(--muted);font-size:15px;margin-top:6px;min-height:46px}
 .price{margin:22px 0 4px;font:700 40px/1 var(--head)}
 .price small{font:500 16px/1 var(--body);color:var(--muted)}
-.price-sub{color:var(--muted);font-size:14px;min-height:21px;margin-bottom:22px}
+.price-sub{color:var(--muted);font-size:14px;min-height:42px;margin-bottom:18px}
 .plan ul{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:11px;font-size:15.5px;flex:1;align-content:start}
 .plan li{display:flex;gap:11px}
 .plan li svg{width:20px;height:20px;flex:none;color:var(--ok);margin-top:3px}
@@ -680,7 +680,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
         <h3>Premium</h3>
         <p class="desc">Tanpa iklan, plus alat lengkap untuk merencanakan keuangan.</p>
         <div class="price"><span class="amt" data-monthly="Rp7.500" data-yearly="Rp75.000">Rp7.500</span><small> / <span class="per">bulan</span></small></div>
-        <div class="price-sub" data-monthly="" data-yearly="Setara Rp6.250 per bulan">&nbsp;</div>
+        <div class="price-sub" data-monthly="+ PPN 11% (total Rp8.325)" data-yearly="Setara Rp6.250 per bulan. + PPN 11% (total Rp83.250)">+ PPN 11% (total Rp8.325)</div>
         <ul>
           <li class="inh"><svg><use href="#i-check"/></svg>Semua fitur Gratis</li>
           <li><svg><use href="#i-check"/></svg>Tanpa iklan</li>
@@ -701,7 +701,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
         <h3>Ultimate</h3>
         <p class="desc">Buat kamu yang mengelola uang pribadi sekaligus usaha.</p>
         <div class="price"><span class="amt" data-monthly="Rp12.500" data-yearly="Rp125.000">Rp12.500</span><small> / <span class="per">bulan</span></small></div>
-        <div class="price-sub" data-monthly="" data-yearly="Setara Rp10.417 per bulan">&nbsp;</div>
+        <div class="price-sub" data-monthly="+ PPN 11% (total Rp13.875)" data-yearly="Setara Rp10.417 per bulan. + PPN 11% (total Rp138.750)">+ PPN 11% (total Rp13.875)</div>
         <ul>
           <li class="inh"><svg><use href="#i-check"/></svg>Semua fitur Premium</li>
           <li><svg><use href="#i-check"/></svg>Multi buku kas, sampai 5 buku</li>
@@ -713,7 +713,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
         <a class="btn btn-primary play-cta" href="#unduh">Pilih Ultimate</a>
       </div>
     </div>
-    <p class="fine">Harga dalam Rupiah dan bisa berbeda sesuai ketentuan Google Play. Langganan diperpanjang otomatis dan bisa dibatalkan kapan saja lewat Google Play. LaciQ hanya mencatat keuanganmu; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p>
+    <p class="fine">Harga di atas belum termasuk PPN 11%, yang ditambahkan Google saat pembayaran. Contoh: Ultimate bulanan Rp12.500 + PPN Rp1.375 = Rp13.875. Harga bisa berbeda sesuai ketentuan Google Play. Langganan diperpanjang otomatis dan bisa dibatalkan kapan saja lewat Google Play. LaciQ hanya mencatat keuanganmu; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.</p>
   </div>
 </section>
 
@@ -729,6 +729,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
       <details><summary>Datanya disimpan di mana?</summary><p>Di HP-mu. Kami tidak menyimpan transaksi, dompet, atau anggaranmu di server. Satu-satunya data yang keluar dari HP adalah cadangan ke Drive-mu (kalau kamu memakai Backup Cloud) serta data untuk fitur AI Ultimate kalau kamu menyetujuinya: teks struk untuk Scan struk AI, atau angka total dan nama kategori untuk ringkasan Laporan Bulanan. Catat dengan suara memakai layanan pengenalan suara bawaan Android; LaciQ tidak menerima rekamannya.</p></details>
       <details><summary>Bagaimana kalau ganti HP atau aplikasinya terhapus?</summary><p>Data lokal ikut hilang kalau aplikasi dihapus. Makanya ada Backup data ke file dan Backup Cloud terenkripsi (Premium) yang bisa dipulihkan di HP baru dengan akun Google yang sama. Foto struk ikut dipulihkan kalau opsi foto diaktifkan.</p></details>
       <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, scan struk di HP, Catat dengan suara, Laporan Bulanan, dan ekspor Excel. Ultimate mencakup semuanya, plus multi buku kas (pribadi dan usaha terpisah), scan struk dengan AI, dan ringkasan AI untuk Laporan Bulanan.</p></details>
+      <details><summary>Kenapa harga di Google Play lebih tinggi dari harga di situs?</summary><p>Harga di situs belum termasuk PPN 11%. Saat membayar, Google menambahkan PPN dan menampilkan total sebelum kamu konfirmasi. Contoh: Ultimate bulanan Rp12.500 + PPN Rp1.375 = Rp13.875. PPN dipungut dan disetor Google, bukan biaya tambahan dari LaciQ.</p></details>
       <details><summary>Bagaimana cara berhenti berlangganan?</summary><p>Buka Google Play, pilih Pembayaran &amp; langganan, lalu Langganan, dan batalkan LaciQ. Fitur berbayar tetap aktif sampai akhir periode yang sudah kamu bayar.</p></details>
       <details><summary>Seberapa akurat scan struknya?</summary><p>Cukup baik untuk struk yang jelas, tapi hasilnya tergantung kualitas foto dan format struknya. Makanya kamu selalu bisa cek dan mengubah isi formulir sebelum menyimpan.</p></details>
       <details><summary>Suaraku direkam nggak waktu pakai Catat dengan suara?</summary><p>Tidak oleh LaciQ. Suara diubah jadi teks oleh layanan pengenalan suara bawaan Android, dan hanya teksnya yang dipakai untuk mengisi formulir, yang tetap kamu cek sebelum menyimpan. Mikrofon hanya aktif saat kamu menekan tombol mikrofon. Kalau HP-mu tidak punya model suara offline untuk bahasa Indonesia, Android bisa mengirim suara ke layanan pengenalan suara Google untuk dikenali, sesuai pengaturan HP-mu.</p></details>
