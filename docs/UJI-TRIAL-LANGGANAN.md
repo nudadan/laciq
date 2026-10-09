@@ -23,7 +23,8 @@ Pembelian uji ditandai "pembelian uji" di lembar pembayaran dan di RevenueCat ta
 `dompetku_ultimate`). Bila lembar pembayaran **tidak** menampilkan "Uji coba gratis 15 hari", akun itu tidak layak. Gunakan akun
 Google lain yang baru didaftarkan sebagai tester, atau produk yang berbeda. Itu perilaku benar, bukan bug.
 
-**Aplikasi build 14 belum menampilkan teks trial di paywall.** Tombol hanya menampilkan harga biasa. Syarat trial tampil di
+**Tidak perlu build atau bundle baru untuk menguji ini.** Aplikasi membeli lewat `PurchaseParams.package` (RevenueCat), yang otomatis memilih
+penawaran uji coba bila akun layak. **Aplikasi build 14 belum menampilkan teks trial di paywall.** Tombol hanya menampilkan harga biasa. Syarat trial tampil di
 **lembar pembayaran Google Play** setelah tombol ditekan. Itu sesuai harapan sampai rilis v1.1.
 
 ## 1. Persiapan (sekali)
@@ -96,6 +97,15 @@ Menguji bahwa pembayaran gagal tidak langsung memutus akses.
 | Setelah masa tenggang habis | Penangguhan akun (10 menit uji): **akses hilang** | |
 | Ubah kartu ke "selalu disetujui" | Langganan pulih, Premium kembali | |
 
+### U8. Naik paket saat masih trial (Premium ke Ultimate)
+Kode pembelian memakai penggantian produk (`productChangeInfo`) untuk naik paket, dan perilaku trial pada penggantian ditentukan Play,
+bukan aplikasi. Uji dan catat apa yang terjadi.
+| Langkah | Yang harus terlihat | Hasil |
+|---|---|---|
+| Saat Premium masih trial, buka Langganan, pilih **Ultimate tahunan**, beli | Lembar Play menjelaskan penggantian; catat apakah trial Ultimate ditawarkan atau langsung berbayar | |
+| Setelah selesai | Aplikasi menunjukkan **Ultimate**; fitur AI dan multi buku kas terbuka; tidak ada langganan ganda | |
+| RevenueCat | Entitlement `premium` dan `ultimate` aktif; hanya satu produk yang dipegang | |
+
 ## 3. Titik periksa di tiap tempat
 | Tempat | Yang dicek |
 |---|---|
@@ -118,7 +128,7 @@ Menguji bahwa pembayaran gagal tidak langsung memutus akses.
    belum menyinkronkan.
 
 ## 5. Hasil akhir
-- [ ] U1 sampai U6 lulus (U7 opsional)
+- [ ] U1 sampai U6 dan U8 lulus (U7 opsional)
 - [ ] Biaya AI per trial Ultimate dicatat (scan: __, ringkasan: __, perkiraan Rp __)
 - [ ] Catatan masalah dimasukkan ke `docs/rencana_implementasi_laciq.md` (Bagian 5 dan 7)
 - [ ] Tanggal uji: ________  Perangkat: ________  Akun tester: ________
