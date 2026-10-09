@@ -28,6 +28,7 @@ dan tanpa melanggar kebijakan Play.
 | Notifikasi lokal | Ada untuk Agenda (`flutter_local_notifications`, `zonedSchedule`); belum ada pengingat harian |
 | Iklan | Paket gratis menampilkan banner AdMob setelah masa tenggang iklan 30 hari sejak pemakaian pertama |
 | Masa tenggang pembayaran | **Sudah diatur** (diperiksa 2026-10-09): `monthly` 7 hari (penangguhan akun 53 hari), `yearly` 14 hari (penangguhan 46 hari), keduanya di Premium dan Ultimate |
+| RevenueCat (diperiksa 2026-10-09) | Kredensial akun layanan valid; empat produk Play terbit dan terhubung ke entitlement (Ultimate = 2 entitlement); offering `dompetku` berisi 4 paket yang benar. **Notifikasi pengembang Google (RTDN) BELUM tersambung** (tombol "Connect to Google" nonaktif, daftar topik kosong). Offering `default` lama (3 paket) masih ada |
 | Peninjauan AdMob | Aplikasi terverifikasi 2026-10-08, menunggu persetujuan (2-3 hari) |
 | Fitur per paket | Suara, scan struk di HP, Laporan Bulanan, Excel = Premium. Scan struk AI, ringkasan AI, multi buku kas = Ultimate |
 
@@ -68,6 +69,16 @@ Dikerjakan bertahap. Perubahan listing memicu peninjauan lagi; penawaran langgan
 * **Satu pengguna dapat dua trial** bila mencoba Premium lalu Ultimate (dua produk berbeda). Dapat diterima, tetapi pantau.
 * **Sebelum aplikasi menampilkan teks trial** (bagian 2.1), lembar pembayaran Google Play sudah menampilkan syarat trial. Itu cukup
   untuk kepatuhan; teks di aplikasi menambah konversi.
+
+### 1.5 Notifikasi pengembang real-time (RTDN) ke RevenueCat: BELUM
+* Tanpa RTDN, RevenueCat baru tahu perubahan langganan (mulai trial, konversi trial ke berbayar, pembatalan, masa tenggang, penangguhan,
+  pengembalian dana) lewat sinkron berkala atau saat aplikasi dibuka, jadi data dan status bisa terlambat. RevenueCat sendiri "sangat
+  menyarankan" menyambungkannya. Ini terutama penting sekarang karena trial 15 hari aktif.
+* **Langkah:** (1) Google Cloud: aktifkan Cloud Pub/Sub API di proyek yang sama dengan akun layanan; beri akun layanan peran yang
+  mengizinkan membuat/mengelola topik (Pub/Sub Admin) dan izin yang diminta RevenueCat. (2) RevenueCat > Apps > DompetKu (Play Store) >
+  Google developer notifications: pilih/buat topik lalu *Connect to Google*. (3) Play Console > Monetisasi > Penyiapan monetisasi:
+  pastikan topik tercatat dan kirim notifikasi uji. (4) Verifikasi: transaksi uji muncul di RevenueCat tanpa membuka aplikasi.
+* Perlu hak akses ke Google Cloud IAM; dikerjakan pemilik atau dengan persetujuannya.
 
 ### 1.3 Listing: pertahankan judul, uji deskripsi singkat
 * **Judul `LaciQ: Catatan Keuangan Harian` sudah tayang.** Jangan diubah lagi sekarang. Ukur dulu dampaknya 4 minggu (Statistik >
@@ -208,7 +219,7 @@ Catat di Play Console (Statistik) dan RevenueCat. Baseline diambil dari 14 hari 
 ## Bagian 6: Matriks prioritas dan jadwal
 | Fase | Waktu | Pekerjaan | Syarat |
 |---|---|---|---|
-| **0. Selesai** | 2026-10-08 | Grace period, trial 15 hari (Premium dan Ultimate tahunan), judul dan deskripsi singkat baru sudah diterapkan pemilik; sisa: uji pembelian trial dengan license tester dan cek akses RevenueCat saat masa tenggang | Tidak perlu rilis aplikasi |
+| **0. Selesai** | 2026-10-08 | Grace period, trial 15 hari (Premium dan Ultimate tahunan), judul dan deskripsi singkat baru sudah diterapkan pemilik; sisa: **sambungkan RTDN di RevenueCat** (lihat bagian 1.5), uji pembelian trial dengan license tester, dan cek akses saat masa tenggang | Tidak perlu rilis aplikasi |
 | **1. Pengamatan** | Minggu 1-2 | Promosi sosial sesuai `promosi/`; ajak 15-20 orang memberi masukan jujur; kumpulkan baseline | Hindari perubahan listing selama peninjauan AdMob |
 | **2. Eksperimen listing** | Minggu 2-4 | Uji deskripsi singkat baru lewat eksperimen listing | Data cukup (minimal beberapa ratus kunjungan) |
 | **3. Rilis v1.1** | Minggu 3-5 | Paywall trial, percobaan gratis (suara, scan HP), pengingat harian opt-in, App Shortcuts, CMP/UMP, sapaan "kamu"; satu build, satu peninjauan | AdMob selesai ditinjau; tes lulus; Data Safety dicek |
