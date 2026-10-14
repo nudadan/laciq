@@ -205,12 +205,36 @@ wajar jauh lebih rendah, jadi jangan dibandingkan langsung.
 | # | Asumsi | Cara memeriksa |
 |---|---|---|
 | 1 | API v1 RevenueCat menerima hibah promosional per entitlement dengan `end_time_ms` (atau durasi tetap `monthly`) | `curl` dengan secret key ke ID uji; baca dokumentasi RevenueCat saat Fase 0 |
+
+> **Terverifikasi dari dokumentasi (2026-10-14), belum dari panggilan nyata:** `POST /v1/subscribers/{id}/entitlements/{entitlement}/promotional` menerima `end_time_ms`; `duration` dan `start_time_ms` ditandai *deprecated*; sukses = HTTP 201; ada `POST …/revoke_promotionals`. **Catatan baru:** hibah dengan `end_time_ms` dalam 2 jam dari hibah promosional aktif dianggap duplikat dan tidak memperpanjang. Skrip uji Fase 0 ada di `tools/fase0-trial/` (lihat README di sana).
 | 2 | Entitlement promosional tampil di `CustomerInfo` aplikasi dan `EntitlementInfo.store` bernilai promotional | Hibah ke ID uji lalu cek di build debug |
 | 3 | `product_identifier` promosional di API subscriber berawalan `rc_promo_` | Baca respons `subscribers/{id}` setelah hibah |
 | 4 | `ANDROID_ID` bernilai sama setelah uninstall/reinstall di Galaxy Z Fold6 pada build Play | Pasang, catat, copot, pasang ulang, bandingkan |
 | 5 | Kunci API secret yang dipakai Worker punya izin menulis (hibah) | Coba hibah; bila 401, buat kunci V1 dengan izin yang sesuai |
 | 6 | Play Integrity (fase 3): kuota harian standar mencukupi dan token bisa diverifikasi dari Worker | Baca dokumentasi saat Fase 3 |
 | 7 | Perilaku buku kas terkunci di UI (apakah masih bisa dibaca) | Baca `ledgers_page.dart`/pengalih buku sebelum mengubah janji ke pengguna |
+
+### Hasil Fase 0 (dijalankan 2026-10-14)
+
+Dijalankan dengan `tools/fase0-trial/` pada Galaxy Z Fold6 (adb nirkabel) dan ID uji dari probe; hibah uji dicabut di akhir.
+
+| # | Asumsi | Hasil | Bukti |
+|---|---|---|---|
+| 1 | Hibah promosional per entitlement dengan `end_time_ms` | **Terbukti** | HTTP 201 untuk `ultimate` dan `premium`; `expires_date` tepat sama dengan `end_time_ms` (selisih 0 ms) |
+| 2 | Hibah terlihat di `CustomerInfo` aplikasi, `store` promotional | **Terbukti** | Probe di Fold: `ultimate` dan `premium` aktif, `store=promotional`, berakhir sama; tanpa perubahan kode aplikasi |
+| 3 | `product_identifier` berawalan `rc_promo_` | **Terbukti** | `rc_promo_ultimate_custom` dan `rc_promo_premium_custom` (bentuk `rc_promo_<entitlement>_custom` untuk hibah `end_time_ms`) |
+| 4 | `ANDROID_ID` sama setelah pasang ulang | **Terbukti pada kunci uji** | Nilai sama pada dua kali copot-pasang dengan kunci tanda tangan khusus probe; ID RevenueCat berubah tiap kali. **Belum terbukti dengan kunci Play** (konfirmasi di Fase 2) |
+| 5 | Kunci secret boleh menulis | **Terbukti** | Hibah HTTP 201 dengan kunci V1 yang dipakai uji. *Catatan:* pastikan itu kunci yang sama dengan rahasia Worker |
+| W | Keputusan Worker benar | **Terbukti untuk hibah aktif dan dicabut** | `hasUltimate=true` saat hibah aktif, `false` setelah dicabut. **Kedaluwarsa alami belum diuji** (`--wait-expiry`) |
+| i | Hibah ulang < 2 jam | **Sesuai dokumentasi** | Hibah +30 menit di atas hibah aktif tidak memperpanjang |
+
+**Akibat bagi rancangan:** tidak ada perubahan. Penentu sumber promosional di Worker memakai awalan `rc_promo_` pada `product_identifier`.
+
+**Sisa verifikasi sebelum/ saat membangun:**
+1. Uji kedaluwarsa alami (`rc_promo_check.mjs --minutes 3 --wait-expiry`) untuk mengonfirmasi `hasUltimate=false` tanpa pencabutan.
+2. `ANDROID_ID` pada build bertanda tangan Play (jalur pengujian internal) di Fase 2.
+3. Butir 6 (Play Integrity di Worker) dan butir 7 (perilaku buku terkunci di UI): bukan bagian skrip ini.
+4. Konfirmasi kunci secret yang dipakai uji sama dengan `REVENUECAT_SECRET_KEY` Worker (bila berbeda, hibah dari Worker bisa gagal berizin).
 
 ## 10. Keputusan
 

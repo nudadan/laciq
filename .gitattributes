@@ -1,0 +1,2 @@
+# Skrip shell harus selalu LF (CRLF merusak bash di Windows dengan autocrlf)
+*.sh text eol=lf

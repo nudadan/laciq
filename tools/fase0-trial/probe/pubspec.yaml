@@ -1,0 +1,13 @@
+name: fase0_probe
+description: "Probe uji Fase 0 trial Ultimate (ANDROID_ID dan entitlement RevenueCat). Bukan bagian aplikasi LaciQ."
+publish_to: 'none'
+version: 0.0.1+1
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  purchases_flutter: ^10.13.1
+  android_id: any

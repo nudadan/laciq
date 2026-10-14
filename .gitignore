@@ -59,3 +59,15 @@ docs/Service-Accounts/
 # Aset toko yang memuat data pribadi (screenshot dari HP); ikon/feature graphic boleh diatur terpisah
 store-assets/_raw/
 store-assets/screenshots/
+
+# Probe uji Fase 0 trial Ultimate (dihasilkan skrip; lihat tools/fase0-trial/README.md)
+tools/fase0-trial/probe/android/
+tools/fase0-trial/probe/work/
+tools/fase0-trial/probe/.metadata
+tools/fase0-trial/probe/pubspec.lock
+tools/fase0-trial/probe/.flutter-plugins-dependencies
+tools/fase0-trial/probe/analysis_options.yaml
+tools/fase0-trial/probe/test/
+tools/fase0-trial/probe/*.iml
+tools/fase0-trial/probe/README.md
+tools/fase0-trial/probe/.gitignore
