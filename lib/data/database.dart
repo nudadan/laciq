@@ -460,6 +460,28 @@ class GoalException implements Exception {
   String toString() => message;
 }
 
+/// Ringkasan dampak berakhirnya uji coba Ultimate (lihat [AppDatabase.trialImpact]).
+class TrialImpact {
+  const TrialImpact({
+    required this.extraLedgers,
+    required this.pausedRules,
+    required this.savingsCount,
+    required this.savingsTotal,
+  });
+
+  static const none = TrialImpact(
+    extraLedgers: 0,
+    pausedRules: 0,
+    savingsCount: 0,
+    savingsTotal: 0,
+  );
+
+  final int extraLedgers;
+  final int pausedRules;
+  final int savingsCount;
+  final int savingsTotal;
+}
+
 class SavingsView {
   const SavingsView({
     required this.savings,
@@ -1500,6 +1522,28 @@ class AppDatabase extends _$AppDatabase {
               ..where(transactions.receiptPath.isNotNull()))
             .get();
     return {for (final r in rows) ?r.read(transactions.receiptPath)};
+  }
+
+  /// Yang akan berubah saat uji coba Ultimate berakhir (semua buku): buku kas
+  /// tambahan yang terkunci, transaksi berulang di dalamnya yang dijeda, serta
+  /// tabungan berisi saldo yang tinggal bisa ditarik. Untuk dialog tonggak.
+  Future<TrialImpact> trialImpact() async {
+    final extraLedgers = (await select(
+      ledgers,
+    ).get()).where((l) => !l.archived && l.id != kMainLedgerId).toList();
+    final extraIds = {for (final l in extraLedgers) l.id};
+    final rules = (await watchRecurringRules(ledgerId: null).first).where(
+      (r) => r.rule.active && extraIds.contains(r.account.ledgerId),
+    );
+    final savings = (await watchSavings(
+      ledgerId: null,
+    ).first).where((s) => !s.savings.archived && s.balance > 0).toList();
+    return TrialImpact(
+      extraLedgers: extraLedgers.length,
+      pausedRules: rules.length,
+      savingsCount: savings.length,
+      savingsTotal: savings.fold(0, (sum, s) => sum + s.balance),
+    );
   }
 
   /// Jumlah transaksi aktif (semua buku). Dipakai untuk menentukan kapan

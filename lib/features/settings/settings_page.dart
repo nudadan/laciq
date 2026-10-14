@@ -23,6 +23,7 @@ import '../security/pin_screens.dart';
 import '../subscription/trial_offer.dart';
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart';
+import '../subscription/trial_countdown.dart' show trialCountdownProvider;
 import '../subscription/trial_service.dart' show TrialOffer;
 import 'excel_export_flow.dart';
 import 'restore_confirm.dart';
@@ -460,6 +461,14 @@ class _TrialOfferTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final countdown = ref.watch(trialCountdownProvider).value;
+    if (countdown != null && countdown.running) {
+      return ListTile(
+        leading: const Icon(Icons.hourglass_bottom_rounded),
+        title: Text('Uji coba Ultimate: ${countdown.daysLeft} hari lagi'),
+        subtitle: const Text('Semua fitur Premium dan Ultimate terbuka.'),
+      );
+    }
     final status = ref.watch(trialStatusProvider).value;
     if (status == null || !status.canStart) return const SizedBox.shrink();
     return ListTile(

@@ -495,6 +495,8 @@ void appTest(
   FakeVoiceRecognizer? voice,
   FakeAiReportService? aiReport,
   FakeTrialService? trialService,
+  /// Penyimpanan kunci-nilai awal (mis. memori uji coba yang sudah ada).
+  MemoryKeyValueStore? kvStore,
   List<Override> extraOverrides = const [],
   Duration grace = const Duration(seconds: 30),
   // Kebanyakan tes tidak menguji alur onboarding itu sendiri, jadi lewati
@@ -509,7 +511,7 @@ void appTest(
     addTearDown(tester.view.reset);
 
     final db = AppDatabase(NativeDatabase.memory());
-    final store = MemoryKeyValueStore();
+    final store = kvStore ?? MemoryKeyValueStore();
     final bio = biometric ?? FakeBiometric();
     final notifications = FakeNotificationSender();
     final sub = subscription ?? FakeSubscriptionStatus();

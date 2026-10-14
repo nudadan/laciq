@@ -18,6 +18,8 @@ import 'features/more/more_page.dart';
 import 'features/onboarding/onboarding_page.dart';
 import 'features/onboarding/onboarding_providers.dart';
 import 'features/security/lock_gate.dart';
+import 'features/subscription/trial_countdown.dart';
+import 'features/subscription/trial_status.dart';
 import 'features/settings/settings_page.dart';
 import 'features/transactions/receipt_storage.dart'
     show purgeOrphanReceiptFiles;
@@ -104,6 +106,8 @@ class _HomeShellState extends ConsumerState<HomeShell>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Sisa hari uji coba berubah seiring waktu.
+      ref.invalidate(trialCountdownProvider);
       _generateRecurring();
       _checkBudgetNotifications();
       _checkBackupReminder();
@@ -300,23 +304,38 @@ class _HomeShellState extends ConsumerState<HomeShell>
         ),
         body: SafeArea(
           bottom: false,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            // Fade-through: halaman lama hilang di separuh pertama, baru
-            // halaman baru muncul di separuh kedua (tidak tumpang-tindih).
-            switchOutCurve: const Interval(0.5, 1.0),
-            switchInCurve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween(
-                  begin: const Offset(0, 0.02),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
+          child: Column(
+            children: [
+              const TrialBanner(),
+              const TrialPromptHost(),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  // Fade-through: halaman lama hilang di separuh pertama, baru
+                  // halaman baru muncul di separuh kedua (tidak tumpang-tindih).
+                  switchOutCurve: const Interval(0.5, 1.0),
+                  switchInCurve: const Interval(
+                    0.5,
+                    1.0,
+                    curve: Curves.easeOutCubic,
+                  ),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween(
+                        begin: const Offset(0, 0.02),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                  child: KeyedSubtree(
+                    key: ValueKey(_index),
+                    child: _pages[_index],
+                  ),
+                ),
               ),
-            ),
-            child: KeyedSubtree(key: ValueKey(_index), child: _pages[_index]),
+            ],
           ),
         ),
         floatingActionButton: GradientFab(
