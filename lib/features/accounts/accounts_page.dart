@@ -329,7 +329,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                           'dikunci. Gunakan "Sesuaikan saldo" bila saldonya '
                           'tidak sesuai kenyataan.'
                     : null,
-                helperMaxLines: 3,
+                helperMaxLines: 5,
               ),
             ),
             if (_hasTransactions == true && !widget.existing!.archived) ...[
