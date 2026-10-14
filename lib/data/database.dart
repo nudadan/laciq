@@ -1502,6 +1502,17 @@ class AppDatabase extends _$AppDatabase {
     return {for (final r in rows) ?r.read(transactions.receiptPath)};
   }
 
+  /// Jumlah transaksi aktif (semua buku). Dipakai untuk menentukan kapan
+  /// penawaran uji coba pantas ditampilkan: setelah pengguna sudah mencatat.
+  Stream<int> watchActiveTransactionCount() {
+    final count = transactions.id.count();
+    return (selectOnly(transactions)
+          ..addColumns([count])
+          ..where(transactions.deletedAt.isNull()))
+        .map((r) => r.read(count) ?? 0)
+        .watchSingle();
+  }
+
   /// Transaksi tabungan hanya boleh diubah lewat halaman Tabungan
   /// ([setSavingsEntryDeleted]), karena saldo tabungan diturunkan darinya.
   Future<void> _rejectSavingsTx(String id) async {

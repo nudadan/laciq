@@ -11,7 +11,7 @@ import '../ledgers/ledgers_page.dart';
 import '../recurring/recurring_page.dart';
 import '../reports/monthly_report_page.dart';
 import '../savings/savings_page.dart';
-import '../subscription/subscription_page.dart';
+import '../subscription/trial_offer.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
 import '../tags/tags_page.dart';
 import '../trends/trend_page.dart';
@@ -47,13 +47,17 @@ class MorePage extends ConsumerWidget {
                   : ledgerCount > 1
                   ? '${ledgerCount - 1} buku terkunci · Fitur Ultimate'
                   : 'Fitur Ultimate',
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ultimate || ledgerCount > 1
-                      ? const LedgersPage()
-                      : SubscriptionPage(upgradeOnly: isPremiumTier),
-                ),
-              ),
+              onTap: () => ultimate || ledgerCount > 1
+                  ? Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LedgersPage(),
+                      ),
+                    )
+                  : openUpgradeOrTrial(
+                      context,
+                      ref,
+                      upgradeOnly: isPremiumTier,
+                    ),
             ),
           _MoreTile(
             icon: Icons.category_rounded,
@@ -95,13 +99,13 @@ class MorePage extends ConsumerWidget {
             subtitle: premium
                 ? 'Sorotan otomatis: kategori, anggaran, dan perbandingan'
                 : 'Fitur Premium',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => premium
-                    ? const MonthlyReportPage()
-                    : const SubscriptionPage(),
-              ),
-            ),
+            onTap: () => premium
+                ? Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MonthlyReportPage(),
+                    ),
+                  )
+                : openUpgradeOrTrial(context, ref),
           ),
           _MoreTile(
             icon: Icons.event_note_rounded,
@@ -120,12 +124,11 @@ class MorePage extends ConsumerWidget {
             subtitle: premium
                 ? 'Catat siapa berutang ke siapa, lunas sebagian atau penuh'
                 : 'Fitur Premium',
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    premium ? const DebtsPage() : const SubscriptionPage(),
-              ),
-            ),
+            onTap: () => premium
+                ? Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
+                  )
+                : openUpgradeOrTrial(context, ref),
           ),
           // Fitur Ultimate. Pengguna yang sudah punya tabungan (lalu turun
           // paket) tetap bisa membukanya untuk melihat dan menarik saldo;
@@ -139,13 +142,17 @@ class MorePage extends ConsumerWidget {
                   : hasSavings
                   ? 'Hanya bisa menarik saldo · Setor butuh Ultimate'
                   : 'Fitur Ultimate',
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ultimate || hasSavings
-                      ? const SavingsPage()
-                      : SubscriptionPage(upgradeOnly: isPremiumTier),
-                ),
-              ),
+              onTap: () => ultimate || hasSavings
+                  ? Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const SavingsPage(),
+                      ),
+                    )
+                  : openUpgradeOrTrial(
+                      context,
+                      ref,
+                      upgradeOnly: isPremiumTier,
+                    ),
             ),
           _MoreTile(
             icon: Icons.flag_outlined,

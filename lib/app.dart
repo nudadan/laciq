@@ -277,6 +277,9 @@ class _HomeShellState extends ConsumerState<HomeShell>
     // Jaga stream Ultimate tetap hidup sejak awal sesi: form Catat membacanya
     // sekali (ref.read) saat scan struk, dan nilai pertama stream selalu false.
     ref.watch(isUltimateProvider);
+    // Muat status penawaran uji coba sejak awal sesi supaya titik penawaran
+    // tidak menunggu jaringan saat diketuk (lihat openUpgradeOrTrial).
+    ref.watch(trialStatusProvider);
     return AmbientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,

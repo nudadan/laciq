@@ -6,7 +6,7 @@ import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/excel_export.dart';
 import '../../data/providers.dart';
-import '../subscription/subscription_page.dart';
+import '../subscription/trial_offer.dart';
 
 enum ExcelScope { month, last3Months, all }
 
@@ -17,12 +17,9 @@ enum ExcelScope { month, last3Months, all }
 /// server dan tidak ada izin tambahan.
 Future<void> startExcelExport(BuildContext context, WidgetRef ref) async {
   final messenger = ScaffoldMessenger.of(context);
-  final navigator = Navigator.of(context);
 
   if (!(ref.read(isPremiumProvider).value ?? false)) {
-    await navigator.push<void>(
-      MaterialPageRoute(builder: (_) => const SubscriptionPage()),
-    );
+    await openUpgradeOrTrial(context, ref);
     return;
   }
 

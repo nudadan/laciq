@@ -11,8 +11,7 @@ import '../../data/insights.dart';
 import '../../data/providers.dart';
 import '../ai/ai_extraction_service.dart' show AiQuotaExceeded;
 import '../security/lock_providers.dart' show keyValueStoreProvider;
-import '../subscription/subscription_page.dart';
-import '../subscription/subscription_plans.dart' show ActiveTier;
+import '../subscription/trial_offer.dart';
 
 /// Laporan bulanan berbasis aturan (fitur Premium). Semua angka dan kalimat
 /// dihitung di perangkat dari data yang sudah ada; tidak ada AI dan tidak ada
@@ -395,14 +394,7 @@ class _AiSummaryCardState extends ConsumerState<_AiSummaryCard> {
     if (!ultimate) {
       if (!onSale) return const SizedBox.shrink();
       return GlassCard(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => SubscriptionPage(
-              upgradeOnly:
-                  ref.read(subscriptionTierProvider) == ActiveTier.premium,
-            ),
-          ),
-        ),
+        onTap: () => openUpgradeOrTrial(context, ref),
         child: Row(
           children: [
             Icon(Icons.auto_awesome_rounded, color: scheme.primary),

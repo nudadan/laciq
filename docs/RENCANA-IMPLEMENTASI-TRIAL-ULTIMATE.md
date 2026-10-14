@@ -281,9 +281,21 @@ Cabang `trial-ultimate-app`.
 |---|---|---|
 | 1 | Pisahkan **tier akses** dari **tier berbayar** (5.2: cegah penagihan ganda) | **Selesai** (710 tes lulus) |
 | 2 | `TrialService` dan `ANDROID_ID` | **Selesai** (720 tes Flutter, 140 tes Worker); endpoint baca-saja `/trial/status` ditambahkan |
-| 3 | Kartu ajakan opt-in kontekstual dan titik penawaran | Belum |
+| 3 | Kartu ajakan opt-in kontekstual dan titik penawaran | **Selesai** (733 tes Flutter lulus) |
 | 4 | Hitung mundur, peringatan per tonggak, dialog akhir (10.4) | Belum |
 | 5 | Tes widget fase dan tonggak | Belum |
+
+**Butir 3, yang dilakukan:**
+- `openUpgradeOrTrial` (lib/features/subscription/trial_offer.dart): titik masuk tunggal untuk fitur terkunci. Bila status
+  trial (dimuat sejak awal sesi) menyatakan layak, tampil lembar konfirmasi; selain itu halaman langganan seperti biasa.
+  Dipasang di: menu Lainnya (Buku Kas, Tabungan, Laporan Bulanan, Utang & Piutang), Dashboard (kartu proyeksi), Agenda
+  (batas gratis), Analisa Tren, ekspor Excel, backup cloud, dan form transaksi (scan struk, suara, pengingat, upsell AI).
+- Lembar konfirmasi satu langkah: isi yang terbuka, kuota AI trial (60 scan, 6 ringkasan), kejujuran soal akhir trial,
+  satu kalimat privasi; tombol Mulai uji coba / Nanti saja / Lihat paket. Varian "Lanjutkan" untuk perangkat yang masih punya
+  trial berjalan. Trial TIDAK pernah dimulai tanpa ketukan pengguna.
+- `TrialOfferCard` di Dashboard: tampil bila layak, minimal 5 transaksi tercatat, dan belum ditutup (disembunyikan 3 hari).
+- Baris "Coba Ultimate gratis 30 hari" di Pengaturan > Langganan bila layak.
+- Pesan hasil klaim per kemungkinan jawaban server (`trialClaimMessage`).
 
 **Butir 2, yang dilakukan:**
 - Worker: `POST /trial/status` (baca saja, tanpa efek samping) mengembalikan `disabled | ultimate | active | resumable | used |

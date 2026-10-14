@@ -17,6 +17,7 @@ import '../../data/recurrence.dart';
 import '../ai/ai_extraction_service.dart';
 import '../ledgers/ledgers_page.dart' show RecordingInLedgerBanner;
 import '../security/lock_providers.dart' show keyValueStoreProvider;
+import '../subscription/trial_offer.dart';
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
 import '../voice/voice_entry_sheet.dart';
@@ -209,9 +210,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
     final messenger = ScaffoldMessenger.of(context);
     final premium = ref.read(isPremiumProvider).value ?? false;
     if (!premium) {
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()));
+      await openUpgradeOrTrial(context, ref);
       return;
     }
     final source = await showModalBottomSheet<ImageSource>(
@@ -269,9 +268,7 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
   Future<void> _voiceEntry() async {
     final premium = ref.read(isPremiumProvider).value ?? false;
     if (!premium) {
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()));
+      await openUpgradeOrTrial(context, ref);
       return;
     }
     if (!await ensureVoiceConsent(context, ref.read(keyValueStoreProvider)) ||
@@ -1118,9 +1115,7 @@ class _ReminderPicker extends ConsumerWidget {
         leading: Icons.notifications_active_rounded,
         title: 'Ingatkan saya',
         subtitle: 'Fitur Premium',
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()),
-        ),
+        onTap: () => openUpgradeOrTrial(context, ref),
       );
     }
     return Column(
@@ -1220,11 +1215,8 @@ class _UltimateUpsellState extends ConsumerState<_UltimateUpsell> {
             child: Text('Isi toko & kategori otomatis dengan AI — Ultimate'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const SubscriptionPage(upgradeOnly: true),
-              ),
-            ),
+            onPressed: () =>
+                openUpgradeOrTrial(context, ref, upgradeOnly: true),
             child: const Text('Lihat'),
           ),
           IconButton(

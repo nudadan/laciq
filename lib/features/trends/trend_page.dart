@@ -8,7 +8,7 @@ import '../../core/money.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
-import '../subscription/subscription_page.dart';
+import '../subscription/trial_offer.dart';
 import 'trend_settings.dart';
 
 /// Analisa tren pengeluaran per kategori — beda dari grafik tren gratis di
@@ -43,11 +43,7 @@ class TrendPage extends ConsumerWidget {
                 onSelectionChanged: (s) {
                   final selected = s.first;
                   if (!premium && selected != 3) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SubscriptionPage(),
-                      ),
-                    );
+                    openUpgradeOrTrial(context, ref);
                     return;
                   }
                   ref.read(trendWindowMonthsProvider.notifier).set(selected);

@@ -8,7 +8,7 @@ import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/recurrence.dart';
-import '../subscription/subscription_page.dart';
+import '../subscription/trial_offer.dart';
 import '../transactions/transaction_form_page.dart';
 import 'agenda_form_page.dart';
 import 'agenda_reminder_service.dart';
@@ -27,9 +27,7 @@ class AgendaPage extends ConsumerWidget {
     bool premium,
   ) async {
     if (!premium && count >= kFreeAgendaLimit) {
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()));
+      await openUpgradeOrTrial(context, ref);
       return;
     }
     await _open(context, const AgendaFormPage());

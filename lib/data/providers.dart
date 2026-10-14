@@ -367,6 +367,11 @@ final trialServiceProvider = Provider<TrialService>(
   ),
 );
 
+/// Jumlah transaksi aktif; syarat tampilnya kartu ajakan uji coba.
+final transactionCountProvider = StreamProvider.autoDispose<int>(
+  (ref) => ref.watch(databaseProvider).watchActiveTransactionCount(),
+);
+
 /// Status penawaran uji coba untuk perangkat ini; satu pengambilan per sesi.
 /// Panggil `ref.invalidate` setelah klaim agar tampilan diperbarui.
 final trialStatusProvider = FutureProvider<TrialStatus>(

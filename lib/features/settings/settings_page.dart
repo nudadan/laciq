@@ -20,8 +20,10 @@ import '../onboarding/onboarding_page.dart';
 import '../onboarding/onboarding_providers.dart';
 import '../security/lock_providers.dart';
 import '../security/pin_screens.dart';
+import '../subscription/trial_offer.dart';
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart';
+import '../subscription/trial_service.dart' show TrialOffer;
 import 'excel_export_flow.dart';
 import 'restore_confirm.dart';
 import 'share_file.dart';
@@ -47,7 +49,7 @@ class SettingsPage extends ConsumerWidget {
             const _Section('Tampilan'),
             const _Group([_ThemePicker()]),
             const _Section('Langganan'),
-            const _Group([_SubscriptionTile()]),
+            const _Group([_SubscriptionTile(), _TrialOfferTile()]),
             const _Section('Keamanan'),
             _Group([
               SwitchListTile(
@@ -451,6 +453,34 @@ class _Group extends StatelessWidget {
   }
 }
 
+/// Baris penawaran uji coba Ultimate (hanya bila perangkat layak). Selain di sini,
+/// penawaran muncul di Dashboard dan saat pengguna menyentuh fitur terkunci.
+class _TrialOfferTile extends ConsumerWidget {
+  const _TrialOfferTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(trialStatusProvider).value;
+    if (status == null || !status.canStart) return const SizedBox.shrink();
+    return ListTile(
+      leading: const Icon(Icons.workspace_premium_rounded),
+      title: Text(
+        status.offer == TrialOffer.resumable
+            ? 'Lanjutkan uji coba Ultimate'
+            : 'Coba Ultimate gratis 30 hari',
+      ),
+      subtitle: const Text('Tanpa kartu. Semua fitur Premium dan Ultimate.'),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () => showTrialOfferSheet(
+        context,
+        ref,
+        status: status,
+        upgradeOnly: ref.read(subscriptionTierProvider) == ActiveTier.premium,
+      ),
+    );
+  }
+}
+
 class _SubscriptionTile extends ConsumerWidget {
   const _SubscriptionTile();
 
@@ -584,9 +614,7 @@ class _CloudBackupTile extends ConsumerWidget {
         title: const Text('Backup cloud terenkripsi'),
         subtitle: const Text('Fitur Premium'),
         trailing: const Icon(Icons.chevron_right_rounded),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()),
-        ),
+        onTap: () => openUpgradeOrTrial(context, ref),
       );
     }
     return ListTile(

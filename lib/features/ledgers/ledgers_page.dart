@@ -9,8 +9,7 @@ import '../../data/csv_export.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../settings/share_file.dart';
-import '../subscription/subscription_page.dart';
-import '../subscription/subscription_plans.dart' show ActiveTier;
+import '../subscription/trial_offer.dart';
 
 /// Ikon yang ditawarkan untuk sebuah buku kas (subset dari [categoryIcons]).
 const ledgerIconKeys = <String>[
@@ -364,15 +363,7 @@ class LedgersPage extends ConsumerWidget {
                         Align(
                           alignment: Alignment.centerRight,
                           child: FilledButton(
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => SubscriptionPage(
-                                  upgradeOnly:
-                                      ref.read(subscriptionTierProvider) ==
-                                      ActiveTier.premium,
-                                ),
-                              ),
-                            ),
+                            onPressed: () => openUpgradeOrTrial(context, ref),
                             child: const Text('Lihat Ultimate'),
                           ),
                         ),

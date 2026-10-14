@@ -246,10 +246,14 @@ class FakeTrialService implements TrialService {
   FakeTrialService({
     this.currentStatus = TrialStatus.hidden,
     this.claimResult = const TrialClaimResult(TrialClaimOutcome.granted),
+    this.onClaim,
   });
 
   TrialStatus currentStatus;
   TrialClaimResult claimResult;
+
+  /// Dipanggil saat klaim, mis. untuk meniru hibah di FakeSubscriptionStatus.
+  void Function()? onClaim;
   var statusCalls = 0;
   var claimCalls = 0;
 
@@ -262,6 +266,7 @@ class FakeTrialService implements TrialService {
   @override
   Future<TrialClaimResult> claim() async {
     claimCalls++;
+    onClaim?.call();
     return claimResult;
   }
 }
@@ -456,6 +461,7 @@ class AppHarness {
     required this.review,
     required this.voice,
     required this.aiReport,
+    required this.trial,
   });
   final AppDatabase db;
   final MemoryKeyValueStore store;
@@ -468,6 +474,7 @@ class AppHarness {
   final FakeReviewLauncher review;
   final FakeVoiceRecognizer voice;
   final FakeAiReportService aiReport;
+  final FakeTrialService trial;
   AppLockService get lock => AppLockService(store);
 }
 
@@ -512,6 +519,16 @@ void appTest(
     final reviewLauncher = FakeReviewLauncher();
     final voiceRecognizer = voice ?? FakeVoiceRecognizer();
     final aiReportService = aiReport ?? FakeAiReportService();
+    final trial = trialService ?? FakeTrialService();
+    // Klaim yang berhasil memberi hak akses seperti hibah sungguhan.
+    trial.onClaim ??= () {
+      if (trial.claimResult.ok) {
+        sub.startTrial(
+          trial.claimResult.endsAt ??
+              DateTime.now().add(const Duration(days: 30)),
+        );
+      }
+    };
     if (seenOnboarding) await store.write(onboardingSeenKey, '1');
     if (preset != null) await preset(AppLockService(store));
     // Drift butuh async sungguhan: jalankan di luar jam palsu.
@@ -532,9 +549,7 @@ void appTest(
           reviewLauncherProvider.overrideWithValue(reviewLauncher),
           voiceRecognizerProvider.overrideWithValue(voiceRecognizer),
           aiReportServiceProvider.overrideWithValue(aiReportService),
-          trialServiceProvider.overrideWithValue(
-            trialService ?? FakeTrialService(),
-          ),
+          trialServiceProvider.overrideWithValue(trial),
           ...extraOverrides,
         ],
         child: const DompetPintarApp(),
@@ -556,6 +571,7 @@ void appTest(
           review: reviewLauncher,
           voice: voiceRecognizer,
           aiReport: aiReportService,
+          trial: trial,
         ),
       );
     } finally {

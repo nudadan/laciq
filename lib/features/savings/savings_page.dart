@@ -7,8 +7,7 @@ import '../../core/money.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
-import '../subscription/subscription_page.dart';
-import '../subscription/subscription_plans.dart' show ActiveTier;
+import '../subscription/trial_offer.dart';
 import 'savings_detail_page.dart';
 import 'savings_form_page.dart';
 
@@ -27,12 +26,8 @@ Future<void> openSavingsForm(
 /// Membuka halaman langganan (Ultimate) dari fitur Tabungan yang terkunci.
 /// Pelanggan Premium hanya diperlihatkan upgrade ke Ultimate.
 void openSavingsUpgrade(BuildContext context, WidgetRef ref) {
-  final premium = ref.read(subscriptionTierProvider) == ActiveTier.premium;
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => SubscriptionPage(upgradeOnly: premium),
-    ),
-  );
+  // Menawarkan uji coba lebih dulu bila perangkat layak.
+  openUpgradeOrTrial(context, ref);
 }
 
 /// Daftar tabungan (fitur Ultimate). Saldonya terpisah dari dompet: setoran

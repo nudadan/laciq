@@ -14,7 +14,7 @@ import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../data/recurrence.dart';
 import '../agenda/agenda_page.dart';
-import '../subscription/subscription_page.dart';
+import '../subscription/trial_offer.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -64,6 +64,7 @@ class DashboardPage extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 6),
+        const TrialOfferCard(),
         const _AgendaCard(),
         const _ProjectionCard(),
         GlassCard(
@@ -670,9 +671,7 @@ class _ProjectionCard extends ConsumerWidget {
     final premium = ref.watch(isPremiumProvider).value ?? false;
     if (!premium) {
       return GlassCard(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const SubscriptionPage()),
-        ),
+        onTap: () => openUpgradeOrTrial(context, ref),
         child: Row(
           children: [
             Icon(
