@@ -12,6 +12,7 @@ import { GrantIgnoredError, type EntitlementState } from "../src/revenuecat.ts";
 import {
   handleTrialClaim,
   hmacHex,
+  recordTtlSeconds,
   trialDayKey,
   trialKey,
   type TrialDeps,
@@ -26,6 +27,7 @@ const NONE: EntitlementState = { active: false, source: null, expiresAtMs: null 
 
 function makeTrial(over: Partial<TrialDeps> = {}) {
   const kv = new Map<string, string>();
+  const ttls = new Map<string, number>();
   const grants: { appUserId: string; endMs: number }[] = [];
   const invalidated: string[] = [];
   const budgetUsage = new Map<string, number>();
@@ -33,9 +35,14 @@ function makeTrial(over: Partial<TrialDeps> = {}) {
     enabled: true,
     days: 30,
     dailyClaimCap: 300,
+    recordRetentionDays: 365,
     store: {
       get: async (k) => kv.get(k) ?? null,
-      put: async (k, v) => void kv.set(k, v),
+      put: async (k, v, ttl) => {
+        kv.set(k, v);
+        if (ttl === undefined) ttls.delete(k);
+        else ttls.set(k, ttl);
+      },
     },
     hashDevice: (d) => hmacHex("rahasia-uji", d),
     getEntitlement: async () => NONE,
@@ -50,7 +57,7 @@ function makeTrial(over: Partial<TrialDeps> = {}) {
     now: () => NOW,
     ...over,
   };
-  return { deps, kv, grants, invalidated, budgetUsage };
+  return { deps, kv, ttls, grants, invalidated, budgetUsage };
 }
 
 function claim(body: unknown, init: { method?: string; path?: string; ip?: string } = {}) {
@@ -646,5 +653,80 @@ describe("handleTrialStatus", () => {
         .status,
       429,
     );
+  });
+});
+
+// ---- masa simpan catatan perangkat (12 bulan setelah uji coba berakhir) ----
+
+describe("masa simpan catatan perangkat", () => {
+  const RETENTION = 365 * 24 * 3600;
+  const TRIAL = 30 * 24 * 3600;
+
+  it("recordTtlSeconds: sisa trial ditambah retensi, minimal 60 detik", () => {
+    const now = NOW.getTime();
+    assert.equal(recordTtlSeconds(now + 30 * DAY, now, 365), TRIAL + RETENTION);
+    assert.equal(recordTtlSeconds(now + 5 * DAY, now, 365), 5 * 24 * 3600 + RETENTION);
+    // Trial sudah berakhir: hanya retensi.
+    assert.equal(recordTtlSeconds(now - DAY, now, 365), RETENTION);
+    // Tanpa retensi dan sudah berakhir: dipotong ke batas minimal KV.
+    assert.equal(recordTtlSeconds(now - DAY, now, 0), 60);
+  });
+
+  it("klaim baru: catatan perangkat berkedaluwarsa 365 hari setelah trial berakhir", async () => {
+    const t = makeTrial();
+    await handleTrialClaim(claim(valid), t.deps);
+    const hash = await hmacHex("rahasia-uji", DEVICE);
+    assert.equal(t.ttls.get(trialKey(hash)), TRIAL + RETENTION);
+  });
+
+  it("pasang ulang di masa trial: TTL dihitung dari akhir trial yang sama, tidak memanjang", async () => {
+    const first = makeTrial();
+    await handleTrialClaim(claim(valid), first.deps);
+
+    const later = new Date(NOW.getTime() + 10 * DAY);
+    const reinstall = makeTrial({ store: first.deps.store, now: () => later });
+    await handleTrialClaim(claim({ appUserId: USER2, deviceId: DEVICE }), reinstall.deps);
+
+    // Sisa 20 hari + 365 hari = tanggal habis yang SAMA seperti klaim awal (hari ke-30 + 365).
+    const hash = await hmacHex("rahasia-uji", DEVICE);
+    const expiryFirst = NOW.getTime() + 1000 * (TRIAL + RETENTION);
+    const expiryResumed = later.getTime() + 1000 * first.ttls.get(trialKey(hash))!;
+    assert.equal(expiryResumed, expiryFirst);
+  });
+
+  it("catatan yang hilang dipulihkan dengan TTL dari kedaluwarsa hibah", async () => {
+    const endMs = NOW.getTime() + 20 * DAY;
+    const t = makeTrial({
+      getEntitlement: async () => ({ active: true, source: "promo", expiresAtMs: endMs }),
+    });
+    await handleTrialClaim(claim(valid), t.deps);
+    const hash = await hmacHex("rahasia-uji", DEVICE);
+    assert.equal(t.ttls.get(trialKey(hash)), 20 * 24 * 3600 + RETENTION);
+  });
+
+  it("retensi dapat diatur (mis. 24 bulan)", async () => {
+    const t = makeTrial({ recordRetentionDays: 730 });
+    await handleTrialClaim(claim(valid), t.deps);
+    const hash = await hmacHex("rahasia-uji", DEVICE);
+    assert.equal(t.ttls.get(trialKey(hash)), TRIAL + 730 * 24 * 3600);
+  });
+
+  it("setelah catatan kedaluwarsa, perangkat boleh mencoba lagi (win-back)", async () => {
+    const first = makeTrial();
+    await handleTrialClaim(claim(valid), first.deps);
+    const hash = await hmacHex("rahasia-uji", DEVICE);
+
+    // Simulasi kedaluwarsa KV: catatan hilang.
+    first.kv.delete(trialKey(hash));
+    const comeback = makeTrial({
+      store: first.deps.store,
+      now: () => new Date(NOW.getTime() + 400 * DAY),
+    });
+    const res = await handleTrialClaim(
+      claim({ appUserId: USER2, deviceId: DEVICE }),
+      comeback.deps,
+    );
+    assert.equal(res.status, 201);
+    assert.equal(((await res.json()) as { status: string }).status, "granted");
   });
 });

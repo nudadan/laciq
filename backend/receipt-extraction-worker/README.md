@@ -105,7 +105,9 @@ Permintaan: `{ "appUserId": "<ID RevenueCat>", "deviceId": "<ANDROID_ID>", "inte
 akan ditolak.
 
 Sifat penting:
-- Kunci kelayakan = `HMAC-SHA256(TRIAL_HASH_SECRET, deviceId)` di KV tanpa kedaluwarsa (`trial:<hash>`); `deviceId` mentah tidak disimpan.
+- Kunci kelayakan = `HMAC-SHA256(TRIAL_HASH_SECRET, deviceId)` di KV (`trial:<hash>`); `deviceId` mentah tidak disimpan.
+  Catatan **terhapus otomatis `TRIAL_RECORD_RETENTION_DAYS` (365) hari setelah uji coba berakhir**; setelah itu perangkat boleh
+  mencoba lagi. Terapkan SEBELUM `TRIAL_ENABLED = "1"` pertama kali: catatan yang sudah ditulis tanpa TTL tidak akan kedaluwarsa.
   **Jangan mengubah `TRIAL_HASH_SECRET` setelah dipakai**: semua perangkat tampak baru.
 - Worker **tidak mempercayai HTTP 201** dari RevenueCat: setelah menghibahkan, ia membaca ulang entitlement dan memeriksa
   `expires_date` (hibah dalam 2 jam dari hibah promosional sebelumnya pada ID yang sama diabaikan diam-diam).

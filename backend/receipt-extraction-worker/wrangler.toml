@@ -34,6 +34,11 @@ TRIAL_REPORT_MONTHLY_LIMIT = "6"
 TRIAL_REPORT_DAILY_LIMIT = "2"
 # Klaim BARU maksimal per hari (UTC); meratakan lonjakan.
 TRIAL_DAILY_CLAIM_CAP = "300"
+# Catatan perangkat (kode ber-hash + ID anonim + waktu) disimpan sekian hari SETELAH uji coba berakhir,
+# lalu terhapus otomatis; setelah itu perangkat boleh mencoba lagi. Harus sama dengan kebijakan privasi
+# bagian 6c dan 9 ("sekitar 12 bulan"). Terapkan SEBELUM TRIAL_ENABLED pertama kali "1": catatan yang
+# sudah ditulis tanpa TTL tidak akan kedaluwarsa sendiri.
+TRIAL_RECORD_RETENTION_DAYS = "365"
 # Batas penegakan anggaran AI promo global (Rupiah per bulan). Plafon yang direlakan Rp1.500.000;
 # batas dipasang 90% dari itu karena penghitung KV tidak atomik. 0/kosong = AI uji coba mati.
 PROMO_AI_MONTHLY_BUDGET_RP = "1350000"

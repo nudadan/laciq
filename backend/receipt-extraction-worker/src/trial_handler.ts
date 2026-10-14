@@ -29,6 +29,8 @@ export interface TrialDeps {
   days: number;
   /** Maksimal klaim BARU per hari (UTC). */
   dailyClaimCap: number;
+  /** Hari catatan perangkat disimpan setelah uji coba berakhir (lihat [recordTtlSeconds]). */
+  recordRetentionDays: number;
   store: TrialStore;
   /** HMAC pengenal perangkat dengan rahasia server. */
   hashDevice(deviceId: string): Promise<string>;
@@ -43,6 +45,22 @@ export interface TrialDeps {
   integrity?: IntegrityVerifier;
   now(): Date;
   allowIp?(ip: string): Promise<boolean>;
+}
+
+/**
+ * Masa simpan catatan perangkat: [retentionDays] hari SETELAH uji coba berakhir
+ * (bukan sejak penulisan), sehingga menulis ulang saat pasang ulang di tengah
+ * trial tidak memperpanjang usianya. Setelah itu catatan terhapus otomatis dan
+ * perangkat boleh mencoba lagi. Lihat kebijakan privasi bagian 6c.
+ */
+export function recordTtlSeconds(
+  endsAtMs: number,
+  nowMs: number,
+  retentionDays: number,
+): number {
+  const untilEnd = Math.max(0, Math.ceil((endsAtMs - nowMs) / 1000));
+  // KV mensyaratkan TTL minimal 60 detik.
+  return Math.max(60, untilEnd + Math.round(retentionDays * 24 * 3600));
 }
 
 const MAX_BODY_BYTES = 2_000;
@@ -153,6 +171,7 @@ export async function handleTrialClaim(req: Request, deps: TrialDeps): Promise<R
       await deps.store.put(
         trialKey(deviceHash),
         JSON.stringify({ grantedAt: now.toISOString(), endsAt, appUserId: claim.appUserId }),
+        recordTtlSeconds(endsAt, nowMs, deps.recordRetentionDays),
       );
     }
     console.log("trial_claim result=active");
@@ -174,6 +193,7 @@ export async function handleTrialClaim(req: Request, deps: TrialDeps): Promise<R
     await deps.store.put(
       trialKey(deviceHash),
       JSON.stringify({ ...record, appUserId: claim.appUserId }),
+      recordTtlSeconds(record.endsAt, nowMs, deps.recordRetentionDays),
     );
     await deps.invalidateEntitlement(claim.appUserId);
     console.log("trial_claim result=resumed");
@@ -210,6 +230,7 @@ export async function handleTrialClaim(req: Request, deps: TrialDeps): Promise<R
       endsAt: endMs,
       appUserId: claim.appUserId,
     } satisfies TrialRecord),
+    recordTtlSeconds(endMs, nowMs, deps.recordRetentionDays),
   );
   await deps.store.put(dayKey, String(claimedToday + 1), DAY_TTL_SECONDS);
   await deps.invalidateEntitlement(claim.appUserId);

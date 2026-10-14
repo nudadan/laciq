@@ -33,6 +33,8 @@ export interface Env extends AiEnv {
   TRIAL_REPORT_DAILY_LIMIT?: string;
   /** Maksimal klaim baru per hari (UTC). */
   TRIAL_DAILY_CLAIM_CAP?: string;
+  /** Hari catatan perangkat disimpan SETELAH uji coba berakhir, lalu terhapus otomatis (bawaan 365). */
+  TRIAL_RECORD_RETENTION_DAYS?: string;
   /** Batas penegakan anggaran AI promo (Rupiah/bulan). 0/kosong = habis. */
   PROMO_AI_MONTHLY_BUDGET_RP?: string;
   /** off | shadow | lenient | strict (Play Integrity). */
@@ -82,6 +84,7 @@ export default {
         enabled: env.TRIAL_ENABLED === "1" && secret !== "",
         days: num(env.TRIAL_DAYS, 30),
         dailyClaimCap: num(env.TRIAL_DAILY_CLAIM_CAP, 300),
+        recordRetentionDays: num(env.TRIAL_RECORD_RETENTION_DAYS, 365),
         store: {
           get: (key) => env.RATE_LIMIT.get(key),
           put: (key, value, ttlSeconds) =>

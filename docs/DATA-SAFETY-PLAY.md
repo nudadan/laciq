@@ -98,7 +98,7 @@ bagian 1, 2, 4, 6, 6a, 9. Tanggal berlaku kebijakan masih placeholder `[ISI TANG
 |---|---|---|
 | **Tabungan** (Ultimate) dan **Sesuaikan saldo** | Tidak (seluruhnya lokal, ikut backup berkas/cloud seperti data lain) | **Tidak ada perubahan** |
 | **Uji coba Ultimate**: pemeriksaan kelayakan | **Ya**: ID anonim RevenueCat + `ANDROID_ID` ke Worker (koneksi TLS) | Tipe sudah dideklarasikan; perbarui **sumber** (lihat di bawah) |
-| **Uji coba Ultimate**: klaim | **Ya, dan disimpan**: HMAC(ANDROID_ID), ID anonim, waktu mulai/akhir | Tipe yang sama; tanpa batas waktu penyimpanan eksplisit |
+| **Uji coba Ultimate**: klaim | **Ya, dan disimpan**: HMAC(ANDROID_ID), ID anonim, waktu mulai/akhir | Tipe yang sama; disimpan **12 bulan setelah uji coba berakhir** lalu terhapus otomatis |
 | Pengingat akhir uji coba | Tidak (notifikasi lokal) | Tidak ada perubahan |
 | Play Integrity | **Belum aktif**: pendekode token tidak dipasang, aplikasi tidak mengirim token | Tidak dideklarasikan sekarang; **perbarui bila Fase 3 mengirim token** |
 
@@ -133,7 +133,9 @@ Alasannya:
    (disimpan ber-hash di server, bukan nilai aslinya). Tidak ada data keuangan yang dikirim."* (perubahan satu kalimat di
    `lib/features/subscription/trial_offer.dart`, ikut tes `trial_offer_test`).
    Alternatif yang lebih ketat: panggil `/trial/status` hanya saat kartu/titik penawaran akan tampil, bukan di awal sesi.
-2. **Masa simpan catatan perangkat.** Catatan `trial:<hash>` di KV saat ini **tanpa kedaluwarsa**. Teks kebijakan ditulis
+2. **[DITERAPKAN 2026-10-14: opsi 12 bulan setelah uji coba berakhir (`TRIAL_RECORD_RETENTION_DAYS = "365"`, TTL dihitung
+   dari tanggal berakhir); kebijakan 6c dan 9 diperbarui. Teks di bawah adalah catatan keputusan semula.]**
+   **Masa simpan catatan perangkat.** Catatan `trial:<hash>` di KV semula **tanpa kedaluwarsa**. Teks kebijakan ditulis
    sesuai itu ("selama program berlangsung atau sampai Anda meminta penghapusan"). Bila Anda ingin batas yang lebih
    tegas (mis. 24 bulan), pasang TTL pada `put` di `trial_handler.ts` dan ganti kalimat "Berapa lama" di 6c menjadi
    "disimpan sekitar 24 bulan lalu terhapus otomatis". Konsekuensi: perangkat bisa mengulang uji coba setelah TTL.
