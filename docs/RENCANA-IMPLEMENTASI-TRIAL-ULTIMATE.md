@@ -273,6 +273,28 @@ menyalakan lebih awal tidak berdampak bagi pengguna.
 **Deploy aman bagi pengguna yang ada:** tanpa hibah promosional, perilaku `/extract` dan `/report-insight` identik dengan
 sebelumnya (diuji). Format cache `ent:` berubah tetapi nilai lama `1`/`0` tetap terbaca.
 
+### Status Fase 2 (aplikasi)
+
+Cabang `trial-ultimate-app`.
+
+| # | Butir | Status |
+|---|---|---|
+| 1 | Pisahkan **tier akses** dari **tier berbayar** (5.2: cegah penagihan ganda) | **Selesai** (710 tes lulus) |
+| 2 | `TrialService` dan channel `ANDROID_ID` | Belum |
+| 3 | Kartu ajakan opt-in kontekstual dan titik penawaran | Belum |
+| 4 | Hitung mundur, peringatan per tonggak, dialog akhir (10.4) | Belum |
+| 5 | Tes widget fase dan tonggak | Belum |
+
+**Butir 1, yang dilakukan:**
+- `SubscriptionDetail` (tier berbayar, ID produk berbayar, `trialEndsAt`) diturunkan murni oleh `subscriptionDetailOf` dari
+  entitlement **dan** daftar langganan aktif (RevenueCat memetakan entitlement ke produk berkedaluwarsa terpanjang, sehingga hibah
+  yang lebih lama menyamarkan langganan berbayar pada objek entitlement).
+- `SubscriptionStatus.watchDetail()` baru. `watchIsPremium/Ultimate` tetap = hak akses (membuka fitur, termasuk uji coba).
+- `subscriptionTierProvider` kini = tier **berbayar**; `accessTierProvider` = hak akses; `trialEndsAtProvider` baru.
+- Penggantian produk Play (`productToReplace`), penantian pembelian (`paidTierSatisfies`), dan "dipulihkan" (`restorePurchases`)
+  hanya memandang langganan berbayar. Pembeli Ultimate saat uji coba tidak lagi salah dianggap sudah Ultimate.
+- Upsell AI di form transaksi tidak menawarkan Ultimate kepada pelanggan Premium yang sedang uji coba.
+
 ## 10. Keputusan
 
 ### Sudah diputuskan pemilik (2026-10-14)

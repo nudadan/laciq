@@ -97,9 +97,17 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   // Named param stays public (`premium`) while the backing field is
   // private (`_premium`), so an initializing formal doesn't fit here.
   // ignore: prefer_initializing_formals
-  FakeSubscriptionStatus({bool premium = false, bool ultimate = false})
-    : _premium = premium || ultimate,
-      _ultimate = ultimate {
+  /// [premium]/[ultimate] = langganan BERBAYAR. [trialEndsAt] = hibah uji coba Ultimate
+  /// yang sedang berjalan: hak akses menjadi Ultimate, tetapi tier berbayar tidak
+  /// berubah (lihat [SubscriptionDetail]).
+  FakeSubscriptionStatus({
+    bool premium = false,
+    bool ultimate = false,
+    this.trialEndsAt,
+  }) : _paidPremium = premium || ultimate,
+       _paidUltimate = ultimate,
+       _premium = premium || ultimate || trialEndsAt != null,
+       _ultimate = ultimate || trialEndsAt != null {
     // Nilai awal dikirim lewat generator async* (lihat watchIsPremium), BUKAN
     // onListen pada stream broadcast: Riverpod menjeda langganan saat rantai
     // provider baru dibuat, dan event broadcast yang datang saat dijeda hilang,
@@ -107,10 +115,28 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
     // seperti implementasi produksi (RevenueCatSubscriptionStatus).
     _controller = StreamController<bool>.broadcast();
     _ultimateController = StreamController<bool>.broadcast();
+    _detailController = StreamController<SubscriptionDetail>.broadcast();
   }
 
+  /// Hak akses (termasuk uji coba).
   bool _premium;
   bool _ultimate;
+
+  /// Langganan berbayar saja.
+  bool _paidPremium;
+  bool _paidUltimate;
+  final DateTime? trialEndsAt;
+  late final StreamController<SubscriptionDetail> _detailController;
+
+  SubscriptionDetail get _detail => SubscriptionDetail(
+    paidTier: ActiveTier.of(premium: _paidPremium, ultimate: _paidUltimate),
+    paidProductId: _paidUltimate
+        ? 'ultimate_monthly'
+        : _paidPremium
+        ? 'premium_monthly'
+        : null,
+    trialEndsAt: _paidUltimate ? null : trialEndsAt,
+  );
   late final StreamController<bool> _controller;
   late final StreamController<bool> _ultimateController;
   final List<SubscriptionPackage> packages = const [
@@ -162,14 +188,16 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   }
 
   @override
+  Stream<SubscriptionDetail> watchDetail() async* {
+    yield _detail;
+    yield* _detailController.stream;
+  }
+
+  @override
   Future<String?> appUserId() async => 'test-user';
 
   @override
-  Future<String?> activeSubscriptionProductId() async => _ultimate
-      ? 'ultimate_monthly'
-      : _premium
-      ? 'premium_monthly'
-      : null;
+  Future<String?> activeSubscriptionProductId() async => _detail.paidProductId;
 
   @override
   Future<List<SubscriptionPackage>> fetchPackages() async => packages;
@@ -178,11 +206,14 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   Future<void> purchase(SubscriptionPackage package) async {
     purchased.add(package.id);
     _premium = true;
+    _paidPremium = true;
     _controller.add(true);
     if (package.tier == SubscriptionTier.ultimate) {
       _ultimate = true;
+      _paidUltimate = true;
       _ultimateController.add(true);
     }
+    _detailController.add(_detail);
   }
 
   @override

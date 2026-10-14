@@ -757,6 +757,9 @@ class _TransactionFormPageState extends ConsumerState<TransactionFormPage> {
               // benar-benar dijual.
               if (_receiptPath != null &&
                   ref.watch(subscriptionTierProvider) == ActiveTier.premium &&
+                  // Pelanggan Premium yang sedang uji coba Ultimate sudah
+                  // punya fitur AI: jangan ditawari lagi.
+                  !(ref.watch(isUltimateProvider).value ?? false) &&
                   (ref.watch(ultimateAvailableProvider).value ?? false))
                 const _UltimateUpsell(),
               const SizedBox(height: 16),

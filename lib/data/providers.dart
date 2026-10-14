@@ -361,13 +361,32 @@ final isUltimateProvider = StreamProvider<bool>(
   (ref) => ref.watch(subscriptionStatusProvider).watchIsUltimate(),
 );
 
-/// Tingkat langganan pengguna saat ini, diturunkan dari stream entitlement
-/// yang sudah ada (tanpa panggilan jaringan baru).
+/// Rincian langganan menurut sumber: tier berbayar, ID produk berbayar, dan
+/// kedaluwarsa uji coba (lihat [SubscriptionDetail]).
+final subscriptionDetailProvider = StreamProvider<SubscriptionDetail>(
+  (ref) => ref.watch(subscriptionStatusProvider).watchDetail(),
+);
+
+/// Tingkat langganan BERBAYAR pengguna (pembelian di toko saja; hibah uji coba
+/// tidak dihitung). Dipakai untuk keputusan pembelian dan tampilan langganan:
+/// tombol upgrade, "Kelola langganan", dan penggantian produk. Untuk membuka
+/// fitur pakai [isPremiumProvider]/[isUltimateProvider] atau [accessTierProvider].
 final subscriptionTierProvider = Provider<ActiveTier>(
+  (ref) =>
+      ref.watch(subscriptionDetailProvider).value?.paidTier ?? ActiveTier.free,
+);
+
+/// Tingkat HAK AKSES: termasuk hibah uji coba. Membuka fitur mengikuti ini.
+final accessTierProvider = Provider<ActiveTier>(
   (ref) => ActiveTier.of(
     premium: ref.watch(isPremiumProvider).value ?? false,
     ultimate: ref.watch(isUltimateProvider).value ?? false,
   ),
+);
+
+/// Kedaluwarsa uji coba Ultimate yang sedang berjalan, null bila tidak ada.
+final trialEndsAtProvider = Provider<DateTime?>(
+  (ref) => ref.watch(subscriptionDetailProvider).value?.trialEndsAt,
 );
 
 /// Apakah paket Ultimate benar-benar ada di offering toko. Ajakan upgrade ke

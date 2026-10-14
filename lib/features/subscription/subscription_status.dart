@@ -54,15 +54,24 @@ abstract interface class SubscriptionStatus {
   Stream<bool> watchIsPremium();
 
   /// Sama seperti [watchIsPremium] tapi untuk tingkat Ultimate.
+  ///
+  /// Kedua stream di atas adalah HAK AKSES: hibah uji coba ikut dihitung.
+  /// Untuk keputusan pembelian dan tampilan langganan pakai [watchDetail].
   Stream<bool> watchIsUltimate();
+
+  /// Rincian menurut sumber: tingkat BERBAYAR (hanya pembelian di toko), ID
+  /// produk berbayarnya, dan kedaluwarsa uji coba Ultimate bila ada. Lihat
+  /// [SubscriptionDetail] untuk alasan pemisahan ini.
+  Stream<SubscriptionDetail> watchDetail();
 
   /// ID pengguna RevenueCat (anonim), dipakai backend untuk memverifikasi
   /// hak akses Ultimate. Null bila SDK belum siap.
   Future<String?> appUserId();
 
-  /// ID produk langganan yang sedang aktif (mis. `dompetku_premium`), atau null
-  /// bila tidak ada atau SDK belum siap. Dipakai untuk menggantikan langganan
-  /// Premium saat upgrade ke Ultimate.
+  /// ID produk langganan BERBAYAR yang sedang aktif (mis. `dompetku_premium`),
+  /// atau null bila tidak ada atau SDK belum siap. Hibah uji coba tidak
+  /// dihitung. Dipakai untuk menggantikan langganan Premium saat upgrade ke
+  /// Ultimate.
   Future<String?> activeSubscriptionProductId();
   Future<List<SubscriptionPackage>> fetchPackages();
   Future<void> purchase(SubscriptionPackage package);
@@ -118,6 +127,37 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
   Stream<bool> watchIsUltimate() => _watchEntitlement(kUltimateEntitlementId);
 
   @override
+  Stream<SubscriptionDetail> watchDetail() =>
+      _watchInfo(SubscriptionDetail.free, _detailOf);
+
+  /// Memetakan CustomerInfo ke [SubscriptionDetail]. Hibah uji coba dikenali
+  /// dari `store == promotional`.
+  static SubscriptionDetail _detailOf(CustomerInfo info) {
+    return subscriptionDetailOf(
+      premiumEntitlementId: kPremiumEntitlementId,
+      ultimateEntitlementId: kUltimateEntitlementId,
+      entitlements: [
+        for (final e in info.entitlements.active.values)
+          ActiveEntitlement(
+            id: e.identifier,
+            productId: e.productIdentifier,
+            promotional: e.store == Store.promotional,
+            expiresAt: DateTime.tryParse(e.expirationDate ?? ''),
+          ),
+      ],
+      subscriptions: [
+        for (final s in info.subscriptionsByProductIdentifier.values)
+          if (s.isActive)
+            ActiveSubscription(
+              productId: s.productIdentifier,
+              promotional: s.store == Store.promotional,
+              expiresAt: DateTime.tryParse(s.expiresDate ?? ''),
+            ),
+      ],
+    );
+  }
+
+  @override
   Future<String?> appUserId() async {
     if (!_configured) return null;
     try {
@@ -132,20 +172,25 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
   /// plugin mengirim ulang info yang sama.
   static final _pushedInfo = StreamController<CustomerInfo>.broadcast();
 
-  Stream<bool> _watchEntitlement(String entitlementId) async* {
+  Stream<bool> _watchEntitlement(String entitlementId) => _watchInfo(
+    false,
+    (info) => info.entitlements.active.containsKey(entitlementId),
+  );
+
+  /// Memantau CustomerInfo dan memetakannya dengan [map]. [initial] dikirim
+  /// lebih dulu supaya provider tidak menggantung menunggu nilai pertama.
+  Stream<T> _watchInfo<T>(T initial, T Function(CustomerInfo) map) async* {
     if (!_configured) {
-      yield false;
+      yield initial;
       return;
     }
     // Status awal aman sebelum info pertama datang (native butuh waktu; tanpa
     // ini provider bisa menggantung menunggu nilai pertama tak terhingga).
-    yield false;
+    yield initial;
 
-    final controller = StreamController<bool>();
+    final controller = StreamController<T>();
     void listener(CustomerInfo info) {
-      if (!controller.isClosed) {
-        controller.add(info.entitlements.active.containsKey(entitlementId));
-      }
+      if (!controller.isClosed) controller.add(map(info));
     }
 
     Purchases.addCustomerInfoUpdateListener(listener);
@@ -249,37 +294,30 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     SubscriptionTier tier,
     CustomerInfo purchased,
   ) async {
-    final id = tier == SubscriptionTier.ultimate
-        ? kUltimateEntitlementId
-        : kPremiumEntitlementId;
-    if (purchased.entitlements.active.containsKey(id)) return;
+    // Yang ditunggu adalah pembelian BERBAYAR: hibah uji coba yang sudah aktif
+    // tidak boleh membuat penantian berhenti sebelum pembelian tercatat.
+    bool bought(CustomerInfo info) =>
+        paidTierSatisfies(_detailOf(info).paidTier, tier);
+    if (bought(purchased)) return;
     for (var i = 0; i < 5; i++) {
       await Future<void>.delayed(const Duration(seconds: 2));
       try {
         await Purchases.invalidateCustomerInfoCache();
         final info = await Purchases.getCustomerInfo();
-        if (info.entitlements.active.containsKey(id)) return;
+        if (bought(info)) return;
       } catch (_) {
         // Coba lagi pada putaran berikutnya.
       }
     }
   }
 
-  /// Membaca langganan yang sedang aktif dari RevenueCat: tingkatnya dan ID
-  /// produk yang dipegang entitlement `premium`. Null bila SDK belum siap
+  /// Membaca langganan BERBAYAR yang sedang aktif dari RevenueCat. Hibah uji
+  /// coba tidak dihitung (lihat [SubscriptionDetail]). Null bila SDK belum siap
   /// atau gagal dibaca (pembelian lanjut tanpa penggantian).
-  Future<({ActiveTier tier, String? productId})?> _activeSubscription() async {
+  Future<SubscriptionDetail?> _activeSubscription() async {
     if (!_configured) return null;
     try {
-      final active = (await Purchases.getCustomerInfo()).entitlements.active;
-      final premium = active[kPremiumEntitlementId];
-      return (
-        tier: ActiveTier.of(
-          premium: premium != null,
-          ultimate: active.containsKey(kUltimateEntitlementId),
-        ),
-        productId: premium?.productIdentifier,
-      );
+      return _detailOf(await Purchases.getCustomerInfo());
     } catch (_) {
       return null;
     }
@@ -287,7 +325,7 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
 
   @override
   Future<String?> activeSubscriptionProductId() async =>
-      (await _activeSubscription())?.productId;
+      (await _activeSubscription())?.paidProductId;
 
   /// Bila pengguna Premium membeli Ultimate, langganan Premium digantikan
   /// (dibayar selisih untuk sisa siklus) supaya tidak ada dua langganan.
@@ -298,12 +336,10 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     SubscriptionPackage package,
   ) async {
     final current = await _activeSubscription();
-    final oldId = current?.productId;
-    if (current == null ||
-        oldId == null ||
-        !shouldReplaceProduct(active: current.tier, target: package.tier)) {
-      return null;
-    }
+    final oldId = current == null
+        ? null
+        : productToReplace(detail: current, target: package.tier);
+    if (oldId == null) return null;
     return StoreProductChangeInfo(
       oldId,
       replacementMode: StoreReplacementMode.chargeProratedPrice,
@@ -340,8 +376,7 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     // Info dari restore bisa kosong walau server sudah tahu; cek sekali lagi
     // langsung ke server sebelum menyimpulkan tidak ada langganan.
     final fresh = await _pushLatestInfo() ?? restored;
-    final active = fresh.entitlements.active;
-    return active.containsKey(kPremiumEntitlementId) ||
-        active.containsKey(kUltimateEntitlementId);
+    // Hanya langganan berbayar yang dihitung "dipulihkan"; hibah uji coba tidak.
+    return _detailOf(fresh).paidTier != ActiveTier.free;
   }
 }
