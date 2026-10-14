@@ -62,7 +62,7 @@ void main() {
     expect(find.text('Ekspor laporan ke Excel'), findsOneWidget);
     expect(find.text('Ekspor CSV'), findsOneWidget);
 
-    // Halaman Ultimate: kedua fitur khusus berlabel Ultimate.
+    // Halaman Ultimate: fitur khusus berlabel Ultimate.
     for (var i = 0; i < 3; i++) {
       await tester.tap(find.text('Lanjut'));
       await settle(tester);
@@ -70,7 +70,8 @@ void main() {
     expect(find.text('Multi buku kas'), findsOneWidget);
     expect(find.text('Scan struk dengan AI'), findsOneWidget);
     expect(find.text('Ringkasan AI untuk Laporan Bulanan'), findsOneWidget);
-    expect(find.textContaining('tiga fitur khusus'), findsOneWidget);
+    expect(find.textContaining('empat fitur khusus'), findsOneWidget);
+    expect(find.text('Tabungan'), findsOneWidget);
     expect(find.text('Ultimate'), findsWidgets);
 
     // Halaman paket: perbandingan Gratis, Premium, Ultimate.

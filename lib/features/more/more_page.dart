@@ -10,6 +10,7 @@ import '../goals/goals_page.dart';
 import '../ledgers/ledgers_page.dart';
 import '../recurring/recurring_page.dart';
 import '../reports/monthly_report_page.dart';
+import '../savings/savings_page.dart';
 import '../subscription/subscription_page.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
 import '../tags/tags_page.dart';
@@ -30,6 +31,7 @@ class MorePage extends ConsumerWidget {
     final isPremiumTier =
         ref.watch(subscriptionTierProvider) == ActiveTier.premium;
     final ledgerCount = ref.watch(ledgersProvider).value?.length ?? 1;
+    final hasSavings = ref.watch(savingsProvider).value?.isNotEmpty ?? false;
     // Jangan menawarkan Buku Kas bila Ultimate belum dijual dan belum ada buku tambahan.
     final ultimateOnSale = ref.watch(ultimateAvailableProvider).value ?? false;
     return ListView(
@@ -125,6 +127,26 @@ class MorePage extends ConsumerWidget {
               ),
             ),
           ),
+          // Fitur Ultimate. Pengguna yang sudah punya tabungan (lalu turun
+          // paket) tetap bisa membukanya untuk melihat dan menarik saldo;
+          // membuat tabungan baru dan menyetor dikunci di dalam halamannya.
+          if (ultimate || hasSavings || ultimateOnSale)
+            _MoreTile(
+              icon: Icons.savings_outlined,
+              title: 'Tabungan',
+              subtitle: ultimate
+                  ? 'Saldo terpisah dari dompet · setor dan tarik kapan saja'
+                  : hasSavings
+                  ? 'Hanya bisa menarik saldo · Setor butuh Ultimate'
+                  : 'Fitur Ultimate',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ultimate || hasSavings
+                      ? const SavingsPage()
+                      : SubscriptionPage(upgradeOnly: isPremiumTier),
+                ),
+              ),
+            ),
           _MoreTile(
             icon: Icons.flag_outlined,
             title: 'Target',

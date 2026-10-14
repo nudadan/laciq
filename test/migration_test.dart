@@ -20,9 +20,9 @@ void main() {
   late SchemaVerifier verifier;
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  const latest = 10;
+  const latest = 11;
 
-  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
     test(
       'skema hasil migrasi v$from -> v$latest identik dengan skema v$latest baru',
       () async {

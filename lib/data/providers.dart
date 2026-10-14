@@ -293,6 +293,20 @@ final goalContributionsProvider = StreamProvider.autoDispose
       (ref, goalId) => ref.watch(databaseProvider).watchContributions(goalId),
     );
 
+/// Tabungan berdompet (saldo terpisah dari dompet), bukan [goalsProvider].
+final savingsProvider = StreamProvider.autoDispose<List<SavingsView>>(
+  (ref) => ref
+      .watch(databaseProvider)
+      .watchSavings(ledgerId: ref.watch(activeLedgerIdProvider)),
+);
+
+/// Setoran dan penarikan satu tabungan (transaksi dompet bertanda tabungan).
+final savingsEntriesProvider = StreamProvider.autoDispose
+    .family<List<TxView>, String>(
+      (ref, savingsId) =>
+          ref.watch(databaseProvider).watchSavingsEntries(savingsId),
+    );
+
 final tagsProvider = StreamProvider.autoDispose<List<Tag>>(
   (ref) => ref.watch(databaseProvider).watchTags(),
 );

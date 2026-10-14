@@ -130,7 +130,8 @@ const _slides = [
         Icons.savings_rounded,
         'Target tabungan',
         'Dana darurat, liburan, atau HP baru: pantau progresnya hingga '
-            'tercapai.',
+            'tercapai. Hanya penanda, saldo dompet tidak berubah (untuk '
+            'tabungan yang memindahkan saldo, lihat Tabungan di Ultimate).',
       ),
       _Feature(
         Icons.summarize_rounded,
@@ -222,8 +223,19 @@ const _slides = [
   _Slide(
     Icons.workspace_premium_rounded,
     'Ultimate untuk pembukuan serius',
-    'Semua fitur Premium, ditambah tiga fitur khusus.',
+    'Semua fitur Premium, ditambah empat fitur khusus.',
     features: [
+      _Feature(
+        Icons.savings_outlined,
+        'Tabungan',
+        'Simpan uang di tabungan yang saldonya terpisah dari dompet. Saat '
+            'Anda menyetor, nominalnya tercatat sebagai pengeluaran dan '
+            'mengurangi saldo dompet asal. Saat Anda menarik, tercatat '
+            'sebagai pemasukan dan menambah saldo dompet tujuan. Buat '
+            'beberapa tabungan sekaligus, mis. dana darurat dan liburan. '
+            'Ada di menu Lainnya.',
+        _Plan.ultimate,
+      ),
       _Feature(
         Icons.menu_book_rounded,
         'Multi buku kas',
@@ -281,6 +293,7 @@ const _slides = [
       _PlanCard('Ultimate', 'Untuk yang mengelola lebih dari satu pembukuan.', [
         'Semua fitur Premium',
         'Multi buku kas, sampai 5 buku',
+        'Tabungan dengan saldo terpisah dari dompet',
         'Scan struk dengan AI: toko, kategori, total, dan tanggal',
         'Ringkasan AI untuk Laporan Bulanan',
       ]),

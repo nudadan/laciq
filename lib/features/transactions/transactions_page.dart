@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../savings/savings_detail_page.dart';
 import 'receipt_viewer_page.dart';
 import 'transaction_form_page.dart';
 
@@ -105,11 +106,16 @@ class _GroupedList extends ConsumerWidget {
           );
         }
         final v = row as TxView;
+        // Transaksi tabungan hanya dikelola dari halaman Tabungan: saldo
+        // tabungan diturunkan darinya, jadi tidak boleh diubah/dihapus di sini.
+        final savingsId = v.tx.savingsId;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Dismissible(
             key: ValueKey(v.tx.id),
-            direction: DismissDirection.endToStart,
+            direction: savingsId == null
+                ? DismissDirection.endToStart
+                : DismissDirection.none,
             background: Container(
               decoration: BoxDecoration(
                 color: palette.expense,
@@ -134,7 +140,13 @@ class _GroupedList extends ConsumerWidget {
             },
             child: _TxTile(
               v,
-              onTap: () => _edit(context, v.tx),
+              onTap: savingsId == null
+                  ? () => _edit(context, v.tx)
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => SavingsDetailPage(savingsId: savingsId),
+                      ),
+                    ),
               onViewReceipt: v.tx.receiptPath == null
                   ? null
                   : () => Navigator.of(context).push(

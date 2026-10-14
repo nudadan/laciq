@@ -157,6 +157,13 @@ class Transactions extends Table {
   /// tanpa menyentuh transaksi pembayaran yang sudah tercatat.
   TextColumn get debtId => text().nullable()();
 
+  /// Tabungan asal/tujuan transaksi ini (null = bukan transaksi tabungan).
+  /// Setoran ke tabungan = pengeluaran dari dompet, penarikan = pemasukan ke
+  /// dompet; saldo tabungan diturunkan dari baris-baris ini (lihat
+  /// [AppDatabase.watchSavings]). Tanpa foreign key, alasannya sama dengan
+  /// [debtId].
+  TextColumn get savingsId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -324,6 +331,27 @@ class GoalContributions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Tabungan: saldo terpisah dari dompet. Tidak punya kolom saldo — saldonya
+/// adalah setoran dikurangi penarikan, yaitu transaksi dompet yang bertanda
+/// `savingsId` ini (satu sumber kebenaran, tidak bisa tidak sinkron dengan
+/// pembukuan dompet). Beda dengan [SavingsGoals] yang hanya penanda dana.
+class SavingsAccounts extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text().withLength(min: 1, max: 60)();
+  TextColumn get icon => text().withDefault(const Constant('savings'))();
+  IntColumn get color => integer()();
+  BoolColumn get archived => boolean().withDefault(const Constant(false))();
+
+  /// Buku kas pemilik (tanpa foreign key, lihat [Accounts.ledgerId]).
+  TextColumn get ledgerId =>
+      text().withDefault(const Constant('ledger-main'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 class AccountBalance {
   const AccountBalance({
     required this.id,
@@ -426,6 +454,29 @@ class GoalView {
 /// Kesalahan validasi target tabungan dengan pesan yang siap ditampilkan.
 class GoalException implements Exception {
   const GoalException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+class SavingsView {
+  const SavingsView({
+    required this.savings,
+    required this.deposited,
+    required this.withdrawn,
+  });
+  final SavingsAccount savings;
+  final int deposited;
+  final int withdrawn;
+
+  /// Saldo tabungan: setoran dikurangi penarikan.
+  int get balance => deposited - withdrawn;
+}
+
+/// Kesalahan validasi tabungan dengan pesan yang siap ditampilkan.
+class SavingsException implements Exception {
+  const SavingsException(this.message);
   final String message;
 
   @override
@@ -626,6 +677,7 @@ const _blankIncome = <_SeedCategory>[
     Debts,
     SavingsGoals,
     GoalContributions,
+    SavingsAccounts,
     Tags,
     TransactionTags,
   ],
@@ -635,7 +687,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'dompet_pintar'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -747,6 +799,11 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(agendaReminders, agendaReminders.ledgerId);
         }
         if (from >= 8) await m.addColumn(debts, debts.ledgerId);
+      }
+      if (from < 11) {
+        // Tabungan berdompet. `transactions` ada sejak v1, jadi addColumn aman.
+        await m.createTable(savingsAccounts);
+        await m.addColumn(transactions, transactions.savingsId);
       }
     },
     beforeOpen: (details) async {
@@ -1346,9 +1403,23 @@ class AppDatabase extends _$AppDatabase {
     return {for (final r in rows) ?r.read(transactions.receiptPath)};
   }
 
-  Future<void> setTransactionDeleted(String id, {required bool deleted}) {
+  /// Transaksi tabungan hanya boleh diubah lewat halaman Tabungan
+  /// ([setSavingsEntryDeleted]), karena saldo tabungan diturunkan darinya.
+  Future<void> _rejectSavingsTx(String id) async {
+    final row = await (select(
+      transactions,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (row?.savingsId != null) {
+      throw const SavingsException(
+        'Transaksi ini bagian dari tabungan. Ubah lewat halaman Tabungan.',
+      );
+    }
+  }
+
+  Future<void> setTransactionDeleted(String id, {required bool deleted}) async {
+    await _rejectSavingsTx(id);
     final now = DateTime.now();
-    return (update(transactions)..where((t) => t.id.equals(id))).write(
+    await (update(transactions)..where((t) => t.id.equals(id))).write(
       TransactionsCompanion(
         deletedAt: Value(deleted ? now : null),
         updatedAt: Value(now),
@@ -1369,6 +1440,7 @@ class AppDatabase extends _$AppDatabase {
     String? note,
   }) async {
     _checkTxFields(type, amount, accountId, categoryId, transferToAccountId);
+    await _rejectSavingsTx(id);
     await _checkSameLedger(
       accountId: accountId,
       categoryId: type == TxType.transfer ? null : categoryId,
@@ -1889,6 +1961,7 @@ class AppDatabase extends _$AppDatabase {
     DateTime? to,
     bool newestFirst = true,
     String? ledgerId,
+    String? savingsId,
   }) {
     final toAccount = alias(accounts, 'to_acc');
     final query =
@@ -1908,6 +1981,9 @@ class AppDatabase extends _$AppDatabase {
                 (ledgerId == null
                     ? const Constant(true)
                     : accounts.ledgerId.equals(ledgerId)) &
+                (savingsId == null
+                    ? const Constant(true)
+                    : transactions.savingsId.equals(savingsId)) &
                 (from == null
                     ? const Constant(true)
                     : transactions.date.isBiggerOrEqualValue(from)) &
@@ -1959,6 +2035,369 @@ class AppDatabase extends _$AppDatabase {
       ledgerId: ledgerId,
     );
     return (await q.query.get()).map(q.map).toList();
+  }
+
+  // ------------------------------------------------------------ tabungan
+
+  static const _savingsSumSql = '''
+    COALESCE((SELECT SUM(t.amount) FROM transactions t
+              WHERE t.savings_id = s.id AND t.type = ? AND t.deleted_at IS NULL),
+             0)
+  ''';
+
+  /// Tabungan aktif lebih dulu (urut waktu dibuat), yang diarsipkan di bawah.
+  /// Saldo = setoran (pengeluaran dompet) dikurangi penarikan (pemasukan dompet).
+  ///
+  /// [ledgerId] membatasi ke satu buku kas (bawaan: Buku Utama); null = semua buku.
+  Stream<List<SavingsView>> watchSavings({String? ledgerId = kMainLedgerId}) {
+    return customSelect(
+      'SELECT s.*, $_savingsSumSql AS deposited, $_savingsSumSql AS withdrawn '
+      'FROM savings_accounts s '
+      '${ledgerId == null ? '' : 'WHERE s.ledger_id = ? '}'
+      'ORDER BY s.archived, s.created_at, s.id',
+      variables: [
+        Variable.withInt(TxType.expense.index),
+        Variable.withInt(TxType.income.index),
+        if (ledgerId != null) Variable.withString(ledgerId),
+      ],
+      readsFrom: {savingsAccounts, transactions},
+    ).watch().map(
+      (rows) => [
+        for (final r in rows)
+          SavingsView(
+            savings: savingsAccounts.map(r.data),
+            deposited: r.read<int>('deposited'),
+            withdrawn: r.read<int>('withdrawn'),
+          ),
+      ],
+    );
+  }
+
+  Future<int> _savingsBalanceOf(String savingsId) async {
+    final row = await customSelect(
+      'SELECT $_savingsSumSql - $_savingsSumSql AS balance '
+      'FROM savings_accounts s WHERE s.id = ?',
+      variables: [
+        Variable.withInt(TxType.expense.index),
+        Variable.withInt(TxType.income.index),
+        Variable.withString(savingsId),
+      ],
+      readsFrom: {savingsAccounts, transactions},
+    ).getSingleOrNull();
+    return row?.read<int>('balance') ?? 0;
+  }
+
+  /// Setoran dan penarikan tabungan: transaksi dompet bertanda [savingsId],
+  /// terbaru dulu.
+  Stream<List<TxView>> watchSavingsEntries(String savingsId) {
+    final q = _txQuery(savingsId: savingsId);
+    return q.query.watch().map((rows) => rows.map(q.map).toList());
+  }
+
+  static String _cleanSavingsName(String name) {
+    final n = name.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (n.isEmpty) throw const SavingsException('Nama tabungan wajib diisi.');
+    if (n.length > 60) {
+      throw const SavingsException('Nama tabungan maksimal 60 karakter.');
+    }
+    return n;
+  }
+
+  Future<void> _ensureSavingsNameFree(
+    String name,
+    String ledgerId, {
+    String? exceptId,
+  }) async {
+    final clash =
+        (await (select(
+          savingsAccounts,
+        )..where((s) => s.ledgerId.equals(ledgerId))).get()).where(
+          (s) => s.id != exceptId && s.name.toLowerCase() == name.toLowerCase(),
+        );
+    if (clash.isNotEmpty) {
+      throw SavingsException(
+        clash.first.archived
+            ? 'Sudah ada tabungan "$name" yang diarsipkan. Pulihkan saja.'
+            : 'Sudah ada tabungan "$name".',
+      );
+    }
+  }
+
+  Future<String> addSavings({
+    required String name,
+    required String icon,
+    required int color,
+    String ledgerId = kMainLedgerId,
+  }) async {
+    final clean = _cleanSavingsName(name);
+    return transaction(() async {
+      await _requireLedger(ledgerId);
+      await _ensureSavingsNameFree(clean, ledgerId);
+      final now = DateTime.now();
+      final id = _uuid.v7();
+      await into(savingsAccounts).insert(
+        SavingsAccountsCompanion.insert(
+          id: id,
+          name: clean,
+          icon: Value(icon),
+          color: color,
+          ledgerId: Value(ledgerId),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      return id;
+    });
+  }
+
+  Future<void> updateSavings({
+    required String id,
+    required String name,
+    required String icon,
+    required int color,
+  }) async {
+    final clean = _cleanSavingsName(name);
+    await transaction(() async {
+      final current = await (select(
+        savingsAccounts,
+      )..where((s) => s.id.equals(id))).getSingleOrNull();
+      if (current == null) throw StateError('Tabungan $id tidak ditemukan.');
+      await _ensureSavingsNameFree(clean, current.ledgerId, exceptId: id);
+      await (update(savingsAccounts)..where((s) => s.id.equals(id))).write(
+        SavingsAccountsCompanion(
+          name: Value(clean),
+          icon: Value(icon),
+          color: Value(color),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
+  }
+
+  /// Mengarsipkan hanya bila saldonya kosong: tabungan tersembunyi yang masih
+  /// berisi uang akan terlupakan dan saldonya tak terlihat di mana pun.
+  Future<void> setSavingsArchived(String id, {required bool archived}) async {
+    await transaction(() async {
+      if (archived && await _savingsBalanceOf(id) > 0) {
+        throw const SavingsException(
+          'Tabungan ini masih berisi saldo. Tarik seluruh saldonya dulu '
+          'sebelum diarsipkan.',
+        );
+      }
+      final rows =
+          await (update(savingsAccounts)..where((s) => s.id.equals(id))).write(
+            SavingsAccountsCompanion(
+              archived: Value(archived),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+      if (rows == 0) throw StateError('Tabungan $id tidak ditemukan.');
+    });
+  }
+
+  /// Menghapus PERMANEN tabungan yang belum pernah dipakai. Yang sudah punya
+  /// riwayat (termasuk yang dihapus lunak) hanya bisa diarsipkan, supaya
+  /// transaksi dompetnya tidak menggantung.
+  Future<void> deleteSavings(String id) => transaction(() async {
+    final used =
+        await (selectOnly(transactions)
+              ..addColumns([transactions.id.count()])
+              ..where(transactions.savingsId.equals(id)))
+            .map((r) => r.read(transactions.id.count()) ?? 0)
+            .getSingle();
+    if (used > 0) {
+      throw const SavingsException(
+        'Tabungan ini sudah punya riwayat setoran. Arsipkan saja.',
+      );
+    }
+    await (delete(savingsAccounts)..where((s) => s.id.equals(id))).go();
+  });
+
+  /// Kategori "Tabungan" (pengeluaran untuk setoran, pemasukan untuk penarikan)
+  /// di buku [ledgerId]. Dibuat saat pertama dibutuhkan, bukan lewat seed,
+  /// supaya buku yang sudah ada tidak perlu migrasi data. Memakai kategori
+  /// buatan pengguna bernama sama bila ada, agar tidak muncul ganda.
+  Future<String> _savingsCategoryId(String ledgerId, TxType type) async {
+    assert(type != TxType.transfer);
+    final id = ledgerSeedId(
+      ledgerId,
+      type == TxType.expense ? 'cat-exp-tabungan' : 'cat-inc-tabungan',
+    );
+    final sameType =
+        await (select(categories)..where(
+              (c) => c.type.equalsValue(type) & c.ledgerId.equals(ledgerId),
+            ))
+            .get();
+    for (final c in sameType) {
+      if (c.id == id) return id;
+    }
+    for (final c in sameType) {
+      if (c.name.toLowerCase() == 'tabungan') return c.id;
+    }
+    final last = sameType.fold<int>(
+      -1,
+      (m, c) => c.sortOrder > m ? c.sortOrder : m,
+    );
+    await into(categories).insert(
+      CategoriesCompanion.insert(
+        id: id,
+        name: 'Tabungan',
+        type: type,
+        icon: const Value('savings'),
+        color: 0xFF00897B,
+        sortOrder: Value(last + 1),
+        ledgerId: Value(ledgerId),
+        updatedAt: DateTime.now(),
+      ),
+    );
+    return id;
+  }
+
+  /// Mencatat satu transaksi dompet bertanda [savingsId]. Setoran = pengeluaran
+  /// dari dompet [accountId]; penarikan = pemasukan ke dompet [accountId].
+  Future<String> _recordSavingsMove({
+    required String savingsId,
+    required String accountId,
+    required int amount,
+    required DateTime date,
+    required bool deposit,
+    String? note,
+  }) async {
+    if (amount <= 0) {
+      throw const SavingsException('Nominal harus lebih dari 0.');
+    }
+    if (amount > maxAccountBalance) {
+      throw const SavingsException('Nominal terlalu besar.');
+    }
+    return transaction(() async {
+      final savings = await (select(
+        savingsAccounts,
+      )..where((s) => s.id.equals(savingsId))).getSingleOrNull();
+      if (savings == null) {
+        throw StateError('Tabungan $savingsId tidak ditemukan.');
+      }
+      if (savings.archived) {
+        throw const SavingsException(
+          'Tabungan ini diarsipkan. Pulihkan dulu untuk mengubah isinya.',
+        );
+      }
+      await _requireLedger(savings.ledgerId);
+      final account = await (select(
+        accounts,
+      )..where((a) => a.id.equals(accountId))).getSingleOrNull();
+      if (account == null) {
+        throw StateError('Dompet $accountId tidak ditemukan.');
+      }
+      if (account.archived) {
+        throw const SavingsException('Dompet ini diarsipkan.');
+      }
+      if (account.ledgerId != savings.ledgerId) {
+        throw const SavingsException(
+          'Dompet dan tabungan harus berasal dari buku kas yang sama.',
+        );
+      }
+      if (!deposit) {
+        final balance = await _savingsBalanceOf(savingsId);
+        if (amount > balance) {
+          throw SavingsException(
+            balance == 0
+                ? 'Belum ada saldo di tabungan ini.'
+                : 'Saldo tabungan hanya ${rupiah(balance)}.',
+          );
+        }
+      }
+      final type = deposit ? TxType.expense : TxType.income;
+      final categoryId = await _savingsCategoryId(savings.ledgerId, type);
+      final now = DateTime.now();
+      final trimmed = note?.trim();
+      final txId = _uuid.v7();
+      await into(transactions).insert(
+        TransactionsCompanion.insert(
+          id: txId,
+          type: type,
+          amount: amount,
+          accountId: accountId,
+          categoryId: Value(categoryId),
+          date: date,
+          note: Value(
+            trimmed == null || trimmed.isEmpty
+                ? (deposit
+                      ? 'Setoran ke ${savings.name}'
+                      : 'Penarikan dari ${savings.name}')
+                : trimmed,
+          ),
+          createdAt: now,
+          updatedAt: now,
+          savingsId: Value(savingsId),
+        ),
+      );
+      return txId;
+    });
+  }
+
+  /// Menyetor [amount] dari dompet [accountId] ke tabungan: dibukukan sebagai
+  /// pengeluaran yang mengurangi saldo dompet itu.
+  Future<String> depositToSavings({
+    required String savingsId,
+    required String accountId,
+    required int amount,
+    required DateTime date,
+    String? note,
+  }) => _recordSavingsMove(
+    savingsId: savingsId,
+    accountId: accountId,
+    amount: amount,
+    date: date,
+    deposit: true,
+    note: note,
+  );
+
+  /// Menarik [amount] dari tabungan ke dompet [accountId]: dibukukan sebagai
+  /// pemasukan yang menambah saldo dompet itu. Tidak boleh melebihi saldo.
+  Future<String> withdrawFromSavings({
+    required String savingsId,
+    required String accountId,
+    required int amount,
+    required DateTime date,
+    String? note,
+  }) => _recordSavingsMove(
+    savingsId: savingsId,
+    accountId: accountId,
+    amount: amount,
+    date: date,
+    deposit: false,
+    note: note,
+  );
+
+  /// Menghapus/memulihkan (soft delete) satu setoran/penarikan, sekaligus
+  /// transaksi dompetnya. Ditolak bila saldo tabungan akan menjadi negatif,
+  /// mis. menghapus setoran yang sudah sebagian ditarik.
+  Future<void> setSavingsEntryDeleted(String txId, {required bool deleted}) {
+    return transaction(() async {
+      final tx = await (select(
+        transactions,
+      )..where((t) => t.id.equals(txId))).getSingleOrNull();
+      if (tx == null || tx.savingsId == null) {
+        throw StateError('Transaksi tabungan $txId tidak ditemukan.');
+      }
+      if ((tx.deletedAt != null) == deleted) return; // sudah sesuai
+      final effect = tx.type == TxType.expense ? tx.amount : -tx.amount;
+      final after =
+          await _savingsBalanceOf(tx.savingsId!) + (deleted ? -effect : effect);
+      if (after < 0) {
+        throw const SavingsException(
+          'Tidak bisa diubah: saldo tabungan akan menjadi negatif. '
+          'Hapus penarikan terkait terlebih dulu.',
+        );
+      }
+      final now = DateTime.now();
+      await (update(transactions)..where((t) => t.id.equals(txId))).write(
+        TransactionsCompanion(
+          deletedAt: Value(deleted ? now : null),
+          updatedAt: Value(now),
+        ),
+      );
+    });
   }
 
   // ------------------------------------------------------ utang/piutang
@@ -2851,6 +3290,7 @@ class AppDatabase extends _$AppDatabase {
         goalContributions,
       )..where((c) => c.goalId.isIn(goalIds))).go();
       await (delete(savingsGoals)..where((g) => g.ledgerId.equals(id))).go();
+      await (delete(savingsAccounts)..where((s) => s.ledgerId.equals(id))).go();
       await (delete(agendaReminders)..where((a) => a.ledgerId.equals(id))).go();
       await (delete(debts)..where((d) => d.ledgerId.equals(id))).go();
       await (delete(categories)..where((c) => c.ledgerId.equals(id))).go();
@@ -2917,6 +3357,7 @@ class AppDatabase extends _$AppDatabase {
     await delete(tags).go();
     await delete(goalContributions).go();
     await delete(savingsGoals).go();
+    await delete(savingsAccounts).go();
     await delete(transactions).go();
     await delete(recurringRules).go();
     await delete(agendaReminders).go();

@@ -33,7 +33,8 @@ void main() {
     expect(find.byType(ActionChip), findsNothing);
     await _openTab(tester, 'Lainnya');
     expect(find.text('Buku Kas'), findsOneWidget);
-    expect(find.text('Fitur Ultimate'), findsOneWidget);
+    // Buku Kas dan Tabungan sama-sama fitur Ultimate.
+    expect(find.text('Fitur Ultimate'), findsNWidgets(2));
 
     await tester.tap(find.text('Buku Kas'));
     await settle(tester);

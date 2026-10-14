@@ -213,6 +213,11 @@ class _TierCard extends StatelessWidget {
   static const _ultimateBenefits = [
     (Icons.workspace_premium_rounded, 'Semua fitur Premium'),
     (
+      Icons.savings_outlined,
+      'Tabungan: saldo terpisah dari dompet; setoran tercatat sebagai '
+          'pengeluaran, penarikan sebagai pemasukan',
+    ),
+    (
       Icons.menu_book_rounded,
       'Multi buku kas: pisahkan pembukuan pribadi dan bisnis '
           '(sampai 5 buku, masing-masing dompet, kategori, dan anggaran sendiri)',

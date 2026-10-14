@@ -26,6 +26,7 @@ class BackupData {
     this.transactionTags = const [],
     this.agendaReminders = const [],
     this.debts = const [],
+    this.savingsAccounts = const [],
   });
 
   final DateTime? exportedAt;
@@ -45,6 +46,7 @@ class BackupData {
   final List<TransactionTag> transactionTags;
   final List<AgendaReminder> agendaReminders;
   final List<Debt> debts;
+  final List<SavingsAccount> savingsAccounts;
 
   int get activeTransactionCount =>
       transactions.where((t) => t.deletedAt == null).length;
@@ -66,9 +68,10 @@ class BackupService {
   /// `goalContributions`, v4 menambah `parentId` di kategori (sub-kategori)
   /// serta `tags`/`transactionTags`, v5 menambah `agendaReminders`, v6
   /// menambah `debts` (utang/piutang), v7 menambah `ledgers` (multi buku kas)
-  /// dan `ledgerId` di dompet/kategori/target/agenda/utang. Backup versi lama
-  /// tetap bisa dipulihkan: semua isinya masuk ke Buku Utama.
-  static const formatVersion = 7;
+  /// dan `ledgerId` di dompet/kategori/target/agenda/utang, v8 menambah
+  /// `savingsAccounts` (tabungan) dan `savingsId` di transaksi. Backup versi
+  /// lama tetap bisa dipulihkan: semua isinya masuk ke Buku Utama.
+  static const formatVersion = 8;
 
   Future<String> export() async {
     final ledgersList = await _db.select(_db.ledgers).get();
@@ -83,6 +86,7 @@ class BackupService {
     final transactionTags = await _db.select(_db.transactionTags).get();
     final agenda = await _db.select(_db.agendaReminders).get();
     final debtsList = await _db.select(_db.debts).get();
+    final savingsList = await _db.select(_db.savingsAccounts).get();
     return const JsonEncoder.withIndent(' ').convert({
       'format': formatName,
       'version': formatVersion,
@@ -99,6 +103,7 @@ class BackupService {
       'transactionTags': [for (final e in transactionTags) e.toJson()],
       'agendaReminders': [for (final e in agenda) e.toJson()],
       'debts': [for (final e in debtsList) e.toJson()],
+      'savingsAccounts': [for (final e in savingsList) e.toJson()],
     });
   }
 
@@ -183,6 +188,12 @@ class BackupService {
           withLedger: true,
         ),
         debts: read('debts', Debt.fromJson, optional: true, withLedger: true),
+        savingsAccounts: read(
+          'savingsAccounts',
+          SavingsAccount.fromJson,
+          optional: true,
+          withLedger: true,
+        ),
       );
       _checkIntegrity(data);
       return data;
@@ -263,6 +274,7 @@ class BackupService {
       for (final g in d.savingsGoals) g.ledgerId,
       for (final a in d.agendaReminders) a.ledgerId,
       for (final debt in d.debts) debt.ledgerId,
+      for (final s in d.savingsAccounts) s.ledgerId,
     ]) {
       if (!ledgerIds.contains(id)) throw corrupt;
     }
@@ -425,6 +437,30 @@ class BackupService {
     for (final debt in d.debts) {
       if (debt.amount <= 0 || debt.paidAmount < 0) throw corrupt;
     }
+
+    // Tabungan: ID tidak ganda; setiap transaksi bertanda tabungan merujuk
+    // tabungan yang ada, bukan transfer, searah (pengeluaran = setoran,
+    // pemasukan = penarikan), dan satu buku dengan tabungannya; saldo tidak
+    // boleh negatif (file yang dimodifikasi/rusak).
+    final savingsLedger = {for (final s in d.savingsAccounts) s.id: s.ledgerId};
+    if (savingsLedger.length != d.savingsAccounts.length) throw corrupt;
+    final savingsBalance = <String, int>{};
+    for (final t in d.transactions) {
+      final sid = t.savingsId;
+      if (sid == null) continue;
+      if (!savingsLedger.containsKey(sid) || t.type == TxType.transfer) {
+        throw corrupt;
+      }
+      if (accountLedger[t.accountId] != savingsLedger[sid]) {
+        throw _inconsistent('transaksi tabungan lintas buku kas');
+      }
+      if (t.deletedAt == null) {
+        savingsBalance[sid] =
+            (savingsBalance[sid] ?? 0) +
+            (t.type == TxType.expense ? t.amount : -t.amount);
+      }
+    }
+    if (savingsBalance.values.any((v) => v < 0)) throw corrupt;
   }
 
   /// MENGGANTI seluruh data yang ada. Berjalan dalam satu transaksi: jika ada
@@ -442,6 +478,7 @@ class BackupService {
       await _db.delete(_db.tags).go();
       await _db.delete(_db.goalContributions).go();
       await _db.delete(_db.savingsGoals).go();
+      await _db.delete(_db.savingsAccounts).go();
       await _db.delete(_db.transactions).go();
       await _db.delete(_db.recurringRules).go();
       await _db.delete(_db.agendaReminders).go();
@@ -489,6 +526,9 @@ class BackupService {
         ]);
         b.insertAll(_db.debts, [
           for (final e in data.debts) e.toCompanion(false),
+        ]);
+        b.insertAll(_db.savingsAccounts, [
+          for (final e in data.savingsAccounts) e.toCompanion(false),
         ]);
       });
     });

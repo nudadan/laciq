@@ -480,7 +480,7 @@ class _SubscriptionTile extends ConsumerWidget {
         return _ActiveSubscriptionTile(
           title: 'LaciQ Premium aktif',
           subtitle: ultimateOnSale
-              ? 'Tanpa iklan · Upgrade ke Ultimate untuk AI dan multi buku kas'
+              ? 'Tanpa iklan · Upgrade ke Ultimate untuk AI, multi buku kas, dan tabungan'
               : 'Tanpa iklan',
           onUpgrade: ultimateOnSale ? () => openPage(upgradeOnly: true) : null,
           onManage: () => launchUrl(_manageSubsUrl),
