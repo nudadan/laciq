@@ -197,8 +197,14 @@ class _TrialOfferSheetState extends ConsumerState<_TrialOfferSheet> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Untuk mencegah uji coba berulang, pengenal perangkat Anda dikirim '
-              'ke server dalam bentuk ber-hash. Tidak ada data keuangan yang dikirim.',
+              // Pengenal perangkat sudah terkirim saat aplikasi dibuka (pemeriksaan
+              // kelayakan, lihat trialStatusProvider), bukan baru setelah tombol
+              // ditekan; kalimat ini harus jujur soal itu. Selaras dengan
+              // kebijakan privasi bagian 6c.
+              'Agar uji coba hanya diberikan sekali per perangkat, aplikasi '
+              'memeriksa kelayakan dengan mengirim pengenal perangkat Anda '
+              '(disimpan ber-hash di server, bukan nilai aslinya). Tidak ada '
+              'data keuangan yang dikirim.',
               style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),

@@ -123,7 +123,8 @@ Alasannya:
 - Penghitung gabungan Worker (jumlah klaim harian, perkiraan biaya AI promo): angka tanpa identitas.
 
 ### Temuan yang perlu keputusan Anda
-1. **Waktu pengiriman pengenal perangkat.** Di kode, status uji coba dimuat di awal sesi untuk semua pengguna non-Ultimate
+1. **[DITERAPKAN 2026-10-14: teks lembar konfirmasi diganti sesuai rekomendasi di bawah; pemanggilan awal sesi tetap dan
+   diungkapkan di kebijakan 6c.]** **Waktu pengiriman pengenal perangkat.** Di kode, status uji coba dimuat di awal sesi untuk semua pengguna non-Ultimate
    (`trialStatusProvider` di `HomeShell`), sehingga `ANDROID_ID` terkirim saat aplikasi dibuka, **sebelum** pengguna menekan
    "Mulai uji coba". Kebijakan 6c sudah menyatakan ini apa adanya. Teks lembar konfirmasi saat ini berbunyi:
    *"Untuk mencegah uji coba berulang, pengenal perangkat Anda dikirim ke server dalam bentuk ber-hash."*, yang menyiratkan

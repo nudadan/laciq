@@ -52,7 +52,9 @@ void main() {
         expect(find.text('Lihat paket'), findsOneWidget);
         // Kejujuran soal akhir uji coba dan privasi.
         expect(find.textContaining('kembali ke paket Gratis'), findsOneWidget);
-        expect(find.textContaining('ber-hash'), findsOneWidget);
+        expect(find.textContaining('memeriksa kelayakan'), findsOneWidget);
+        expect(find.textContaining('disimpan ber-hash'), findsOneWidget);
+        expect(find.textContaining('bukan nilai aslinya'), findsOneWidget);
       },
       seed: (db) => _seedTransactions(db, 5),
       trialService: FakeTrialService(currentStatus: _available()),
