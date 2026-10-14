@@ -31,7 +31,7 @@
 <main>
 
 <h1>Kebijakan Privasi LaciQ</h1>
-<p class="meta">Berlaku sejak 4 Oktober 2026 · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
+<p class="meta">Berlaku sejak [ISI TANGGAL RILIS] · Pengembang: hardan-ti · Kontak: <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></p>
 
 <p>LaciQ adalah aplikasi pencatat keuangan pribadi untuk Android (nama paket <code>com.hardanti.lacipintar</code>), dikembangkan oleh <strong>hardan-ti</strong> ("kami"). Sebelumnya aplikasi ini bernama DompetKu; paket dan kebijakan ini sama. Dokumen ini menjelaskan data apa yang diproses aplikasi, ke mana data itu pergi, dan pilihan yang Anda miliki.</p>
 
@@ -39,7 +39,7 @@
   <strong>Ringkasnya:</strong>
   <ul>
     <li>Data keuangan Anda (transaksi, dompet, anggaran, dan lainnya) disimpan <strong>di HP Anda</strong>. Kami tidak punya server yang menampung data itu dan tidak dapat melihatnya.</li>
-    <li>Data hanya keluar dari HP jika Anda memakai fitur tertentu: iklan (paket gratis), langganan, Backup Cloud ke Google Drive Anda sendiri, Catat dengan Suara (Premium; pengenalan suara oleh layanan bawaan Android), atau fitur AI (paket Ultimate: Ekstraksi Struk dan Ringkasan Laporan Bulanan).</li>
+    <li>Data hanya keluar dari HP jika Anda memakai fitur tertentu: iklan (paket gratis), langganan, Backup Cloud ke Google Drive Anda sendiri, Catat dengan Suara (Premium; pengenalan suara oleh layanan bawaan Android), atau fitur AI (paket Ultimate: Ekstraksi Struk dan Ringkasan Laporan Bulanan). Pemeriksaan kelayakan uji coba Ultimate juga mengirim pengenal perangkat dalam bentuk yang di-hash di server (bagian 6c).</li>
     <li>Kami tidak menjual data Anda dan tidak memakai layanan analitik atau pelaporan crash pihak ketiga.</li>
   </ul>
 </div>
@@ -47,7 +47,7 @@
 <h2>1. Data yang disimpan di perangkat Anda</h2>
 <p>Semua data berikut dibuat oleh Anda dan disimpan dalam penyimpanan pribadi aplikasi di HP Anda:</p>
 <ul>
-  <li>Transaksi (nominal, tanggal, catatan, kategori, tag), dompet/akun, kategori, anggaran, target tabungan, transaksi berulang, agenda pengingat, serta utang dan piutang (termasuk nama pihak yang Anda isi). Pada paket Ultimate, data itu dapat dipisah ke beberapa buku kas (misalnya pribadi dan bisnis), tetap di HP Anda.</li>
+  <li>Transaksi (nominal, tanggal, catatan, kategori, tag), dompet/akun, kategori, anggaran, target tabungan, tabungan (saldo terpisah dari dompet; paket Ultimate), transaksi berulang, agenda pengingat, serta utang dan piutang (termasuk nama pihak yang Anda isi). Pada paket Ultimate, data itu dapat dipisah ke beberapa buku kas (misalnya pribadi dan bisnis), tetap di HP Anda.</li>
   <li>Foto struk yang Anda ambil atau pilih saat memakai Scan Struk.</li>
   <li>Pengaturan aplikasi: tema, status onboarding, PIN (disimpan sebagai hash di penyimpanan aman Android), dan preferensi lain.</li>
 </ul>
@@ -59,7 +59,7 @@
   <tr><td>Kamera</td><td>Memotret struk pada fitur Scan Struk. Teks struk dibaca di perangkat dengan ML Kit (pengenalan teks Google) tanpa mengirim foto ke mana pun.</td></tr>
   <tr><td>Biometrik</td><td>Membuka kunci aplikasi dengan sidik jari/wajah. Pencocokan dilakukan sepenuhnya oleh sistem Android; aplikasi tidak menerima atau menyimpan data biometrik Anda.</td></tr>
   <tr><td>Mikrofon</td><td>Hanya dipakai saat Anda menekan tombol "Catat dengan Suara" (Premium), setelah Anda menyetujui penjelasan di dalam aplikasi. Izin diminta saat itu, bukan saat aplikasi dibuka. Lihat bagian 6b.</td></tr>
-  <tr><td>Notifikasi</td><td>Pengingat lokal (agenda, transaksi berulang, pengingat backup). Dijadwalkan di HP, tidak lewat server.</td></tr>
+  <tr><td>Notifikasi</td><td>Pengingat lokal (agenda, transaksi berulang, pengingat backup, dan pengingat akhir masa uji coba Ultimate). Dijadwalkan di HP, tidak lewat server.</td></tr>
   <tr><td>Internet</td><td>Diperlukan untuk iklan, langganan, Backup Cloud, serta fitur AI (Ekstraksi Struk dan Ringkasan Laporan Bulanan). Pencatatan keuangan dasar tetap berjalan tanpa internet.</td></tr>
   <tr><td>ID Iklan</td><td>Dipakai oleh layanan iklan Google pada paket gratis (lihat bagian 3).</td></tr>
 </table></div>
@@ -69,7 +69,7 @@
 <p>Anda dapat mengatur atau mereset ID iklan, atau menonaktifkan personalisasi iklan, di pengaturan Android (Google &gt; Iklan). Berlangganan Premium atau Ultimate menghilangkan iklan.</p>
 
 <h2>4. Langganan dan pembayaran</h2>
-<p>Pembayaran langganan diproses oleh <strong>Google Play</strong>. Kami tidak menerima nomor kartu atau data pembayaran Anda. Status langganan dikelola lewat <strong>RevenueCat</strong>, yang menerima informasi pembelian dari Google Play dan sebuah ID pengguna anonim yang dibuat aplikasi, untuk memastikan fitur berbayar aktif. Kami tidak mengaitkan ID tersebut dengan nama atau email Anda. Anda dapat mengelola atau membatalkan langganan lewat Google Play (Pembayaran &amp; langganan).</p>
+<p>Pembayaran langganan diproses oleh <strong>Google Play</strong>. Kami tidak menerima nomor kartu atau data pembayaran Anda. Status langganan dikelola lewat <strong>RevenueCat</strong>, yang menerima informasi pembelian dari Google Play dan sebuah ID pengguna anonim yang dibuat aplikasi, untuk memastikan fitur berbayar aktif. Kami tidak mengaitkan ID tersebut dengan nama atau email Anda. Anda dapat mengelola atau membatalkan langganan lewat Google Play (Pembayaran &amp; langganan). Pada uji coba Ultimate tanpa kartu (bagian 6c), akses diberikan lewat RevenueCat sebagai hibah promosional untuk ID pengguna anonim tersebut; tidak ada pembayaran yang terlibat.</p>
 
 <h2>5. Backup Cloud (Premium)</h2>
 <p>Fitur ini bersifat opsional dan hanya aktif jika Anda masuk dengan akun Google di dalam aplikasi.</p>
@@ -86,7 +86,7 @@
 <ul>
   <li><strong>Teks hasil pembacaan struk</strong> (maksimal 4.000 karakter). Foto struk <strong>tidak</strong> dikirim.</li>
   <li>Daftar nama kategori Anda pada jenis transaksi yang sedang dicatat.</li>
-  <li>ID pengguna anonim RevenueCat, untuk memverifikasi langganan Ultimate dan menghitung kuota (300 scan per bulan dan 15 per hari).</li>
+  <li>ID pengguna anonim RevenueCat, untuk memverifikasi langganan Ultimate dan menghitung kuota (300 scan per bulan dan 15 per hari; selama masa uji coba Ultimate 60 per bulan dan 10 per hari).</li>
 </ul>
 <p>Server tersebut (<code>dompetku-api.hardan-ti.com</code>) berjalan di <strong>Cloudflare Workers</strong>. Server memverifikasi langganan ke RevenueCat, lalu meneruskan teks struk dan daftar kategori ke <strong>Google</strong> lewat Gemini API (layanan berbayar) untuk menebak nama toko, kategori, total, dan tanggal transaksi. Hasilnya dikembalikan ke aplikasi Anda.</p>
 <ul>
@@ -99,7 +99,7 @@
 <h2>6a. Ringkasan Laporan Bulanan dengan AI (Ultimate)</h2>
 <p>Laporan Bulanan (Premium) dihitung seluruhnya di HP Anda dan tidak mengirim data apa pun. Pelanggan Ultimate dapat, secara opsional, menekan tombol "Buat ringkasan AI" untuk mendapat rangkuman beberapa kalimat. Aplikasi meminta persetujuan Anda satu kali sebelum tombol itu pertama kali dipakai, terpisah dari persetujuan Ekstraksi Struk.</p>
 <ul>
-  <li><strong>Yang dikirim:</strong> angka bulan itu saja: total pemasukan dan pengeluaran, pengeluaran periode pembanding, taksiran pengeluaran akhir bulan, nama kategori (maksimal 6) beserta totalnya, dan persen pemakaian anggaran. Ditambah ID pengguna anonim RevenueCat untuk verifikasi langganan dan kuota (30 ringkasan per bulan dan 5 per hari).</li>
+  <li><strong>Yang dikirim:</strong> angka bulan itu saja: total pemasukan dan pengeluaran, pengeluaran periode pembanding, taksiran pengeluaran akhir bulan, nama kategori (maksimal 6) beserta totalnya, dan persen pemakaian anggaran. Ditambah ID pengguna anonim RevenueCat untuk verifikasi langganan dan kuota (30 ringkasan per bulan dan 5 per hari; selama masa uji coba Ultimate 6 per bulan dan 2 per hari).</li>
   <li><strong>Yang tidak dikirim:</strong> catatan transaksi, nama toko, tanggal transaksi, nama dompet, foto struk, dan transaksi individual.</li>
   <li>Server kami (Cloudflare Workers) meneruskan angka itu ke <strong>Google</strong> lewat Gemini API berbayar untuk dirangkai menjadi kalimat, seperti pada bagian 6. Kami tidak menyimpan angka maupun ringkasannya; yang tersimpan hanya penghitung pemakaian yang kedaluwarsa otomatis.</li>
   <li>Ringkasan <strong>dibuat oleh AI dan bisa keliru</strong>. Isinya hanya gambaran dari angka Anda dan bukan nasihat keuangan, investasi, pajak, atau hukum. Server menolak ringkasan yang menyebut nominal yang tidak ada di data Anda.</li>
@@ -113,6 +113,21 @@
   <li>Aplikasi meminta pengenalan di perangkat bila tersedia. Bila HP Anda tidak punya model suara offline untuk bahasa Indonesia, Android dapat mengirim suara ke layanan pengenalan suara Google untuk dikenali, sesuai pengaturan suara HP Anda dan <a href="https://policies.google.com/privacy">Kebijakan Privasi Google</a>. Hal itu terjadi di luar kendali LaciQ.</li>
   <li>Teks ucapan ditafsirkan di HP Anda tanpa AI dan tanpa jaringan. Tebakan kategori memakai nama kategori dan catatan transaksi lama Anda yang tersimpan di HP.</li>
   <li>Mikrofon hanya aktif saat tombol mikrofon ditekan. Anda dapat mencabut izin kapan saja di Pengaturan Android &gt; Aplikasi &gt; LaciQ &gt; Izin.</li>
+</ul>
+
+<h2>6c. Uji coba Ultimate tanpa kartu</h2>
+<p>Pengguna yang belum berlangganan Ultimate dapat memilih uji coba semua fitur Ultimate selama 30 hari tanpa kartu pembayaran. Uji coba <strong>hanya dimulai bila Anda sendiri menekan tombol "Mulai uji coba"</strong> setelah membaca penjelasannya di dalam aplikasi.</p>
+<p>Agar satu perangkat tidak mendapat uji coba berulang (misalnya setelah aplikasi dipasang ulang), kami memakai pengenal perangkat. Rinciannya:</p>
+<ul>
+  <li><strong>Pemeriksaan kelayakan.</strong> Agar aplikasi hanya menawarkan uji coba kepada perangkat yang layak, saat aplikasi dibuka aplikasi mengirim ke server kami <strong>ID pengguna anonim RevenueCat</strong> dan <strong>pengenal perangkat Android (ANDROID_ID)</strong> melalui koneksi terenkripsi. Pemeriksaan ini hanya membaca; server tidak menyimpan hasilnya. Pengenal itu dibatasi oleh Android pada aplikasi LaciQ dan perangkat Anda, dan bukan IMEI, nomor telepon, atau email.</li>
+  <li><strong>Saat Anda memulai uji coba.</strong> Server mengubah pengenal perangkat menjadi kode <strong>ber-hash satu arah</strong> (HMAC dengan kunci rahasia kami, sehingga tidak dapat dikembalikan menjadi ANDROID_ID), lalu menyimpan: kode ber-hash itu, ID pengguna anonim RevenueCat, serta waktu mulai dan berakhirnya uji coba. Nilai ANDROID_ID mentah <strong>tidak disimpan</strong>. Tidak ada nama, email, atau data keuangan yang disimpan.</li>
+  <li><strong>Untuk apa.</strong> Mencegah uji coba berulang pada perangkat yang sama, memberi <em>sisa hari</em> (bukan uji coba baru) bila Anda memasang ulang aplikasi saat uji coba masih berjalan, dan melindungi layanan dari penyalahgunaan.</li>
+  <li><strong>Berapa lama.</strong> Catatan itu disimpan selama program uji coba berlangsung, atau sampai Anda meminta penghapusan (bagian 9). Menghapus catatan berarti perangkat tersebut dapat memulai uji coba lagi.</li>
+  <li><strong>Hak akses.</strong> Diberikan lewat RevenueCat sebagai hibah promosional untuk ID pengguna anonim Anda, sehingga RevenueCat menerima ID itu beserta tanggal berakhirnya hibah (lihat bagian 4).</li>
+  <li><strong>Kuota AI</strong> selama uji coba lebih kecil daripada pelanggan berbayar (60 scan struk dan 6 ringkasan per bulan). Fitur AI tetap memerlukan persetujuan Anda seperti pada bagian 6 dan 6a. Kami juga mencatat jumlah total klaim harian dan perkiraan biaya AI uji coba sebagai angka gabungan tanpa identitas, untuk menjaga anggaran program.</li>
+  <li><strong>Server.</strong> Berjalan di Cloudflare Workers seperti pada bagian 6; Cloudflare dapat mencatat data teknis koneksi seperti alamat IP.</li>
+  <li><strong>Pengingat akhir uji coba</strong> dijadwalkan di HP Anda sebagai notifikasi lokal (bagian 2), tidak lewat server.</li>
+  <li>Setelah 30 hari Anda kembali ke paket Gratis kecuali berlangganan. Data Anda tetap ada di HP; buku kas tambahan hanya terkunci dan tabungan hanya bisa ditarik.</li>
 </ul>
 
 <h2>7. Berbagi dan ekspor oleh Anda</h2>
@@ -131,7 +146,7 @@
   <li><strong>Di HP:</strong> menu Pengaturan &gt; <em>Hapus semua data</em> menghapus permanen seluruh data keuangan, foto struk, PIN, dan pengaturan sehingga aplikasi kembali seperti baru dipasang. Menghapus (uninstall) aplikasi juga menghapus data lokal.</li>
   <li><strong>Backup Cloud:</strong> hapus lewat pengaturan Google Drive (Kelola aplikasi &gt; LaciQ &gt; Hapus data tersembunyi), atau cabut akses aplikasi dari akun Google Anda. Menghapus data di HP tidak otomatis menghapus cadangan di Drive.</li>
   <li><strong>Langganan:</strong> batalkan lewat Google Play. Menghapus aplikasi tidak membatalkan langganan.</li>
-  <li><strong>Data di server kami:</strong> hanya penghitung kuota AI dan cache status langganan yang kedaluwarsa otomatis. Untuk penghapusan lebih awal, hubungi kami dengan menyebutkan ID pengguna anonim Anda.</li>
+  <li><strong>Data di server kami:</strong> penghitung kuota AI dan cache status langganan yang kedaluwarsa otomatis, serta, bila Anda memulai uji coba Ultimate, satu catatan berisi kode ber-hash perangkat, ID pengguna anonim RevenueCat, dan waktu mulai/berakhir uji coba (bagian 6c). Untuk penghapusan lebih awal, hubungi kami dengan menyebutkan ID pengguna anonim Anda; kami akan menghapus catatan yang terkait ID itu. Perlu dipahami bahwa menghapus catatan uji coba membuat perangkat itu dapat memulai uji coba lagi.</li>
 </ul>
 
 <h2>10. Hak Anda</h2>

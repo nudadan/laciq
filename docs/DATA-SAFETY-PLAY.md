@@ -88,3 +88,63 @@ Keduanya dihitung dan dibuat sepenuhnya di perangkat (tanpa jaringan, tanpa izin
 2. **Input suara (Premium)**: aplikasi hanya meminta izin `RECORD_AUDIO` dan menerima TEKS dari layanan pengenalan suara Android; audio tidak diterima, disimpan, atau dikirim oleh aplikasi/server kita. Sikap konservatif yang disarankan: **jawab "tidak dikumpulkan" untuk Audio (Rekaman suara atau bunyi)** karena diproses oleh layanan sistem pada perangkat, dan jelaskan di kebijakan privasi (bagian 6b, sudah ditulis) bahwa Android dapat memakai layanan Google bila model offline tidak ada. Bila ragu, deklarasikan Audio > "Rekaman suara" sebagai **dikumpulkan = tidak** terlebih dahulu dan baca panduan resmi Google tentang data yang diproses di perangkat (data yang hanya diproses di perangkat dan tidak dikirim keluar tidak perlu dideklarasikan).
 3. **Izin baru di manifest: `RECORD_AUDIO`.** Cek halaman Konten aplikasi/Izin apakah Play meminta deklarasi tambahan. Izin ini tidak termasuk izin sensitif yang dibatasi (SMS, log panggilan, lokasi latar belakang).
 4. Jangan menulis "tidak ada data yang dikirim" secara mutlak di listing untuk fitur suara; gunakan kalimat dari kebijakan privasi.
+
+## Pembaruan 2026-10-14: uji coba Ultimate tanpa kartu, Tabungan, penyesuaian saldo
+**PERIKSA ULANG di Play Console sebelum merilis.** Berpadanan dengan kebijakan privasi bagian 6c (baru) dan perubahan kecil di
+bagian 1, 2, 4, 6, 6a, 9. Tanggal berlaku kebijakan masih placeholder `[ISI TANGGAL RILIS]`; isi dan deploy kebijakan SEBELUM rilis.
+
+### Ringkasan keputusan
+| Fitur | Data keluar HP? | Dampak Data Safety |
+|---|---|---|
+| **Tabungan** (Ultimate) dan **Sesuaikan saldo** | Tidak (seluruhnya lokal, ikut backup berkas/cloud seperti data lain) | **Tidak ada perubahan** |
+| **Uji coba Ultimate**: pemeriksaan kelayakan | **Ya**: ID anonim RevenueCat + `ANDROID_ID` ke Worker (koneksi TLS) | Tipe sudah dideklarasikan; perbarui **sumber** (lihat di bawah) |
+| **Uji coba Ultimate**: klaim | **Ya, dan disimpan**: HMAC(ANDROID_ID), ID anonim, waktu mulai/akhir | Tipe yang sama; tanpa batas waktu penyimpanan eksplisit |
+| Pengingat akhir uji coba | Tidak (notifikasi lokal) | Tidak ada perubahan |
+| Play Integrity | **Belum aktif**: pendekode token tidak dipasang, aplikasi tidak mengirim token | Tidak dideklarasikan sekarang; **perbarui bila Fase 3 mengirim token** |
+
+### Perubahan pada formulir Data Safety
+Tidak ada tipe data baru. Satu baris yang sudah ada diperbarui deskripsinya:
+
+| Kategori > Tipe | Dikumpulkan | Dibagikan | Wajib/Opsional | Tujuan | Sumber (perbarui) |
+|---|---|---|---|---|---|
+| Perangkat atau ID lainnya > **ID perangkat atau ID lainnya** | Ya | **Ya** (AdMob, seperti sebelumnya) | Wajib | Iklan atau pemasaran; Analitik; **Pencegahan penipuan, keamanan**; **Fungsi aplikasi** | AdMob (ID iklan) + ID anonim RevenueCat + **`ANDROID_ID` ke server kami untuk kelayakan uji coba (disimpan ber-hash, bukan nilai mentah)** |
+
+Alasannya:
+- `ANDROID_ID` dikirim ke server kami lewat TLS, jadi **dikumpulkan**. Disimpan hanya sebagai HMAC satu arah; tetap dianggap
+  "disimpan" karena turunannya dipakai sebagai kunci. Play tidak mensyaratkan deklarasi ulang tipe, hanya tujuan yang jujur:
+  *Pencegahan penipuan, keamanan* (anti uji coba berulang) dan *Fungsi aplikasi* (sisa hari saat pasang ulang), keduanya sudah dicentang.
+- **Dibagikan** tidak berubah: Worker kami (Cloudflare) adalah penyedia layanan/pemroses, bukan pihak ketiga. RevenueCat sudah
+  menerima ID anonim sejak sebelumnya; ia kini juga menerima hibah promosional untuk ID itu (informasi pembelian/hak akses).
+- **Wajib vs opsional:** pemeriksaan kelayakan berjalan untuk semua pengguna non-Ultimate saat aplikasi dibuka, jadi tetap **Wajib**.
+- Jawaban pertanyaan umum tidak berubah (TLS: ya; akun: tidak; permintaan penghapusan: ya, lihat bagian 9 kebijakan).
+
+### Yang TIDAK dideklarasikan
+- Tabungan, penyesuaian saldo, hitung mundur uji coba, dan pengingat akhir uji coba: lokal.
+- Penghitung gabungan Worker (jumlah klaim harian, perkiraan biaya AI promo): angka tanpa identitas.
+
+### Temuan yang perlu keputusan Anda
+1. **Waktu pengiriman pengenal perangkat.** Di kode, status uji coba dimuat di awal sesi untuk semua pengguna non-Ultimate
+   (`trialStatusProvider` di `HomeShell`), sehingga `ANDROID_ID` terkirim saat aplikasi dibuka, **sebelum** pengguna menekan
+   "Mulai uji coba". Kebijakan 6c sudah menyatakan ini apa adanya. Teks lembar konfirmasi saat ini berbunyi:
+   *"Untuk mencegah uji coba berulang, pengenal perangkat Anda dikirim ke server dalam bentuk ber-hash."*, yang menyiratkan
+   pengiriman baru terjadi setelah tombol ditekan dan tidak menyebut pemeriksaan awal. **Rekomendasi:** ganti menjadi
+   *"Agar uji coba hanya diberikan sekali per perangkat, aplikasi memeriksa kelayakan dengan mengirim pengenal perangkat Anda
+   (disimpan ber-hash di server, bukan nilai aslinya). Tidak ada data keuangan yang dikirim."* (perubahan satu kalimat di
+   `lib/features/subscription/trial_offer.dart`, ikut tes `trial_offer_test`).
+   Alternatif yang lebih ketat: panggil `/trial/status` hanya saat kartu/titik penawaran akan tampil, bukan di awal sesi.
+2. **Masa simpan catatan perangkat.** Catatan `trial:<hash>` di KV saat ini **tanpa kedaluwarsa**. Teks kebijakan ditulis
+   sesuai itu ("selama program berlangsung atau sampai Anda meminta penghapusan"). Bila Anda ingin batas yang lebih
+   tegas (mis. 24 bulan), pasang TTL pada `put` di `trial_handler.ts` dan ganti kalimat "Berapa lama" di 6c menjadi
+   "disimpan sekitar 24 bulan lalu terhapus otomatis". Konsekuensi: perangkat bisa mengulang uji coba setelah TTL.
+3. **Penghapusan atas permintaan.** Kebijakan menjanjikan penghapusan lewat ID anonim; catatan KV berkunci hash perangkat,
+   jadi pencarian dilakukan dengan memindai nilai (`appUserId`). Cukup untuk skala sekarang; perlu skrip kecil bila jumlahnya besar.
+
+### Daftar periksa sebelum mengirim
+- [ ] Isi tanggal berlaku di `docs/kebijakan-privasi/index.html`, lalu deploy ke `laciq.solusimandiri.id/privacy`
+      (halaman lama `dompetku.hardan-ti.com/privacy` tetap tidak diubah kecuali Anda memutuskan lain).
+- [ ] Putuskan temuan 1 dan 2 di atas; sesuaikan kode/teks bila perlu.
+- [ ] Play Console > Keamanan data: perbarui baris "ID perangkat atau ID lainnya" (sumber/tujuan) dan **kirim ulang** formulir.
+- [ ] Cocokkan halaman Konten aplikasi bila Play meminta deklarasi tambahan setelah formulir diubah.
+- [ ] Listing Play: jangan menulis "tidak ada data dikirim" atau "tanpa pelacakan" secara mutlak; sebut uji coba hanya
+      sebagai "uji coba gratis 30 hari tanpa kartu".
+- [ ] Setelah Fase 3 (Play Integrity) benar-benar mengirim token, perbarui kebijakan dan baris ini lagi.
