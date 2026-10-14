@@ -138,9 +138,14 @@ tanpa iklan) tidak terbuka.
 
 ### 5.2 Interaksi dengan pembelian
 - Membeli Premium/Ultimate saat trial: entitlement berbayar berjalan berdampingan dengan hibah; yang terpanjang berlaku.
-- `shouldReplaceProduct` di `subscription_plans.dart` hanya menimbang `ActiveTier.premium`; pengguna trial dihitung
-  `ultimate`, jadi membeli Ultimate saat trial **tidak** memicu penggantian produk Play (benar, karena tidak ada langganan
-  Play aktif yang diganti). Perlu tes eksplisit.
+- **RISIKO PENAGIHAN GANDA (wajib ditangani sebelum menawarkan trial ke pelanggan Premium, keputusan 2c).**
+  `shouldReplaceProduct` memutuskan penggantian produk Play dari `ActiveTier`, dan tier itu dihitung dari entitlement
+  *termasuk yang promosional*. Pelanggan Premium berbayar yang sedang trial Ultimate akan dihitung `ultimate`, sehingga bila ia
+  membeli Ultimate, aplikasi **tidak** meminta penggantian produk dan Play menagih **Premium dan Ultimate sekaligus**.
+  Perbaikan: pisahkan dua pengertian tier. (a) *Tier akses* (membuka fitur) boleh memasukkan hibah promosional; (b) *tier
+  berbayar* (menentukan penggantian produk, tombol beli, tampilan "Kelola langganan") hanya dari entitlement bertoko Play
+  (`Store.playStore`). Tambah tes: Premium berbayar + trial Ultimate lalu beli Ultimate = produk Premium diganti; Gratis + trial
+  lalu beli = pembelian biasa tanpa penggantian; trial berakhir saat masih Premium berbayar = tetap Premium.
 
 ### 5.3 Cache dan kedaluwarsa
 Cache positif 300 dtk berarti trial yang baru berakhir bisa lolos hingga 5 menit. Dapat diterima (biaya ≈ nol), tetapi untuk
@@ -217,13 +222,12 @@ wajar jauh lebih rendah, jadi jangan dibandingkan langsung.
 | 4 | Plafon anggaran AI promo global **Rp1.500.000 per bulan** (rincian dan angka turunan di 10.1) |
 | 5 | Play Integrity **opsi B**: aplikasi mengirim token, Worker hanya mencatat vonis, penegakan lewat bendera `INTEGRITY_ENFORCE` (rincian di 10.2) |
 | 2a | Pengguna memulai trial lewat **opt-in kontekstual** (tombol di titik relevan, bukan klaim otomatis); rincian di 10.3 |
+| 2b | Pengguna Gratis lama (sebelum rilis ini) **ikut ditawari, sekali** |
+| 2c | Pelanggan Premium **ditawari trial Ultimate sebagai upsell**, setelah interaksi dengan langganan Play diuji (lihat 5.2: risiko penagihan ganda) |
+| 2d | Pengingat hari ke-23 dan ke-28 **aktif**, hanya bila izin notifikasi sudah ada; ditambah **peringatan di dalam aplikasi** yang tidak bergantung izin (lihat 10.4) |
 
 ### Masih terbuka
-| # | Keputusan | Usulan |
-|---|---|---|
-| 2b | Pengguna Gratis lama (sebelum rilis ini) ikut ditawari | Usulan: ya, sekali |
-| 2c | Pelanggan Premium ditawari trial Ultimate sebagai upsell | Usulan: ya (perlu uji interaksi dengan langganan Play, 5.2) |
-| 2d | Pengingat hari ke-23 dan ke-28 | Usulan: aktif, hanya bila izin notifikasi sudah ada |
+Tidak ada keputusan produk yang terbuka. Yang tersisa adalah verifikasi teknis di Fase 0 (bagian 9).
 
 ### 10.1 Anggaran AI promo global (butir 4)
 
@@ -406,3 +410,41 @@ titik penawaran yang buruk bisa dibuang.
 2. Pengguna Gratis lama (sebelum rilis ini) ikut ditawari, ya atau tidak?
 3. Pelanggan Premium ditawari trial Ultimate sebagai upsell, ya atau tidak?
 4. Pengingat hari ke-23 dan ke-28 diaktifkan?
+
+### 10.4 Peringatan di dalam aplikasi (keputusan 2d)
+
+Pengingat notifikasi hanya sampai ke pengguna yang mengizinkan notifikasi (dan ada yang mematikannya). Karena itu peringatan
+utama ada **di dalam aplikasi**, tidak bergantung izin; notifikasi hanya penguat.
+
+**Tahapan.** `sisa` = hari tersisa dari `trialEndsAt` (dibaca dari entitlement RevenueCat, bukan dari jam klaim di HP).
+
+| Fase | Sisa hari | Kartu Dashboard | Banner | Dialog (sekali per tonggak) |
+|---|---|---|---|---|
+| Normal | 30 sampai 8 | Netral: "Uji coba Ultimate: N hari lagi" | - | - |
+| Mendekati | 7 sampai 4 (hari ke-23 dst.) | Berwarna aksen: "Uji coba berakhir N hari lagi" + tombol "Lihat paket" | - | **Hari ke-23:** ringkasan "Yang akan berubah" |
+| Mendesak | 3 sampai 1 (hari ke-27 dst.) | Warna peringatan, tombol utama "Lanjutkan berlangganan" | Banner tipis di atas tab utama, bisa ditutup per hari | **Hari ke-28:** pengingat kedua |
+| Hari terakhir | < 24 jam | Merah: "Berakhir hari ini pukul HH:mm" | Banner tidak bisa ditutup hari itu | Dialog sekali saat dibuka |
+| Berakhir | - | "Uji coba berakhir. Data Anda aman." + tawaran | - | Dialog akhir (3.3), lalu kartu menetap 7 hari |
+
+**Isi dialog "Yang akan berubah"** (dihitung dari database lokal, bukan teks generik, supaya terasa nyata dan jujur):
+- jumlah buku kas tambahan yang akan terkunci dan transaksi berulang di dalamnya yang akan dijeda;
+- jumlah tabungan dan total saldonya (tetap bisa ditarik);
+- fitur yang berhenti: scan dan ringkasan AI, Excel, backup cloud; iklan kembali;
+- yang **tetap**: seluruh data, pencatatan di Buku Utama, ekspor CSV.
+- Tombol: "Lihat paket" (Premium sebagai pijakan, Ultimate bila memakai buku/tabungan), "Ingatkan nanti" (menunda sampai tonggak
+  berikutnya). Tidak ada tombol yang memblokir pemakaian.
+
+**Aturan agar tidak mengganggu.**
+1. Maksimal **satu** dialog per sesi aplikasi dan satu per tonggak (kunci di `KeyValueStore`: `trial_prompt_d23`, `_d28`, `_d30`, `_end`).
+2. Tidak ditampilkan saat formulir transaksi terbuka atau saat kunci aplikasi (PIN) aktif; tunggu layar utama.
+3. Berhenti total begitu entitlement berbayar aktif; kartu berubah menjadi ucapan terima kasih.
+4. Teks bersifat informatif, tanpa hitung mundur agresif atau nada menakut-nakuti.
+
+**Notifikasi (penguat, hanya bila izin sudah ada).** Dijadwalkan saat klaim berhasil lewat `NotificationSender` (pola sama
+`agenda_reminder_service.dart`): hari ke-23 dan ke-28 pukul 10.00 waktu lokal; dibatalkan bila pengguna membeli. Tidak
+meminta izin notifikasi hanya untuk ini; bila izin belum ada, peringatan dalam aplikasi sudah cukup.
+
+**Tambahan untuk Fase 2 (aplikasi).** Widget `TrialStatusCard`, `TrialBanner`, dan `TrialMilestoneDialog` di
+`lib/features/subscription/`; `TrialPromptPolicy` (murni, mudah diuji: input sisa hari, tonggak yang sudah dilihat, status
+sesi → keputusan apa yang ditampilkan). Tes: setiap fase dan tonggak, tidak muncul dua kali, hilang setelah membeli, tidak
+muncul di atas formulir.
