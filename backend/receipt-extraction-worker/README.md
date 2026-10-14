@@ -80,3 +80,40 @@ mencetak tabel benar/salah serta token terpakai. Tidak ikut di-deploy. Lihat `ev
   Verifikasi memakai ID anonim RevenueCat tanpa bukti kepemilikan: risiko diterima (ID sulit ditebak, ada batas
   harian/bulanan, ada pembatas per IP bila diaktifkan).
 - Teks struk tidak disimpan di server dan tidak dicatat di log.
+
+## Uji coba Ultimate tanpa kartu (`POST /trial/claim`)
+
+Rencana lengkap: [docs/RENCANA-IMPLEMENTASI-TRIAL-ULTIMATE.md](../../docs/RENCANA-IMPLEMENTASI-TRIAL-ULTIMATE.md).
+**Bawaan mati** (`TRIAL_ENABLED = "0"`); menyalakannya butuh rahasia `TRIAL_HASH_SECRET`.
+
+Permintaan: `{ "appUserId": "<ID RevenueCat>", "deviceId": "<ANDROID_ID>", "integrityToken": "<opsional>" }`.
+
+| Jawaban | Arti |
+|---|---|
+| `201 {status:"granted", endsAt}` | Trial baru diberikan (hibah `ultimate` + `premium` sampai `endsAt`) |
+| `200 {status:"active"}` | Idempoten: hibah sudah aktif pada ID ini |
+| `200 {status:"resumed", endsAt}` | Pasang ulang di masa trial: ID baru mendapat SISA hari |
+| `409 already_used` | Perangkat ini sudah memakai trial dan sudah habis |
+| `409 already_ultimate` | Pelanggan Ultimate berbayar |
+| `429 trial_paused` / `promo_budget_exhausted` | Pagar global; hak trial perangkat TIDAK terpakai |
+| `403 integrity_*`, `503 integrity_unavailable` | Hanya di mode penegakan Play Integrity |
+| `502 grant_ignored` / `grant_failed` | Hibah tidak berlaku / gagal; hak perangkat TIDAK terpakai |
+| `503 trial_disabled` | Saklar mati atau rahasia belum dipasang |
+
+Sifat penting:
+- Kunci kelayakan = `HMAC-SHA256(TRIAL_HASH_SECRET, deviceId)` di KV tanpa kedaluwarsa (`trial:<hash>`); `deviceId` mentah tidak disimpan.
+  **Jangan mengubah `TRIAL_HASH_SECRET` setelah dipakai**: semua perangkat tampak baru.
+- Worker **tidak mempercayai HTTP 201** dari RevenueCat: setelah menghibahkan, ia membaca ulang entitlement dan memeriksa
+  `expires_date` (hibah dalam 2 jam dari hibah promosional sebelumnya pada ID yang sama diabaikan diam-diam).
+- Pengguna uji coba (entitlement `rc_promo_*` tanpa langganan berbayar aktif) memakai kuota uji coba
+  (`TRIAL_*`) dan anggaran AI promo global `PROMO_AI_MONTHLY_BUDGET_RP` (perkiraan biaya: scan Rp5, ringkasan Rp30).
+  Pelanggan berbayar tidak terpengaruh.
+- `INTEGRITY_MODE`: pendekode token Play Integrity BELUM dipasang (butuh kredensial akun layanan Google). Hanya
+  `off`/`shadow` yang aman dipakai sekarang; `lenient`/`strict` akan menolak semua klaim (`integrity_unavailable`).
+
+Menyalakan (urutan):
+```bash
+npx wrangler secret put TRIAL_HASH_SECRET     # acak panjang, simpan di pengelola kata sandi
+# ubah TRIAL_ENABLED = "1" di wrangler.toml, lalu:
+npx wrangler deploy
+```

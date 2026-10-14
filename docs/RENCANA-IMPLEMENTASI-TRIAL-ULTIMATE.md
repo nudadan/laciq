@@ -251,6 +251,28 @@ Akibat bagi Worker (masuk ke Fase 1):
 3. Butir 6 (Play Integrity di Worker) dan butir 7 (perilaku buku terkunci di UI): bukan bagian skrip ini.
 4. Konfirmasi kunci secret yang dipakai uji sama dengan `REVENUECAT_SECRET_KEY` Worker (bila berbeda, hibah dari Worker bisa gagal berizin).
 
+### Status Fase 1 (Worker) — diselesaikan 2026-10-14, BELUM di-deploy
+
+Cabang `trial-ultimate-worker`. 134 tes Worker lulus (84 lama + 50 baru), typecheck bersih, `wrangler deploy --dry-run` valid.
+
+| Bagian | Status |
+|---|---|
+| `POST /trial/claim` (kunci HMAC perangkat, idempoten, sisa hari saat pasang ulang, `already_used`, `already_ultimate`) | Selesai + tes |
+| Hibah `ultimate` + `premium` dengan **pembacaan ulang** (`GrantIgnoredError`) | Selesai + tes |
+| Pengenal sumber entitlement (`promo` vs `store`, pelanggan berbayar tidak kena kuota uji coba) | Selesai + tes |
+| Kuota uji coba 60/10 scan dan 6/2 ringkasan; cache hibah 60 dtk | Selesai + tes |
+| Anggaran AI promo global (Rp1,35 jt, scan Rp5 / ringkasan Rp30), klaim baru dijeda tanpa menghabiskan hak perangkat | Selesai + tes |
+| Batas klaim harian, saklar `TRIAL_ENABLED` (bawaan mati), pembatas IP | Selesai + tes |
+| Play Integrity: kebijakan vonis + mode `off/shadow/lenient/strict` | Selesai + tes |
+| Play Integrity: **pendekode token ke Google** (butuh akun layanan) | **Belum**; `shadow` hanya mencatat `unavailable` |
+
+**Yang perlu Anda lakukan sebelum menyalakan:** `wrangler secret put TRIAL_HASH_SECRET`, memastikan `REVENUECAT_SECRET_KEY` Worker
+berizin menulis (butir 5), mengubah `TRIAL_ENABLED = "1"`, lalu deploy. Aplikasi belum memanggil endpoint ini (Fase 2), jadi
+menyalakan lebih awal tidak berdampak bagi pengguna.
+
+**Deploy aman bagi pengguna yang ada:** tanpa hibah promosional, perilaku `/extract` dan `/report-insight` identik dengan
+sebelumnya (diuji). Format cache `ent:` berubah tetapi nilai lama `1`/`0` tetap terbaca.
+
 ## 10. Keputusan
 
 ### Sudah diputuskan pemilik (2026-10-14)

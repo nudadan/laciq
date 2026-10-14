@@ -1,3 +1,7 @@
+import { resolveAccess } from "./access.ts";
+import type { TrialQuota } from "./promo_budget.ts";
+import type { EntitlementState } from "./revenuecat.ts";
+
 export interface CategoryOption {
   id: string;
   name: string;
@@ -15,6 +19,10 @@ export interface Extraction {
 export interface Deps {
   /** Apakah pengguna ini punya entitlement Ultimate aktif (dicek ke RevenueCat). */
   hasUltimate(appUserId: string): Promise<boolean>;
+  /** Keadaan entitlement lengkap (sumber); bila ada, menggantikan [hasUltimate]. */
+  getEntitlement?(appUserId: string): Promise<EntitlementState>;
+  /** Kuota + anggaran khusus pengguna uji coba (hibah promosional). */
+  trial?: TrialQuota;
   /** Jumlah pemakaian untuk kunci tertentu. */
   getUsage(key: string): Promise<number>;
   /** Menyimpan jumlah pemakaian; kunci kedaluwarsa sendiri setelah [ttlSeconds]. */
@@ -141,24 +149,29 @@ export async function handleExtract(req: Request, deps: Deps): Promise<Response>
   const body = parseBody(raw);
   if (!body) return json({ error: "invalid_request" }, 400);
 
-  let ultimate: boolean;
+  let access;
   try {
-    ultimate = await deps.hasUltimate(body.appUserId);
+    access = await resolveAccess(deps, body.appUserId);
   } catch {
     return json({ error: "entitlement_check_failed" }, 502);
   }
-  if (!ultimate) return json({ error: "not_ultimate" }, 403);
+  if (!access.active) return json({ error: "not_ultimate" }, 403);
 
   const now = deps.now();
+  // Pengguna uji coba: anggaran AI promo global dicek lebih dulu.
+  if (access.trial && (await access.trial.budget.exhausted(now))) {
+    return json({ error: "promo_budget_exhausted" }, 429);
+  }
+  const { monthlyLimit, dailyLimit } = access;
   const monthKey = usageKey(body.appUserId, now);
   const used = await deps.getUsage(monthKey);
-  if (used >= deps.monthlyLimit) {
-    return json({ error: "quota_exceeded", limit: deps.monthlyLimit }, 429);
+  if (used >= monthlyLimit) {
+    return json({ error: "quota_exceeded", limit: monthlyLimit }, 429);
   }
   const dayKey = dailyUsageKey(body.appUserId, now);
-  const usedToday = deps.dailyLimit ? await deps.getUsage(dayKey) : 0;
-  if (deps.dailyLimit && usedToday >= deps.dailyLimit) {
-    return json({ error: "daily_limit_exceeded", limit: deps.dailyLimit }, 429);
+  const usedToday = dailyLimit ? await deps.getUsage(dayKey) : 0;
+  if (dailyLimit && usedToday >= dailyLimit) {
+    return json({ error: "daily_limit_exceeded", limit: dailyLimit }, 429);
   }
 
   let result: Extraction;
@@ -170,7 +183,8 @@ export async function handleExtract(req: Request, deps: Deps): Promise<Response>
   // Hanya dihitung bila ekstraksi berhasil; pengguna tidak dirugikan oleh
   // kegagalan di sisi kita.
   await deps.setUsage(monthKey, used + 1, MONTH_TTL_SECONDS);
-  if (deps.dailyLimit) await deps.setUsage(dayKey, usedToday + 1, DAY_TTL_SECONDS);
+  if (dailyLimit) await deps.setUsage(dayKey, usedToday + 1, DAY_TTL_SECONDS);
+  if (access.trial) await access.trial.budget.add(now, access.trial.costRp);
 
   // Jangan percaya keluaran model: kategori harus salah satu yang dikirim app,
   // total dan tanggal harus wajar.
@@ -187,6 +201,6 @@ export async function handleExtract(req: Request, deps: Deps): Promise<Response>
     categoryId,
     total: sanitizeTotal(result.total),
     date: sanitizeDate(result.date, now),
-    remaining: deps.monthlyLimit - used - 1,
+    remaining: monthlyLimit - used - 1,
   });
 }

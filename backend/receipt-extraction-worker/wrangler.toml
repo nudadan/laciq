@@ -19,6 +19,28 @@ DAILY_LIMIT = "15"
 REPORT_MONTHLY_LIMIT = "30"
 REPORT_DAILY_LIMIT = "5"
 
+# --- Uji coba Ultimate 30 hari tanpa kartu (docs/RENCANA-IMPLEMENTASI-TRIAL-ULTIMATE.md) ---
+# BAWAAN MATI. Sebelum menyalakan: `npx wrangler secret put TRIAL_HASH_SECRET` (acak panjang), lalu
+# ubah TRIAL_ENABLED menjadi "1" dan deploy. Rahasia itu TIDAK boleh berubah setelah dipakai:
+# mengubahnya membuat semua catatan perangkat tak terbaca (semua orang tampak baru).
+TRIAL_ENABLED = "0"
+TRIAL_DAYS = "30"
+PREMIUM_ENTITLEMENT = "premium"
+# Kuota AI pengguna uji coba (hibah promosional); pelanggan berbayar memakai kuota di atas.
+# Biaya terburuk per trial ≈ 60 x Rp4,6 + 6 x Rp30 ≈ Rp456.
+TRIAL_MONTHLY_LIMIT = "60"
+TRIAL_DAILY_LIMIT = "10"
+TRIAL_REPORT_MONTHLY_LIMIT = "6"
+TRIAL_REPORT_DAILY_LIMIT = "2"
+# Klaim BARU maksimal per hari (UTC); meratakan lonjakan.
+TRIAL_DAILY_CLAIM_CAP = "300"
+# Batas penegakan anggaran AI promo global (Rupiah per bulan). Plafon yang direlakan Rp1.500.000;
+# batas dipasang 90% dari itu karena penghitung KV tidak atomik. 0/kosong = AI uji coba mati.
+PROMO_AI_MONTHLY_BUDGET_RP = "1350000"
+# Play Integrity: off | shadow | lenient | strict. Pendekode token belum dipasang, jadi "shadow"
+# hanya mencatat vonis "unavailable"; JANGAN memakai lenient/strict sebelum pendekode ada.
+INTEGRITY_MODE = "shadow"
+
 # Penyedia dan model AI. Penyedia: "gemini" (satu-satunya yang didukung).
 # ID model SENGAJA di sini, bukan di kode, supaya ganti model tidak perlu rilis.
 # Pilih model lewat evaluasi (eval/), lihat docs/RENCANA-IMPLEMENTASI-ULTIMATE-LANJUTAN.md B3.
@@ -53,3 +75,4 @@ id = "85728dd92a8d4c4dbf7de95efeefbd56"
 # Rahasia (jangan ditaruh di file ini):
 #   npx wrangler secret put GEMINI_API_KEY          # kunci PAID TIER, project Google Cloud khusus
 #   npx wrangler secret put REVENUECAT_SECRET_KEY
+#   npx wrangler secret put TRIAL_HASH_SECRET       # hanya untuk uji coba; jangan diubah setelah dipakai

@@ -1,10 +1,11 @@
+import { resolveAccess } from "./access.ts";
 import type { Deps } from "./handler.ts";
 import type { ReportBudget, ReportCategory, ReportInput } from "./report_prompt.ts";
 
 /** Bagian [Deps] yang dipakai ulang (entitlement, kuota, jam, pembatas IP). */
 export type ReportDeps = Pick<
   Deps,
-  "hasUltimate" | "getUsage" | "setUsage" | "now" | "allowIp"
+  "hasUltimate" | "getEntitlement" | "trial" | "getUsage" | "setUsage" | "now" | "allowIp"
 > & {
   /** Menulis ringkasan dari angka agregat; melempar bila gagal/tidak layak. */
   narrate(report: ReportInput): Promise<string>;
@@ -132,24 +133,28 @@ export async function handleReportInsight(req: Request, deps: ReportDeps): Promi
   const body = parseReport(raw);
   if (!body) return json({ error: "invalid_request" }, 400);
 
-  let ultimate: boolean;
+  let access;
   try {
-    ultimate = await deps.hasUltimate(body.appUserId);
+    access = await resolveAccess(deps, body.appUserId);
   } catch {
     return json({ error: "entitlement_check_failed" }, 502);
   }
-  if (!ultimate) return json({ error: "not_ultimate" }, 403);
+  if (!access.active) return json({ error: "not_ultimate" }, 403);
 
   const now = deps.now();
+  if (access.trial && (await access.trial.budget.exhausted(now))) {
+    return json({ error: "promo_budget_exhausted" }, 429);
+  }
+  const { monthlyLimit, dailyLimit } = access;
   const monthKey = reportUsageKey(body.appUserId, now);
   const used = await deps.getUsage(monthKey);
-  if (used >= deps.monthlyLimit) {
-    return json({ error: "quota_exceeded", limit: deps.monthlyLimit }, 429);
+  if (used >= monthlyLimit) {
+    return json({ error: "quota_exceeded", limit: monthlyLimit }, 429);
   }
   const dayKey = reportDailyUsageKey(body.appUserId, now);
-  const usedToday = deps.dailyLimit ? await deps.getUsage(dayKey) : 0;
-  if (deps.dailyLimit && usedToday >= deps.dailyLimit) {
-    return json({ error: "daily_limit_exceeded", limit: deps.dailyLimit }, 429);
+  const usedToday = dailyLimit ? await deps.getUsage(dayKey) : 0;
+  if (dailyLimit && usedToday >= dailyLimit) {
+    return json({ error: "daily_limit_exceeded", limit: dailyLimit }, 429);
   }
 
   let summary: string;
@@ -160,9 +165,10 @@ export async function handleReportInsight(req: Request, deps: ReportDeps): Promi
   }
   // Dihitung hanya bila berhasil.
   await deps.setUsage(monthKey, used + 1, MONTH_TTL_SECONDS);
-  if (deps.dailyLimit) await deps.setUsage(dayKey, usedToday + 1, DAY_TTL_SECONDS);
+  if (dailyLimit) await deps.setUsage(dayKey, usedToday + 1, DAY_TTL_SECONDS);
+  if (access.trial) await access.trial.budget.add(now, access.trial.costRp);
 
   // Diagnostik tanpa data pengguna.
   console.log(`ai_report_result chars=${summary.length} categories=${body.report.categories.length}`);
-  return json({ summary, remaining: deps.monthlyLimit - used - 1 });
+  return json({ summary, remaining: monthlyLimit - used - 1 });
 }
