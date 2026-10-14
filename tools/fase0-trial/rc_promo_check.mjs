@@ -15,6 +15,7 @@
 //   --wait-expiry    tunggu sampai hibah kedaluwarsa lalu periksa lagi (butuh --minutes kecil, mis. 3)
 //   --keep           jangan cabut hibah di akhir (bawaan: dicabut)
 //   --revoke-only    hanya cabut hibah promosional ID ini lalu keluar
+//   --show           BACA SAJA: tampilkan entitlement, sumber (uji coba/berbayar), dan keputusan Worker
 //
 // Gunakan ID uji (mis. dari aplikasi probe), BUKAN ID pengguna sungguhan.
 
@@ -108,6 +109,29 @@ console.log(`Lama hibah: ${minutes} menit`);
 
 if (flag("--revoke-only")) {
   await revokeAll();
+  process.exit(0);
+}
+
+if (flag("--show")) {
+  // Baca saja: tidak menghibahkan atau mencabut apa pun. Aman dipakai berulang
+  // pada ID sungguhan milik perangkat uji (lihat docs/UJI-HP-TRIAL-ULTIMATE.md).
+  const r = await rc("GET", `/subscribers/${uid}`);
+  if (!r.ok) die(`Baca pelanggan gagal (HTTP ${r.status}).`);
+  const sub = subscriberOf(r.json);
+  showEntitlements(sub, "Keadaan sekarang");
+  const state = workerDecision(sub);
+  const ent = sub?.entitlements?.[ULTIMATE];
+  const paid = Object.values(sub?.subscriptions ?? {}).filter(
+    (s) => s.store !== "promotional" && (s.expires_date === null || Date.parse(s.expires_date) > Date.now()),
+  );
+  console.log(`\nWorker menganggap Ultimate aktif : ${state}`);
+  console.log(
+    `Sumber                           : ${
+      !state ? "-" : paid.length > 0 ? "berbayar (store)" : ent?.product_identifier?.startsWith("rc_promo_") ? "uji coba (promo)" : "berbayar (store)"
+    }`,
+  );
+  console.log(`Langganan berbayar aktif         : ${paid.length}`);
+  for (const s of paid) console.log(`  - store=${s.store} expires_date=${s.expires_date}`);
   process.exit(0);
 }
 
