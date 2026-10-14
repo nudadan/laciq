@@ -100,6 +100,10 @@ Permintaan: `{ "appUserId": "<ID RevenueCat>", "deviceId": "<ANDROID_ID>", "inte
 | `502 grant_ignored` / `grant_failed` | Hibah tidak berlaku / gagal; hak perangkat TIDAK terpakai |
 | `503 trial_disabled` | Saklar mati atau rahasia belum dipasang |
 
+`POST /trial/status` (baca saja, tanpa efek samping; badan sama) menjawab `{state, endsAt?}` dengan `state` salah satu
+`disabled | ultimate | active | resumable | used | paused | available`. Dipakai aplikasi agar tidak menawarkan trial yang
+akan ditolak.
+
 Sifat penting:
 - Kunci kelayakan = `HMAC-SHA256(TRIAL_HASH_SECRET, deviceId)` di KV tanpa kedaluwarsa (`trial:<hash>`); `deviceId` mentah tidak disimpan.
   **Jangan mengubah `TRIAL_HASH_SECRET` setelah dipakai**: semua perangkat tampak baru.

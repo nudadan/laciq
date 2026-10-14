@@ -16,3 +16,14 @@ String aiReportUrlFrom(String extractionUrl) =>
     : '';
 
 final kAiReportUrl = aiReportUrlFrom(kAiExtractionUrl);
+
+/// Alamat uji coba Ultimate di Worker yang sama (`/extract` -> `/trial/claim`
+/// dan `/trial/status`). Kosong bila `AI_EXTRACTION_URL` dikosongkan atau tidak
+/// berakhiran `/extract`: tanpa Worker, penawaran uji coba tidak ditampilkan.
+String workerUrlFrom(String extractionUrl, String path) =>
+    extractionUrl.endsWith('/extract')
+    ? '${extractionUrl.substring(0, extractionUrl.length - '/extract'.length)}$path'
+    : '';
+
+final kTrialClaimUrl = workerUrlFrom(kAiExtractionUrl, '/trial/claim');
+final kTrialStatusUrl = workerUrlFrom(kAiExtractionUrl, '/trial/status');

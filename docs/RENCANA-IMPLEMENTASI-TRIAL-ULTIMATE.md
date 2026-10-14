@@ -280,10 +280,21 @@ Cabang `trial-ultimate-app`.
 | # | Butir | Status |
 |---|---|---|
 | 1 | Pisahkan **tier akses** dari **tier berbayar** (5.2: cegah penagihan ganda) | **Selesai** (710 tes lulus) |
-| 2 | `TrialService` dan channel `ANDROID_ID` | Belum |
+| 2 | `TrialService` dan `ANDROID_ID` | **Selesai** (720 tes Flutter, 140 tes Worker); endpoint baca-saja `/trial/status` ditambahkan |
 | 3 | Kartu ajakan opt-in kontekstual dan titik penawaran | Belum |
 | 4 | Hitung mundur, peringatan per tonggak, dialog akhir (10.4) | Belum |
 | 5 | Tes widget fase dan tonggak | Belum |
+
+**Butir 2, yang dilakukan:**
+- Worker: `POST /trial/status` (baca saja, tanpa efek samping) mengembalikan `disabled | ultimate | active | resumable | used |
+  paused | available`. Tujuannya: **tidak menjanjikan "coba gratis" kepada perangkat yang akan ditolak** (mis. pasang ulang
+  setelah trial habis). Klaim tetap lewat `/trial/claim`.
+- Aplikasi: `TrialService` (`HttpTrialService`) dengan `status()` dan `claim()` yang tidak pernah melempar; tidak pasti =
+  `TrialOffer.hidden`. Setelah klaim berhasil memanggil `SubscriptionStatus.refresh()` agar hibah langsung terlihat.
+- Pengenal perangkat lewat paket `android_id` (tanpa izin baru; manifest gabungan diperiksa). `deviceIdSourceProvider`,
+  `trialServiceProvider`, `trialStatusProvider`.
+- URL diturunkan dari `AI_EXTRACTION_URL` (`/extract` → `/trial/claim`, `/trial/status`); kosong = penawaran tidak tampil.
+- Harness tes: `FakeTrialService` terpasang bawaan di `appTest`, `FakeSubscriptionStatus.startTrial()` dan `refreshCount`.
 
 **Butir 1, yang dilakukan:**
 - `SubscriptionDetail` (tier berbayar, ID produk berbayar, `trialEndsAt`) diturunkan murni oleh `subscriptionDetailOf` dari

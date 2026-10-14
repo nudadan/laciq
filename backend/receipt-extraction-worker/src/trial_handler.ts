@@ -267,3 +267,71 @@ export async function hmacHex(secret: string, message: string): Promise<string> 
   const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`trial-device:${message}`));
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
+
+export type TrialStatusState =
+  | "disabled" // saklar mati
+  | "ultimate" // pelanggan Ultimate berbayar
+  | "active" // hibah uji coba sedang berjalan pada ID ini
+  | "resumable" // perangkat punya trial berjalan; ID baru bisa melanjutkan sisa hari
+  | "used" // perangkat sudah memakai trial dan sudah habis
+  | "paused" // pagar global (klaim harian / anggaran AI promo) sedang penuh
+  | "available";
+
+/**
+ * POST /trial/status — BACA SAJA (tanpa efek samping): apakah penawaran trial
+ * pantas ditampilkan untuk perangkat dan ID ini. Dipakai aplikasi agar tidak
+ * menjanjikan "coba gratis" kepada pengguna yang akan ditolak setelah menekan
+ * tombol (mis. memasang ulang setelah trial habis).
+ */
+export async function handleTrialStatus(req: Request, deps: TrialDeps): Promise<Response> {
+  const url = new URL(req.url);
+  if (url.pathname !== "/trial/status") return json({ error: "not_found" }, 404);
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+
+  const ip = req.headers.get("cf-connecting-ip");
+  if (deps.allowIp && ip && !(await deps.allowIp(ip))) {
+    return json({ error: "rate_limited" }, 429);
+  }
+  const text = await req.text();
+  if (text.length > MAX_BODY_BYTES + MAX_TOKEN_CHARS) {
+    return json({ error: "payload_too_large" }, 413);
+  }
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return json({ error: "invalid_json" }, 400);
+  }
+  const claim = parseClaim(raw);
+  if (!claim) return json({ error: "invalid_request" }, 400);
+
+  const reply = (state: TrialStatusState, endsAtMs?: number | null) =>
+    json({
+      state,
+      ...(endsAtMs ? { endsAt: new Date(endsAtMs).toISOString() } : {}),
+    });
+
+  if (!deps.enabled) return reply("disabled");
+
+  const now = deps.now();
+  const nowMs = now.getTime();
+  let state: EntitlementState;
+  try {
+    state = await deps.getEntitlement(claim.appUserId);
+  } catch {
+    return json({ error: "entitlement_check_failed" }, 502);
+  }
+  if (state.active && state.source === "store") return reply("ultimate");
+  if (state.active && state.source === "promo") return reply("active", state.expiresAtMs);
+
+  const record = parseRecord(await deps.store.get(trialKey(await deps.hashDevice(claim.deviceId))));
+  if (record) {
+    return record.endsAt > nowMs ? reply("resumable", record.endsAt) : reply("used", record.endsAt);
+  }
+
+  const claimedToday = Number((await deps.store.get(trialDayKey(now))) ?? 0);
+  if (claimedToday >= deps.dailyClaimCap || (await deps.budget.exhausted(now))) {
+    return reply("paused");
+  }
+  return reply("available");
+}

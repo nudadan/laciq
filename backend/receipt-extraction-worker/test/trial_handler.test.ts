@@ -557,3 +557,94 @@ describe("kuota uji coba pada /report-insight", () => {
     assert.equal(((await res.json()) as { error: string }).error, "promo_budget_exhausted");
   });
 });
+
+// ---- /trial/status ----
+
+import { handleTrialStatus } from "../src/trial_handler.ts";
+
+describe("handleTrialStatus", () => {
+  const status = (body: unknown, init: { method?: string; ip?: string } = {}) =>
+    new Request("https://w.example/trial/status", {
+      method: init.method ?? "POST",
+      headers: init.ip ? { "cf-connecting-ip": init.ip } : {},
+      body: (init.method ?? "POST") === "POST" ? JSON.stringify(body) : undefined,
+    });
+  const stateOf = async (res: Response) => ((await res.json()) as { state: string }).state;
+
+  it("tersedia untuk perangkat baru, tanpa efek samping", async () => {
+    const t = makeTrial();
+    const res = await handleTrialStatus(status(valid), t.deps);
+    assert.equal(res.status, 200);
+    assert.equal(await stateOf(res), "available");
+    assert.equal(t.kv.size, 0);
+    assert.deepEqual(t.grants, []);
+  });
+
+  it("saklar mati: disabled", async () => {
+    const t = makeTrial({ enabled: false });
+    assert.equal(await stateOf(await handleTrialStatus(status(valid), t.deps)), "disabled");
+  });
+
+  it("pelanggan Ultimate berbayar: ultimate; hibah aktif: active + endsAt", async () => {
+    const paid = makeTrial({
+      getEntitlement: async () => ({ active: true, source: "store", expiresAtMs: null }),
+    });
+    assert.equal(await stateOf(await handleTrialStatus(status(valid), paid.deps)), "ultimate");
+
+    const end = NOW.getTime() + 5 * DAY;
+    const promo = makeTrial({
+      getEntitlement: async () => ({ active: true, source: "promo", expiresAtMs: end }),
+    });
+    const body = (await (await handleTrialStatus(status(valid), promo.deps)).json()) as {
+      state: string;
+      endsAt: string;
+    };
+    assert.equal(body.state, "active");
+    assert.equal(body.endsAt, new Date(end).toISOString());
+  });
+
+  it("perangkat sudah memakai trial: used (pasang ulang setelah habis); masih berjalan: resumable", async () => {
+    const first = makeTrial();
+    await handleTrialClaim(claim(valid), first.deps);
+
+    const reinstallDuring = makeTrial({
+      store: first.deps.store,
+      now: () => new Date(NOW.getTime() + 10 * DAY),
+    });
+    const during = (await (
+      await handleTrialStatus(status({ appUserId: USER2, deviceId: DEVICE }), reinstallDuring.deps)
+    ).json()) as { state: string; endsAt: string };
+    assert.equal(during.state, "resumable");
+    assert.equal(during.endsAt, new Date(NOW.getTime() + 30 * DAY).toISOString());
+
+    const reinstallAfter = makeTrial({
+      store: first.deps.store,
+      now: () => new Date(NOW.getTime() + 31 * DAY),
+    });
+    assert.equal(
+      await stateOf(await handleTrialStatus(status({ appUserId: USER2, deviceId: DEVICE }), reinstallAfter.deps)),
+      "used",
+    );
+  });
+
+  it("pagar global penuh: paused (tanpa menyentuh hak perangkat)", async () => {
+    const t = makeTrial({ dailyClaimCap: 1 });
+    t.kv.set(trialDayKey(NOW), "1");
+    assert.equal(await stateOf(await handleTrialStatus(status(valid), t.deps)), "paused");
+
+    const b = makeTrial();
+    b.budgetUsage.set(promoBudgetKey(NOW), 1_350_000);
+    assert.equal(await stateOf(await handleTrialStatus(status(valid), b.deps)), "paused");
+  });
+
+  it("permintaan salah: 400/405/404, pembatas IP: 429", async () => {
+    const t = makeTrial();
+    assert.equal((await handleTrialStatus(status({ appUserId: "x" }), t.deps)).status, 400);
+    assert.equal((await handleTrialStatus(status(valid, { method: "GET" }), t.deps)).status, 405);
+    assert.equal(
+      (await handleTrialStatus(status(valid, { ip: "1.1.1.1" }), makeTrial({ allowIp: async () => false }).deps))
+        .status,
+      429,
+    );
+  });
+});

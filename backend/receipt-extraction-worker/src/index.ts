@@ -6,7 +6,7 @@ import { buildNarrator } from "./narrator.ts";
 import { makePromoBudget, REPORT_COST_RP, SCAN_COST_RP } from "./promo_budget.ts";
 import { handleReportInsight } from "./report_handler.ts";
 import { makeEntitlementLookup, makeTrialGranter } from "./revenuecat.ts";
-import { handleTrialClaim, hmacHex } from "./trial_handler.ts";
+import { handleTrialClaim, handleTrialStatus, hmacHex } from "./trial_handler.ts";
 
 export interface Env extends AiEnv {
   REVENUECAT_SECRET_KEY: string;
@@ -75,9 +75,10 @@ export default {
 
     const path = new URL(req.url).pathname;
 
-    if (path === "/trial/claim") {
+    if (path === "/trial/claim" || path === "/trial/status") {
       const secret = env.TRIAL_HASH_SECRET ?? "";
-      return handleTrialClaim(req, {
+      const handle = path === "/trial/claim" ? handleTrialClaim : handleTrialStatus;
+      return handle(req, {
         enabled: env.TRIAL_ENABLED === "1" && secret !== "",
         days: num(env.TRIAL_DAYS, 30),
         dailyClaimCap: num(env.TRIAL_DAILY_CLAIM_CAP, 300),

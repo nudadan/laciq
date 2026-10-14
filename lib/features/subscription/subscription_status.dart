@@ -74,6 +74,11 @@ abstract interface class SubscriptionStatus {
   /// Ultimate.
   Future<String?> activeSubscriptionProductId();
   Future<List<SubscriptionPackage>> fetchPackages();
+
+  /// Memaksa info terbaru dari server lalu mendorongnya ke semua pengamat
+  /// status (mis. setelah Worker memberi hibah uji coba). Gagal = diam.
+  Future<void> refresh();
+
   Future<void> purchase(SubscriptionPackage package);
 
   /// Memulihkan pembelian dari Google Play lalu mengembalikan true bila SESUDAH
@@ -344,6 +349,12 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
       oldId,
       replacementMode: StoreReplacementMode.chargeProratedPrice,
     );
+  }
+
+  @override
+  Future<void> refresh() async {
+    if (!_configured) return;
+    await _pushLatestInfo();
   }
 
   /// Memaksa info terbaru dari server (bukan cache) lalu mendorongnya ke

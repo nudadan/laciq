@@ -18,6 +18,7 @@ import '../features/settings/share_file.dart';
 import '../features/security/lock_providers.dart' show keyValueStoreProvider;
 import '../features/subscription/subscription_plans.dart';
 import '../features/subscription/subscription_status.dart';
+import '../features/subscription/trial_service.dart';
 import '../features/transactions/receipt_scanner.dart';
 import '../features/voice/voice_recognizer.dart';
 import '../features/trends/trend_settings.dart';
@@ -351,6 +352,25 @@ final reviewPromptServiceProvider = Provider<ReviewPromptService>(
 
 final subscriptionStatusProvider = Provider<SubscriptionStatus>(
   (ref) => RevenueCatSubscriptionStatus(),
+);
+
+/// Pengenal perangkat untuk kelayakan uji coba (tes memakai nilai palsu).
+final deviceIdSourceProvider = Provider<DeviceIdSource>(
+  (ref) => AndroidDeviceIdSource(),
+);
+
+/// Uji coba Ultimate tanpa kartu (lihat trial_service.dart).
+final trialServiceProvider = Provider<TrialService>(
+  (ref) => HttpTrialService(
+    ref.watch(subscriptionStatusProvider),
+    ref.watch(deviceIdSourceProvider),
+  ),
+);
+
+/// Status penawaran uji coba untuk perangkat ini; satu pengambilan per sesi.
+/// Panggil `ref.invalidate` setelah klaim agar tampilan diperbarui.
+final trialStatusProvider = FutureProvider<TrialStatus>(
+  (ref) => ref.watch(trialServiceProvider).status(),
 );
 
 final isPremiumProvider = StreamProvider<bool>(

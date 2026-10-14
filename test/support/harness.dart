@@ -16,6 +16,7 @@ import 'package:dompet_pintar/features/security/app_lock_service.dart';
 import 'package:dompet_pintar/features/security/lock_providers.dart';
 import 'package:dompet_pintar/features/subscription/subscription_plans.dart';
 import 'package:dompet_pintar/features/subscription/subscription_status.dart';
+import 'package:dompet_pintar/features/subscription/trial_service.dart';
 import 'package:dompet_pintar/features/transactions/receipt_scanner.dart';
 import 'package:dompet_pintar/features/voice/voice_recognizer.dart';
 import 'package:image_picker/image_picker.dart' show ImageSource;
@@ -125,7 +126,7 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   /// Langganan berbayar saja.
   bool _paidPremium;
   bool _paidUltimate;
-  final DateTime? trialEndsAt;
+  DateTime? trialEndsAt;
   late final StreamController<SubscriptionDetail> _detailController;
 
   SubscriptionDetail get _detail => SubscriptionDetail(
@@ -202,6 +203,23 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   @override
   Future<List<SubscriptionPackage>> fetchPackages() async => packages;
 
+  /// Berapa kali [refresh] dipanggil (mis. setelah klaim trial).
+  var refreshCount = 0;
+
+  @override
+  Future<void> refresh() async => refreshCount++;
+
+  /// Meniru hibah uji coba yang baru diberikan Worker: hak akses jadi Ultimate,
+  /// tier berbayar tidak berubah.
+  void startTrial(DateTime endsAt) {
+    trialEndsAt = endsAt;
+    _premium = true;
+    _ultimate = true;
+    _controller.add(true);
+    _ultimateController.add(true);
+    _detailController.add(_detail);
+  }
+
   @override
   Future<void> purchase(SubscriptionPackage package) async {
     purchased.add(package.id);
@@ -220,6 +238,31 @@ class FakeSubscriptionStatus implements SubscriptionStatus {
   Future<bool> restorePurchases() async {
     restoreCalled = true;
     return restoreFindsSubscription;
+  }
+}
+
+/// Layanan uji coba palsu: status dan hasil klaim diatur tes; tanpa jaringan.
+class FakeTrialService implements TrialService {
+  FakeTrialService({
+    this.currentStatus = TrialStatus.hidden,
+    this.claimResult = const TrialClaimResult(TrialClaimOutcome.granted),
+  });
+
+  TrialStatus currentStatus;
+  TrialClaimResult claimResult;
+  var statusCalls = 0;
+  var claimCalls = 0;
+
+  @override
+  Future<TrialStatus> status() async {
+    statusCalls++;
+    return currentStatus;
+  }
+
+  @override
+  Future<TrialClaimResult> claim() async {
+    claimCalls++;
+    return claimResult;
   }
 }
 
@@ -444,6 +487,7 @@ void appTest(
   FakeAiExtractionService? aiExtraction,
   FakeVoiceRecognizer? voice,
   FakeAiReportService? aiReport,
+  FakeTrialService? trialService,
   List<Override> extraOverrides = const [],
   Duration grace = const Duration(seconds: 30),
   // Kebanyakan tes tidak menguji alur onboarding itu sendiri, jadi lewati
@@ -488,6 +532,9 @@ void appTest(
           reviewLauncherProvider.overrideWithValue(reviewLauncher),
           voiceRecognizerProvider.overrideWithValue(voiceRecognizer),
           aiReportServiceProvider.overrideWithValue(aiReportService),
+          trialServiceProvider.overrideWithValue(
+            trialService ?? FakeTrialService(),
+          ),
           ...extraOverrides,
         ],
         child: const DompetPintarApp(),
