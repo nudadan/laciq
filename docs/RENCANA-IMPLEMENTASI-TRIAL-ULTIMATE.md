@@ -225,13 +225,28 @@ Dijalankan dengan `tools/fase0-trial/` pada Galaxy Z Fold6 (adb nirkabel) dan ID
 | 3 | `product_identifier` berawalan `rc_promo_` | **Terbukti** | `rc_promo_ultimate_custom` dan `rc_promo_premium_custom` (bentuk `rc_promo_<entitlement>_custom` untuk hibah `end_time_ms`) |
 | 4 | `ANDROID_ID` sama setelah pasang ulang | **Terbukti pada kunci uji** | Nilai sama pada dua kali copot-pasang dengan kunci tanda tangan khusus probe; ID RevenueCat berubah tiap kali. **Belum terbukti dengan kunci Play** (konfirmasi di Fase 2) |
 | 5 | Kunci secret boleh menulis | **Terbukti** | Hibah HTTP 201 dengan kunci V1 yang dipakai uji. *Catatan:* pastikan itu kunci yang sama dengan rahasia Worker |
-| W | Keputusan Worker benar | **Terbukti untuk hibah aktif dan dicabut** | `hasUltimate=true` saat hibah aktif, `false` setelah dicabut. **Kedaluwarsa alami belum diuji** (`--wait-expiry`) |
+| W | Keputusan Worker benar | **Terbukti** (aktif, kedaluwarsa alami, dan dicabut) | `hasUltimate=true` saat hibah aktif, `false` setelah dicabut. Uji ulang dengan ID segar: `hasUltimate=true` saat aktif, `false` setelah kedaluwarsa tanpa pencabutan (selisih end_time_ms 659 ms); uji pertama tidak sahih karena ID bekas hibah (lihat temuan) |
 | i | Hibah ulang < 2 jam | **Sesuai dokumentasi** | Hibah +30 menit di atas hibah aktif tidak memperpanjang |
 
-**Akibat bagi rancangan:** tidak ada perubahan. Penentu sumber promosional di Worker memakai awalan `rc_promo_` pada `product_identifier`.
+**Temuan dari uji kedaluwarsa pertama (2026-10-14, hasil tidak sahih tetapi sangat berguna):**
+
+Uji `--wait-expiry` dijalankan pada ID yang sama dengan uji sebelumnya, beberapa menit setelah hibah lama dicabut. Hasilnya:
+
+| Pengamatan | Arti |
+|---|---|
+| Hibah baru dijawab **HTTP 201**, tetapi `expires_date` tidak berubah (tetap waktu pencabutan lama) | **Hibah baru DIABAIKAN diam-diam.** Aturan "end_time_ms dalam 2 jam dari hibah promosional sebelumnya = duplikat" berlaku juga terhadap hibah yang sudah dicabut/kedaluwarsa pada ID yang sama |
+| Pencabutan mengembalikan **HTTP 404** | Tidak ada hibah aktif untuk dicabut; wajar, bukan galat |
+| Setelah pencabutan, entitlement **tetap tercantum** dengan `expires_date` = saat pencabutan | Pencabutan = memajukan kedaluwarsa, bukan menghapus entri. Pengecekan Worker (membandingkan tanggal) sudah benar |
+
+Akibat bagi Worker (masuk ke Fase 1):
+1. **Jangan mempercayai HTTP 201.** Setelah menghibahkan, baca ulang pelanggan (atau pakai badan respons) dan pastikan `expires_date` ≈ `end_time_ms`; bila tidak, perlakukan sebagai gagal (`grant_ignored`), jangan catat KV, dan laporkan.
+2. **Aman untuk alur utama:** klaim dan "sisa hari" selalu menyasar **ID RevenueCat baru** (pasang ulang menghasilkan ID baru), jadi tidak tersandung aturan 2 jam. Aturan ini hanya mengena bila Worker menghibahkan lagi ke **ID yang sama**, mis. klaim berulang pada ID yang sama setelah trial berakhir; kasus itu seharusnya sudah ditolak oleh catatan KV perangkat (`already_used`).
+3. **Pengujian harus memakai ID segar** untuk setiap uji hibah (skrip kini memperingatkan bila ID pernah menerima hibah).
+
+**Akibat bagi rancangan:** tidak ada perubahan. Penentu sumber promosional di Worker memakai awalan `rc_promo_` pada `product_identifier`; tambahan: verifikasi hibah dengan membaca ulang (lihat temuan di atas).
 
 **Sisa verifikasi sebelum/ saat membangun:**
-1. Uji kedaluwarsa alami (`rc_promo_check.mjs --minutes 3 --wait-expiry`) untuk mengonfirmasi `hasUltimate=false` tanpa pencabutan.
+1. ~~Uji kedaluwarsa alami~~ **selesai (lulus)**.
 2. `ANDROID_ID` pada build bertanda tangan Play (jalur pengujian internal) di Fase 2.
 3. Butir 6 (Play Integrity di Worker) dan butir 7 (perilaku buku terkunci di UI): bukan bagian skrip ini.
 4. Konfirmasi kunci secret yang dipakai uji sama dengan `REVENUECAT_SECRET_KEY` Worker (bila berbeda, hibah dari Worker bisa gagal berizin).

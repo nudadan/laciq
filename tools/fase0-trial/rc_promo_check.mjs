@@ -96,7 +96,10 @@ function workerDecision(sub) {
 async function revokeAll() {
   for (const e of ENTITLEMENTS) {
     const r = await rc("POST", `/subscribers/${uid}/entitlements/${e}/revoke_promotionals`);
-    console.log(`  cabut ${e}: HTTP ${r.status}`);
+    console.log(
+      `  cabut ${e}: HTTP ${r.status}` +
+        (r.status === 404 ? " (tidak ada hibah aktif untuk dicabut)" : ""),
+    );
   }
 }
 
@@ -115,6 +118,16 @@ if (base.status === 401 || base.status === 403) {
 }
 if (!base.ok) die(`Baca pelanggan gagal (HTTP ${base.status}).`);
 showEntitlements(subscriberOf(base.json), "Sebelum hibah");
+const priorPromo = Object.values(subscriberOf(base.json)?.entitlements ?? {}).some((e) =>
+  e.product_identifier?.startsWith("rc_promo_"),
+);
+if (priorPromo) {
+  console.log(
+    "\n⚠ ID ini SUDAH pernah menerima hibah promosional. RevenueCat menganggap hibah baru dalam 2 jam dari hibah\n" +
+      "  sebelumnya sebagai duplikat: API tetap menjawab 201 tetapi hibah TIDAK berlaku. Hasil uji ini tidak sahih;\n" +
+      "  pakai ID baru (pasang ulang probe: run-probe.sh reinstall) atau tunggu lebih dari 2 jam.",
+  );
+}
 
 // 1. Hibah dengan end_time_ms
 const endMs = Date.now() + minutes * 60_000;
@@ -147,6 +160,12 @@ const ent = subAfter?.entitlements?.[ULTIMATE];
 const entPremium = subAfter?.entitlements?.premium;
 const diffMs = ent?.expires_date ? Math.abs(new Date(ent.expires_date).getTime() - endMs) : null;
 record(1, "expires_date sesuai end_time_ms (±1 menit)", diffMs !== null && diffMs < 60_000, `selisih=${diffMs}ms`);
+if (diffMs === null || diffMs >= 60_000) {
+  console.log(
+    "\n⚠ Hibah menjawab sukses tetapi expires_date TIDAK sesuai end_time_ms: hibah kemungkinan diabaikan sebagai duplikat.\n" +
+      "  Pelajaran untuk Worker: jangan percaya HTTP 201; baca ulang entitlement dan pastikan expires_date benar.",
+  );
+}
 record(3, "product_identifier berawalan rc_promo_", !!ent?.product_identifier?.startsWith("rc_promo_"), `nilai=${ent?.product_identifier}`);
 record(1, "kedua entitlement (ultimate, premium) aktif", !!ent && !!entPremium, `ultimate=${!!ent} premium=${!!entPremium}`);
 const decision = workerDecision(subAfter);
