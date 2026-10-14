@@ -58,7 +58,7 @@ void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
 
   group('ubah dompet', () {
-    appTest('dialog terisi; perubahan tersimpan dan saldo dihitung ulang', (
+    appTest('dompet bertransaksi: nama tersimpan, saldo awal terkunci', (
       tester,
       h,
     ) async {
@@ -71,24 +71,70 @@ void main() {
         tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
         'BCA',
       );
-      expect(
-        tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
-        '1.000.000',
-      );
+      final balance = tester.widget<TextField>(find.byType(TextField).at(1));
+      expect(balance.controller!.text, '1.000.000');
+      expect(balance.enabled, isFalse);
+      expect(find.textContaining('saldo awal dikunci'), findsOneWidget);
+      expect(find.textContaining('Sesuaikan saldo (kini'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField).at(0), 'BCA Utama');
-      await tester.enterText(find.byType(TextField).at(1), '2000000');
       await tester.tap(find.text('Simpan'));
       await settle(tester);
 
       expect(find.byType(AlertDialog), findsNothing);
       expect(find.text('Dompet diperbarui'), findsOneWidget);
-      expect(find.text('BCA Utama'), findsOneWidget);
       final a = (await _accounts(
         tester,
         h,
       )).firstWhere((a) => a.name == 'BCA Utama');
-      expect((a.initialBalance, a.balance), (2000000, 1750000));
+      expect((a.initialBalance, a.balance), (1000000, 750000));
+    }, seed: (db) => _seedBca(db, withTx: true));
+
+    appTest('dompet tanpa transaksi: saldo awal masih bisa diubah', (
+      tester,
+      h,
+    ) async {
+      await _tab(tester, 'Dompet');
+      await tester.tap(find.text('BCA'));
+      await settle(tester);
+
+      expect(
+        tester.widget<TextField>(find.byType(TextField).at(1)).enabled,
+        isTrue,
+      );
+      expect(find.textContaining('Sesuaikan saldo'), findsNothing);
+      await tester.enterText(find.byType(TextField).at(1), '2000000');
+      await tester.tap(find.text('Simpan'));
+      await settle(tester);
+
+      final a = (await _accounts(tester, h)).firstWhere((a) => a.name == 'BCA');
+      expect((a.initialBalance, a.balance), (2000000, 2000000));
+    }, seed: (db) => _seedBca(db));
+
+    appTest('Sesuaikan saldo: pratinjau selisih, lalu tercatat sebagai '
+        'penyesuaian', (tester, h) async {
+      await _tab(tester, 'Dompet');
+      await tester.tap(find.text('BCA'));
+      await settle(tester);
+      await tester.tap(find.textContaining('Sesuaikan saldo (kini'));
+      await settle(tester);
+
+      expect(find.text('Sesuaikan saldo BCA'), findsOneWidget);
+      // Tanpa selisih: tombol mati.
+      await tester.enterText(find.byType(TextField).last, '750000');
+      await tester.pump();
+      expect(find.text('Sudah sama dengan saldo di aplikasi.'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).last, '800000');
+      await tester.pump();
+      expect(find.textContaining('pemasukan +'), findsOneWidget);
+      await tester.tap(find.text('Sesuaikan'));
+      await settle(tester);
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.textContaining('Saldo disesuaikan menjadi'), findsOneWidget);
+      final a = (await _accounts(tester, h)).firstWhere((a) => a.name == 'BCA');
+      expect((a.initialBalance, a.balance), (1000000, 800000));
     }, seed: (db) => _seedBca(db, withTx: true));
 
     appTest(

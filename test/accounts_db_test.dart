@@ -74,9 +74,83 @@ void main() {
   });
 
   group('ubah', () {
-    test(
-      'mengubah nama, jenis, dan saldo awal; saldo ikut dihitung ulang',
-      () async {
+    test('dompet kosong: nama, jenis, dan saldo awal bisa diubah', () async {
+      final id = await addBca(initial: 1000000);
+      await db.updateAccount(
+        id: id,
+        name: ' BCA  Utama ',
+        kind: AccountKind.card,
+        initialBalance: 2000000,
+      );
+      final a = await byName('BCA Utama');
+      expect(
+        (a.kind, a.initialBalance, a.balance),
+        (AccountKind.card, 2000000, 2000000),
+      );
+      expect(a.id, id);
+    });
+
+    test('dompet bertransaksi: nama dan jenis bisa diubah, saldo awal '
+        'dikunci', () async {
+      final id = await addBca(initial: 1000000);
+      await db.addTransaction(
+        type: TxType.expense,
+        amount: 250000,
+        accountId: id,
+        categoryId: 'cat-exp-makan',
+        date: DateTime.now(),
+      );
+      expect(await db.accountHasTransactions(id), isTrue);
+
+      // Saldo awal yang sama (tidak berubah) tetap boleh disimpan.
+      await db.updateAccount(
+        id: id,
+        name: ' BCA  Utama ',
+        kind: AccountKind.card,
+        initialBalance: 1000000,
+      );
+      final a = await byName('BCA Utama');
+      expect(
+        (a.kind, a.initialBalance, a.balance),
+        (AccountKind.card, 1000000, 750000),
+      );
+      expect(a.id, id); // ID tetap: transaksi lama tetap menempel
+
+      await expectLater(
+        db.updateAccount(
+          id: id,
+          name: 'BCA Utama',
+          kind: AccountKind.card,
+          initialBalance: 2000000,
+        ),
+        throwsA(isA<AccountException>()),
+      );
+      expect((await byName('BCA Utama')).balance, 750000);
+    });
+
+    test('dompet tujuan transfer juga terkunci; transaksi yang dihapus tidak '
+        'menghitung', () async {
+      final a = await addBca(initial: 100000);
+      final txId = await db.addTransaction(
+        type: TxType.transfer,
+        amount: 10000,
+        accountId: 'acc-tunai',
+        transferToAccountId: a,
+        date: DateTime.now(),
+      );
+      expect(await db.accountHasTransactions(a), isTrue);
+      await db.setTransactionDeleted(txId, deleted: true);
+      expect(await db.accountHasTransactions(a), isFalse);
+      await db.updateAccount(
+        id: a,
+        name: 'BCA',
+        kind: AccountKind.bank,
+        initialBalance: 5000,
+      );
+    });
+
+    group('sesuaikan saldo', () {
+      test('saldo aktual lebih kecil: pengeluaran Penyesuaian Saldo', () async {
         final id = await addBca(initial: 1000000);
         await db.addTransaction(
           type: TxType.expense,
@@ -85,22 +159,63 @@ void main() {
           categoryId: 'cat-exp-makan',
           date: DateTime.now(),
         );
-        expect((await byName('BCA')).balance, 750000);
+        final diff = await db.adjustAccountBalance(
+          accountId: id,
+          actualBalance: 700000,
+        );
+        expect(diff, -50000);
+        final a = await byName('BCA');
+        expect((a.balance, a.initialBalance), (700000, 1000000));
+        final adj = (await db.getTransactions()).firstWhere(
+          (e) => e.category?.name == 'Penyesuaian Saldo',
+        );
+        expect((adj.tx.type, adj.tx.amount), (TxType.expense, 50000));
+        expect(adj.tx.note, 'Penyesuaian saldo');
+      });
 
-        await db.updateAccount(
-          id: id,
-          name: ' BCA  Utama ',
-          kind: AccountKind.card,
-          initialBalance: 2000000,
-        );
-        final a = await byName('BCA Utama');
-        expect(
-          (a.kind, a.initialBalance, a.balance),
-          (AccountKind.card, 2000000, 1750000),
-        );
-        expect(a.id, id); // ID tetap: transaksi lama tetap menempel
-      },
-    );
+      test(
+        'saldo aktual lebih besar: pemasukan; kategori dipakai ulang',
+        () async {
+          final id = await addBca(initial: 100000);
+          expect(
+            await db.adjustAccountBalance(accountId: id, actualBalance: 160000),
+            60000,
+          );
+          expect(
+            await db.adjustAccountBalance(accountId: id, actualBalance: 150000),
+            -10000,
+          );
+          expect((await byName('BCA')).balance, 150000);
+          final income = await db.watchCategories(TxType.income).first;
+          final expense = await db.watchCategories(TxType.expense).first;
+          expect(
+            [...income, ...expense].where((c) => c.name == 'Penyesuaian Saldo'),
+            hasLength(2), // satu per jenis, tidak ganda
+          );
+        },
+      );
+
+      test(
+        'tanpa selisih, saldo tidak valid, atau dompet arsip ditolak',
+        () async {
+          final id = await addBca(initial: 100000);
+          await expectLater(
+            db.adjustAccountBalance(accountId: id, actualBalance: 100000),
+            throwsA(isA<AccountException>()),
+          );
+          await expectLater(
+            db.adjustAccountBalance(accountId: id, actualBalance: -1),
+            throwsA(isA<AccountException>()),
+          );
+          await db.setAccountArchived(id, archived: true);
+          await expectLater(
+            db.adjustAccountBalance(accountId: id, actualBalance: 5),
+            throwsA(isA<AccountException>()),
+          );
+          expect(await db.getTransactions(), isEmpty);
+        },
+      );
+    });
 
     test(
       'boleh menyimpan dengan nama yang sama; nama dompet lain ditolak',

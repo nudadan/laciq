@@ -14,7 +14,7 @@ Produk aktif di Play Console: **Premium** (`dompetku_premium`) dan **Ultimate** 
 | Fitur | Gratis | Premium | Ultimate | Status implementasi |
 |---|---|---|---|---|
 | Transaksi pemasukan, pengeluaran, transfer | ✅ | ✅ | ✅ | ✅ |
-| Multi-dompet / akun | ✅ | ✅ | ✅ | ✅ |
+| Multi-dompet / akun | ✅ | ✅ | ✅ | ✅ Saldo awal dompet dikunci setelah dompet punya transaksi; saldo yang tidak sesuai kenyataan disesuaikan lewat "Sesuaikan saldo" (transaksi pemasukan/pengeluaran berkategori "Penyesuaian Saldo", ikut terhitung di laporan) |
 | Kategori, sub-kategori, tag | ✅ | ✅ | ✅ | ✅ |
 | Anggaran bulanan + notifikasi | ✅ | ✅ | ✅ | ✅ Notifikasi anggaran terbukti di Galaxy Z Fold6 (2026-10-01): muncul saat aplikasi dibuka ulang (dicek tiap buka/kembali dari latar, bukan layanan latar), sekali per kategori per ambang |
 | Dashboard: saldo, arus kas, grafik kategori | ✅ | ✅ | ✅ | ✅ |

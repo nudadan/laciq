@@ -64,7 +64,9 @@ const _slides = [
         Icons.account_balance_wallet_rounded,
         'Banyak dompet',
         'Tunai, rekening bank, dan e-wallet, masing-masing dengan saldonya '
-            'sendiri.',
+            'sendiri. Kalau saldo di aplikasi berbeda dari kenyataan, pakai '
+            '"Sesuaikan saldo": selisihnya dicatat sebagai transaksi '
+            'penyesuaian, bukan mengubah saldo awal.',
       ),
       _Feature(
         Icons.category_rounded,

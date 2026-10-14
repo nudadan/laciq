@@ -997,8 +997,100 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Mengubah nama, jenis, dan saldo awal. Mengubah saldo awal langsung
-  /// mengubah saldo dompet (saldo = saldo awal + transaksi).
+  /// Apakah dompet [id] punya transaksi aktif, baik sebagai dompet asal maupun
+  /// tujuan transfer. Dompet seperti ini saldo awalnya dikunci
+  /// ([updateAccount]); penyesuaian lewat [adjustAccountBalance].
+  Future<bool> accountHasTransactions(String id) async {
+    final count =
+        await (selectOnly(transactions)
+              ..addColumns([transactions.id.count()])
+              ..where(
+                transactions.deletedAt.isNull() &
+                    (transactions.accountId.equals(id) |
+                        transactions.transferToAccountId.equals(id)),
+              ))
+            .map((r) => r.read(transactions.id.count()) ?? 0)
+            .getSingle();
+    return count > 0;
+  }
+
+  Future<int> _accountBalanceOf(String id) async {
+    final row = await customSelect(
+      '''
+      SELECT a.initial_balance
+        + COALESCE((SELECT SUM(CASE t.type WHEN 0 THEN t.amount ELSE -t.amount END)
+                    FROM transactions t
+                    WHERE t.account_id = a.id AND t.deleted_at IS NULL), 0)
+        + COALESCE((SELECT SUM(t.amount) FROM transactions t
+                    WHERE t.transfer_to_account_id = a.id AND t.type = 2
+                      AND t.deleted_at IS NULL), 0) AS balance
+      FROM accounts a WHERE a.id = ?
+      ''',
+      variables: [Variable.withString(id)],
+      readsFrom: {accounts, transactions},
+    ).getSingleOrNull();
+    if (row == null) throw StateError('Dompet $id tidak ditemukan.');
+    return row.read<int>('balance');
+  }
+
+  /// Menyesuaikan saldo dompet [accountId] menjadi [actualBalance] dengan
+  /// mencatat satu transaksi selisih (pemasukan bila saldo aktual lebih besar,
+  /// pengeluaran bila lebih kecil) berkategori "Penyesuaian Saldo". Riwayat
+  /// tetap utuh dan selisihnya terlihat jelas. Mengembalikan selisih bertanda
+  /// (positif = pemasukan, negatif = pengeluaran).
+  Future<int> adjustAccountBalance({
+    required String accountId,
+    required int actualBalance,
+    DateTime? date,
+    String? note,
+  }) async {
+    if (actualBalance < 0 || actualBalance > maxAccountBalance) {
+      throw const AccountException('Saldo aktual tidak valid.');
+    }
+    return transaction(() async {
+      final account = await (select(
+        accounts,
+      )..where((a) => a.id.equals(accountId))).getSingleOrNull();
+      if (account == null) {
+        throw StateError('Dompet $accountId tidak ditemukan.');
+      }
+      if (account.archived) {
+        throw const AccountException(
+          'Dompet ini diarsipkan. Pulihkan dulu untuk menyesuaikan saldo.',
+        );
+      }
+      await _requireLedger(account.ledgerId);
+      final diff = actualBalance - await _accountBalanceOf(accountId);
+      if (diff == 0) {
+        throw const AccountException('Saldo sudah sama dengan saldo aktual.');
+      }
+      final type = diff > 0 ? TxType.income : TxType.expense;
+      final categoryId = await _adjustmentCategoryId(account.ledgerId, type);
+      final now = DateTime.now();
+      final trimmed = note?.trim();
+      await into(transactions).insert(
+        TransactionsCompanion.insert(
+          id: _uuid.v7(),
+          type: type,
+          amount: diff.abs(),
+          accountId: accountId,
+          categoryId: Value(categoryId),
+          date: date ?? now,
+          note: Value(
+            trimmed == null || trimmed.isEmpty ? 'Penyesuaian saldo' : trimmed,
+          ),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      return diff;
+    });
+  }
+
+  /// Mengubah nama, jenis, dan saldo awal. Saldo dompet = saldo awal +
+  /// transaksi, jadi saldo awal TIDAK boleh diubah setelah dompet punya
+  /// transaksi (pengguna yang mengetik saldo aktual akan mendapat angka yang
+  /// meleset); gunakan [adjustAccountBalance].
   Future<void> updateAccount({
     required String id,
     required String name,
@@ -1012,6 +1104,13 @@ class AppDatabase extends _$AppDatabase {
         accounts,
       )..where((a) => a.id.equals(id))).getSingleOrNull();
       if (current == null) throw StateError('Dompet $id tidak ditemukan.');
+      if (initialBalance != current.initialBalance &&
+          await accountHasTransactions(id)) {
+        throw const AccountException(
+          'Saldo awal tidak bisa diubah karena dompet ini sudah punya '
+          'transaksi. Gunakan "Sesuaikan saldo".',
+        );
+      }
       await _ensureAccountNameFree(clean, current.ledgerId, exceptId: id);
       final rows = await (update(accounts)..where((a) => a.id.equals(id)))
           .write(
@@ -2214,14 +2313,45 @@ class AppDatabase extends _$AppDatabase {
   });
 
   /// Kategori "Tabungan" (pengeluaran untuk setoran, pemasukan untuk penarikan)
-  /// di buku [ledgerId]. Dibuat saat pertama dibutuhkan, bukan lewat seed,
-  /// supaya buku yang sudah ada tidak perlu migrasi data. Memakai kategori
-  /// buatan pengguna bernama sama bila ada, agar tidak muncul ganda.
-  Future<String> _savingsCategoryId(String ledgerId, TxType type) async {
+  /// di buku [ledgerId]; lihat [_systemCategoryId].
+  Future<String> _savingsCategoryId(String ledgerId, TxType type) =>
+      _systemCategoryId(
+        ledgerId,
+        type,
+        key: 'tabungan',
+        name: 'Tabungan',
+        icon: 'savings',
+        color: 0xFF00897B,
+      );
+
+  /// Kategori "Penyesuaian Saldo" di buku [ledgerId]; lihat
+  /// [_systemCategoryId].
+  Future<String> _adjustmentCategoryId(String ledgerId, TxType type) =>
+      _systemCategoryId(
+        ledgerId,
+        type,
+        key: 'penyesuaian',
+        name: 'Penyesuaian Saldo',
+        icon: 'other',
+        color: 0xFF607D8B,
+      );
+
+  /// Kategori yang dibuat aplikasi untuk fitur tertentu di buku [ledgerId].
+  /// Dibuat saat pertama dibutuhkan, bukan lewat seed, supaya buku yang sudah
+  /// ada tidak perlu migrasi data. Memakai kategori buatan pengguna bernama
+  /// sama bila ada, agar tidak muncul ganda.
+  Future<String> _systemCategoryId(
+    String ledgerId,
+    TxType type, {
+    required String key,
+    required String name,
+    required String icon,
+    required int color,
+  }) async {
     assert(type != TxType.transfer);
     final id = ledgerSeedId(
       ledgerId,
-      type == TxType.expense ? 'cat-exp-tabungan' : 'cat-inc-tabungan',
+      type == TxType.expense ? 'cat-exp-$key' : 'cat-inc-$key',
     );
     final sameType =
         await (select(categories)..where(
@@ -2232,7 +2362,7 @@ class AppDatabase extends _$AppDatabase {
       if (c.id == id) return id;
     }
     for (final c in sameType) {
-      if (c.name.toLowerCase() == 'tabungan') return c.id;
+      if (c.name.toLowerCase() == name.toLowerCase()) return c.id;
     }
     final last = sameType.fold<int>(
       -1,
@@ -2241,10 +2371,10 @@ class AppDatabase extends _$AppDatabase {
     await into(categories).insert(
       CategoriesCompanion.insert(
         id: id,
-        name: 'Tabungan',
+        name: name,
         type: type,
-        icon: const Value('savings'),
-        color: 0xFF00897B,
+        icon: Value(icon),
+        color: color,
         sortOrder: Value(last + 1),
         ledgerId: Value(ledgerId),
         updatedAt: DateTime.now(),
