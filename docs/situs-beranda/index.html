@@ -34,10 +34,12 @@
     "Catat transaksi dengan suara (Premium)",
     "Anggaran bulanan dengan pemberitahuan",
     "Laporan Bulanan dengan sorotan otomatis (Premium)",
+    "Sesuaikan saldo dompet tanpa merusak riwayat transaksi",
     "Ekspor laporan ke Excel .xlsx dan CSV",
     "Scan struk, dengan AI untuk pelanggan Ultimate",
     "Ringkasan AI untuk Laporan Bulanan (Ultimate)",
     "Multi buku kas untuk keuangan pribadi dan usaha (Ultimate)",
+    "Tabungan dengan saldo terpisah dari dompet (Ultimate)",
     "Backup Cloud terenkripsi ke Google Drive pengguna (Premium)"
   ],
   "publisher": {"@type": "Organization", "name": "hardan-ti", "email": "support@hardan-ti.com"},
@@ -690,9 +692,10 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
     </div>
     <div class="grid3">
       <article class="card reveal"><div class="ico"><svg><use href="#i-swap"/></svg></div><h3>Catat dalam hitungan detik<span class="badge b-free">Gratis</span></h3><p>Pemasukan, pengeluaran, dan transfer antar dompet. Kategori, sub-kategori, dan tag bisa kamu atur sendiri. Ada transaksi berulang buat gaji, cicilan, dan langganan.</p></article>
-      <article class="card reveal"><div class="ico"><svg><use href="#i-wallet"/></svg></div><h3>Banyak dompet<span class="badge b-free">Gratis</span></h3><p>Tunai, rekening bank, sampai e-wallet. Saldo tiap dompet dan total saldomu kelihatan jelas di satu layar.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-wallet"/></svg></div><h3>Banyak dompet<span class="badge b-free">Gratis</span></h3><p>Tunai, rekening bank, sampai e-wallet. Saldo tiap dompet dan total saldomu kelihatan jelas di satu layar. Kalau saldo di aplikasi beda dari kenyataan, pakai &quot;Sesuaikan saldo&quot;: selisihnya dicatat sebagai transaksi penyesuaian, jadi riwayatmu tetap utuh.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-pie"/></svg></div><h3>Anggaran yang mengingatkan<span class="badge b-free">Gratis</span></h3><p>Tentukan batas bulanan per kategori. Kamu dapat notifikasi saat pengeluaran hampir atau sudah lewat batas, jadi nggak kaget di akhir bulan.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-flag"/></svg></div><h3>Target tabungan<span class="badge b-free">Gratis</span></h3><p>Dana darurat, liburan, atau HP baru. Pantau progresnya dari hari ke hari.</p></article>
+      <article class="card reveal"><div class="ico"><svg><use href="#i-save"/></svg></div><h3>Tabungan terpisah<span class="badge b-ult">Ultimate</span></h3><p>Simpan uang di tabungan dengan saldo sendiri, terpisah dari dompet. Setor tercatat sebagai pengeluaran dompet asal, tarik tercatat sebagai pemasukan dompet tujuan, jadi total saldomu tetap jujur.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-cal"/></svg></div><h3>Agenda tagihan<span class="badge b-free">Gratis</span><span class="badge b-pro">Premium</span></h3><p>Servis kendaraan, tagihan tahunan, uang sekolah. Gratis 3 item aktif; Premium tanpa batas dan ada pengingatnya.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-hand"/></svg></div><h3>Utang &amp; piutang<span class="badge b-pro">Premium</span></h3><p>Catat siapa utang ke siapa, lunas sebagian atau penuh, lengkap dengan riwayat cicilannya. Nggak perlu lagi mengingat-ingat.</p></article>
       <article class="card reveal"><div class="ico"><svg><use href="#i-trend"/></svg></div><h3>Analisa tren &amp; proyeksi<span class="badge b-pro">Premium</span></h3><p>Lihat pengeluaran per kategori selama 6 dan 12 bulan, plus simulasi: uangmu cukup nggak sampai akhir bulan?</p></article>
@@ -839,6 +842,11 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
           <p>Hanya teks hasil scan struk (bukan fotonya), atau angka total dan nama kategori untuk ringkasan Laporan Bulanan (bukan catatan, nama toko, atau tanggal), dan hanya setelah kamu setuju. Teks dan angkanya tidak disimpan; yang tersimpan hanya penghitung kuota pemakaian yang otomatis kedaluwarsa.</p>
         </div>
         <div class="node">
+          <div class="ico"><svg><use href="#i-lock"/></svg></div>
+          <h3>Server kelayakan uji coba</h3>
+          <p>Untuk memastikan uji coba Ultimate hanya diberikan sekali per perangkat, aplikasi mengirim pengenal perangkat dan ID anonim langganan. Pengenal perangkat disimpan dalam bentuk ber-hash dan terhapus otomatis sekitar 12 bulan setelah uji coba berakhir. Tidak ada data keuangan yang dikirim.</p>
+        </div>
+        <div class="node">
           <div class="ico"><svg><use href="#i-mic"/></svg></div>
           <h3>Layanan suara Android (Catat dengan suara)</h3>
           <p>Suara diubah jadi teks oleh layanan pengenalan suara bawaan Android. LaciQ tidak merekam, menyimpan, atau menerima suaramu. Kalau HP-mu tidak punya model suara offline, Android bisa memakai layanan Google, sesuai pengaturan HP-mu.</p>
@@ -892,6 +900,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
           <li><svg><use href="#i-check"/></svg>Banyak dompet, kategori, dan tag</li>
           <li><svg><use href="#i-check"/></svg>Anggaran dengan pemberitahuan</li>
           <li><svg><use href="#i-check"/></svg>Target tabungan dan transaksi berulang</li>
+          <li><svg><use href="#i-check"/></svg>Sesuaikan saldo dompet</li>
           <li><svg><use href="#i-check"/></svg>Ringkasan, grafik, dan ekspor CSV</li>
           <li><svg><use href="#i-check"/></svg>Agenda 3 item, tren 3 bulan</li>
           <li class="off"><svg><use href="#i-x"/></svg>Menampilkan iklan banner</li>
@@ -934,6 +943,7 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
           <li><svg><use href="#i-check"/></svg>300 scan AI per bulan</li>
           <li><svg><use href="#i-check"/></svg>Ringkasan AI untuk Laporan Bulanan (30/bln)</li>
           <li><svg><use href="#i-check"/></svg>Dompet, anggaran, dan laporan terpisah per buku</li>
+          <li><svg><use href="#i-check"/></svg>Tabungan dengan saldo terpisah dari dompet</li>
         </ul>
         <a class="btn btn-primary play-cta" href="#unduh">Pilih Ultimate</a>
       </div>
@@ -951,9 +961,10 @@ footer{padding:64px 0 40px;color:var(--muted);font-size:15px}
     </div>
     <div class="faq reveal">
       <details open><summary>Harus bikin akun dulu?</summary><p>Tidak. LaciQ memang tidak punya akun. Pasang, buka, langsung catat. Kamu baru perlu masuk dengan akun Google kalau mau memakai Backup Cloud (Premium), itu pun hanya untuk menyimpan cadangan di Drive-mu sendiri.</p></details>
-      <details><summary>Datanya disimpan di mana?</summary><p>Di HP-mu. Kami tidak menyimpan transaksi, dompet, atau anggaranmu di server. Satu-satunya data yang keluar dari HP adalah cadangan ke Drive-mu (kalau kamu memakai Backup Cloud) serta data untuk fitur AI Ultimate kalau kamu menyetujuinya: teks struk untuk Scan struk AI, atau angka total dan nama kategori untuk ringkasan Laporan Bulanan. Catat dengan suara memakai layanan pengenalan suara bawaan Android; LaciQ tidak menerima rekamannya.</p></details>
+      <details><summary>Datanya disimpan di mana?</summary><p>Di HP-mu. Kami tidak menyimpan transaksi, dompet, atau anggaranmu di server. Data yang keluar dari HP hanya: cadangan ke Drive-mu (kalau kamu memakai Backup Cloud); data untuk fitur AI Ultimate kalau kamu menyetujuinya, yaitu teks struk untuk Scan struk AI atau angka total dan nama kategori untuk ringkasan Laporan Bulanan; serta pengenal perangkat dan ID anonim langganan yang dikirim ke server kami untuk memeriksa kelayakan uji coba Ultimate (pengenal perangkat disimpan dalam bentuk ber-hash, bukan nilai aslinya). Tidak ada data keuangan yang ikut terkirim. Catat dengan suara memakai layanan pengenalan suara bawaan Android; LaciQ tidak menerima rekamannya.</p></details>
       <details><summary>Bagaimana kalau ganti HP atau aplikasinya terhapus?</summary><p>Data lokal ikut hilang kalau aplikasi dihapus. Makanya ada Backup data ke file dan Backup Cloud terenkripsi (Premium) yang bisa dipulihkan di HP baru dengan akun Google yang sama. Foto struk ikut dipulihkan kalau opsi foto diaktifkan.</p></details>
-      <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, scan struk di HP, Catat dengan suara, Laporan Bulanan, dan ekspor Excel. Ultimate mencakup semuanya, plus multi buku kas (pribadi dan usaha terpisah), scan struk dengan AI, dan ringkasan AI untuk Laporan Bulanan.</p></details>
+      <details><summary>Apa bedanya Premium dan Ultimate?</summary><p>Premium menghilangkan iklan dan menambah Backup Cloud, tren 6/12 bulan, agenda tanpa batas, proyeksi, utang piutang, scan struk di HP, Catat dengan suara, Laporan Bulanan, dan ekspor Excel. Ultimate mencakup semuanya, plus multi buku kas (pribadi dan usaha terpisah), tabungan dengan saldo terpisah dari dompet, scan struk dengan AI, dan ringkasan AI untuk Laporan Bulanan.</p></details>
+      <details><summary>Kenapa saldo awal dompet tidak bisa diubah lagi?</summary><p>Saldo dompet dihitung dari saldo awal ditambah semua transaksinya. Kalau saldo awal diubah setelah ada transaksi, angkanya bisa meleset dan riwayatmu tidak lagi cocok. Karena itu, saldo awal dompet yang sudah punya transaksi dikunci. Kalau saldo di aplikasi berbeda dari kenyataan, pakai &quot;Sesuaikan saldo&quot; di dompet itu: selisihnya dicatat sebagai transaksi penyesuaian yang bisa kamu lihat di riwayat.</p></details>
       <details><summary>Bagaimana cara berhenti berlangganan?</summary><p>Buka Google Play, pilih Pembayaran &amp; langganan, lalu Langganan, dan batalkan LaciQ. Fitur berbayar tetap aktif sampai akhir periode yang sudah kamu bayar.</p></details>
       <details><summary>Seberapa akurat scan struknya?</summary><p>Cukup baik untuk struk yang jelas, tapi hasilnya tergantung kualitas foto dan format struknya. Makanya kamu selalu bisa cek dan mengubah isi formulir sebelum menyimpan.</p></details>
       <details><summary>Suaraku direkam nggak waktu pakai Catat dengan suara?</summary><p>Tidak oleh LaciQ. Suara diubah jadi teks oleh layanan pengenalan suara bawaan Android, dan hanya teksnya yang dipakai untuk mengisi formulir, yang tetap kamu cek sebelum menyimpan. Mikrofon hanya aktif saat kamu menekan tombol mikrofon. Kalau HP-mu tidak punya model suara offline untuk bahasa Indonesia, Android bisa mengirim suara ke layanan pengenalan suara Google untuk dikenali, sesuai pengaturan HP-mu.</p></details>
