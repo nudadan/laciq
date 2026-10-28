@@ -118,7 +118,9 @@ saat itu). Tautan bio memakai UTM per kanal (`PAKET-KONTEN.md` bagian 0).
   satu paragraf "bila bosan mengetik di Excel, LaciQ bisa mengekspor laporan serupa dari HP" + tombol Play dengan UTM
   `utm_source=situs&utm_medium=template`. Tanpa janji hasil keuangan.
 - Tambahkan ke `sitemap.xml` setelah tayang.
-- **Status (2026-10-28): SIAP DI-DEPLOY, belum tayang.** Berkas di `docs/situs-beranda/`:
+- **Status (2026-10-28): TAYANG di produksi** (server 10.9.0.208, `/var/www/laciq.solusimandiri.id`; vhost live ditambal dengan dua blok `location`;
+  cadangan berkas lama di `~dimas/backups-laciq-20261028/`). Halaman dan xlsx menjawab 200, checksum xlsx cocok. `sitemap.xml` di origin sudah baru,
+  tetapi cache Cloudflare (max-age 4 jam) masih menyajikan versi lama sampai kedaluwarsa atau di-purge. Berkas di `docs/situs-beranda/`:
   `template-buku-kas-umkm/index.html` (halaman), `unduh/template-buku-kas-umkm.xlsx` (dibuat oleh `tools/build_template_xlsx.js`),
   `nginx-laciq.conf` (lokasi `/template-buku-kas-umkm` dan `/unduh/` ditambahkan; muat ulang nginx di server),
   `sitemap.xml` (entri sudah ada), tautan footer di `index.html`. Tautan Play di halaman memakai
