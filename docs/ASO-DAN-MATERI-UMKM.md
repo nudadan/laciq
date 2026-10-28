@@ -118,6 +118,13 @@ saat itu). Tautan bio memakai UTM per kanal (`PAKET-KONTEN.md` bagian 0).
   satu paragraf "bila bosan mengetik di Excel, LaciQ bisa mengekspor laporan serupa dari HP" + tombol Play dengan UTM
   `utm_source=situs&utm_medium=template`. Tanpa janji hasil keuangan.
 - Tambahkan ke `sitemap.xml` setelah tayang.
+- **Status (2026-10-28): SIAP DI-DEPLOY, belum tayang.** Berkas di `docs/situs-beranda/`:
+  `template-buku-kas-umkm/index.html` (halaman), `unduh/template-buku-kas-umkm.xlsx` (dibuat oleh `tools/build_template_xlsx.js`),
+  `nginx-laciq.conf` (lokasi `/template-buku-kas-umkm` dan `/unduh/` ditambahkan; muat ulang nginx di server),
+  `sitemap.xml` (entri sudah ada), tautan footer di `index.html`. Tautan Play di halaman memakai
+  `utm_source=situs&utm_medium=template&utm_campaign=template_umkm`. Unduhan tidak punya UTM; hitung dari log akses nginx
+  (`grep unduh/template laciq-access.log`). Rumus Ringkasan diverifikasi dengan HyperFormula (contoh November: masuk 4.350.000,
+  keluar usaha 670.000, prive 500.000, saldo 3.180.000), tetapi BELUM dibuka di Excel sungguhan: buka sekali sebelum diumumkan.
 
 ## 6. Pesan ke pembuat konten mikro (1.000 - 20.000 pengikut)
 > Halo [nama], saya developer LaciQ, aplikasi buku kas Android tanpa akun yang datanya di HP. Kontenmu soal

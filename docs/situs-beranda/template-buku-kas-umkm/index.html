@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template Buku Kas UMKM Excel Gratis | LaciQ</title>
+<meta name="description" content="Unduh template buku kas UMKM Excel gratis: kas masuk, kas keluar, ringkasan bulanan, dan catatan utang piutang. Pisahkan uang pribadi dan uang usaha. Tanpa daftar, tanpa email.">
+<meta name="theme-color" content="#0b0f1e">
+<link rel="canonical" href="https://laciq.solusimandiri.id/template-buku-kas-umkm">
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LaciQ">
+<meta property="og:title" content="Template Buku Kas UMKM Excel Gratis">
+<meta property="og:description" content="Kas masuk, kas keluar, ringkasan bulanan, dan utang piutang dalam satu berkas Excel. Gratis, tanpa daftar.">
+<meta property="og:url" content="https://laciq.solusimandiri.id/template-buku-kas-umkm">
+<meta property="og:image" content="https://laciq.solusimandiri.id/img/og.jpg">
+<meta property="og:locale" content="id_ID">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Template Buku Kas UMKM Excel Gratis",
+  "url": "https://laciq.solusimandiri.id/template-buku-kas-umkm",
+  "inLanguage": "id",
+  "description": "Template Excel gratis untuk buku kas usaha kecil: kas masuk, kas keluar, ringkasan bulanan, dan utang piutang.",
+  "isPartOf": {"@type": "WebSite", "name": "LaciQ", "url": "https://laciq.solusimandiri.id/"},
+  "publisher": {"@type": "Organization", "name": "hardan-ti", "email": "support@hardan-ti.com"}
+}
+</script>
+
+<link rel="preload" href="/fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/PlusJakartaSans.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Space Grotesk";src:url(/fonts/SpaceGrotesk.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Plus Jakarta Sans";src:url(/fonts/PlusJakartaSans.woff2) format("woff2");font-weight:200 800;font-display:swap}
+:root{
+  --bg:#0b0f1e; --bg2:#0f1530; --surface:#141a38; --surface2:#1a2144;
+  --line:rgba(255,255,255,.09); --line-hl:rgba(157,176,255,.3); --text:#e9ecf8; --muted:#a1a9c7;
+  --a1:#4f6bff; --a2:#8a4dff; --ok:#34d399;
+  --grad:linear-gradient(135deg,var(--a1),var(--a2));
+  --radius:22px; --max:960px;
+  --head:"Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:#9db0ff}
+h1,h2,h3{font-family:var(--head);line-height:1.15;margin:0;letter-spacing:-.02em}
+p{margin:0}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+.skip{position:absolute;left:-999px;top:8px;background:#fff;color:#000;padding:8px 14px;border-radius:8px;z-index:100}
+.skip:focus{left:8px}
+:focus-visible{outline:3px solid #9db0ff;outline-offset:3px;border-radius:8px}
+
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;font:600 16px/1 var(--body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 10px 30px -8px rgba(99,102,255,.75)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border-color:var(--line)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:var(--line-hl)}
+.btn svg{width:20px;height:20px;flex:none}
+
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,15,30,.82);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font:700 20px/1 var(--head)}
+.brand img{width:34px;height:34px;border-radius:9px}
+.nav .btn{padding:10px 18px;font-size:14px}
+
+.hero{position:relative;padding:72px 0 36px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto -10%;height:90%;background:radial-gradient(60% 60% at 25% 20%,rgba(79,107,255,.32),transparent 70%),radial-gradient(50% 50% at 85% 10%,rgba(138,77,255,.24),transparent 70%);pointer-events:none}
+.hero .wrap{position:relative}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 16px;border:1px solid rgba(0,242,254,.35);border-radius:999px;background:rgba(0,242,254,.08);color:#a5f3fc;font-size:13.5px;font-weight:600;margin-bottom:22px;letter-spacing:.02em}
+.hero h1{font-size:clamp(34px,5.4vw,56px);font-weight:700;max-width:16em}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#00f2fe 0%,#8a4dff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin-top:22px;font-size:18.5px;color:var(--muted);max-width:36em}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px;align-items:center}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:22px;color:var(--muted);font-size:14.5px;list-style:none;padding:0}
+.meta li{display:flex;align-items:center;gap:7px}
+.meta svg{width:18px;height:18px;color:var(--ok)}
+
+section{padding:64px 0}
+.alt{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.sec-head{max-width:700px;margin-bottom:34px}
+.tag{color:#9db0ff;font:600 13px/1 var(--body);letter-spacing:.14em;text-transform:uppercase}
+.sec-head h2{font-size:clamp(26px,3.8vw,38px);margin-top:12px}
+.sec-head p{color:var(--muted);margin-top:14px}
+.prose p+p{margin-top:14px}
+.prose p{color:var(--muted)}
+.prose strong{color:var(--text)}
+
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{padding:26px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.card h3{font-size:20px;margin-bottom:8px}
+.card p{color:var(--muted);font-size:15.5px}
+.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:14px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:16px;align-items:start;padding:20px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.steps li::before{content:counter(s);width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--grad);font:700 20px/1 var(--head);color:#fff}
+.steps b{display:block;font:600 18px/1.3 var(--head);margin-bottom:4px}
+.steps span{color:var(--muted);font-size:15.5px}
+
+.dl{padding:36px 30px;border-radius:28px;background:linear-gradient(160deg,#151c3d,#111630);border:1px solid rgba(0,242,254,.3);box-shadow:0 24px 60px -20px rgba(0,0,0,.7);text-align:center}
+.dl h2{font-size:clamp(24px,3.4vw,32px)}
+.dl p{color:var(--muted);margin:12px auto 24px;max-width:34em}
+.dl small{display:block;margin-top:16px;color:var(--muted);font-size:13.5px}
+
+.promo{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;padding:34px 30px;border-radius:28px;background:linear-gradient(135deg,#364cd9,#7932e6)}
+.promo h2{font-size:clamp(22px,3vw,30px);color:#fff}
+.promo p{color:rgba(255,255,255,.9);margin-top:12px;font-size:16.5px}
+.promo .btn{background:#fff;color:#2b2f8f;font-weight:700;white-space:nowrap}
+
+.faq{display:grid;gap:12px}
+details{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:0 24px}
+summary{cursor:pointer;list-style:none;padding:20px 0;font:600 17px/1.4 var(--head);display:flex;justify-content:space-between;gap:16px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 28px/1 var(--head);color:#9db0ff;transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{padding:0 0 22px;color:var(--muted)}
+
+footer{padding:48px 0 40px;color:var(--muted);font-size:15px;border-top:1px solid var(--line)}
+footer ul{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-wrap:wrap;gap:8px 24px}
+footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--text)}
+.legal{font-size:13.5px;line-height:1.6}
+
+@media (max-width:760px){
+  body{font-size:16px}
+  .hero{padding:40px 0 20px}
+  section{padding:44px 0}
+  .grid2{grid-template-columns:1fr}
+  .cta-row{flex-direction:column;align-items:stretch}
+  .cta-row .btn{justify-content:center}
+  .promo{grid-template-columns:1fr;padding:28px 20px}
+  .promo .btn{justify-content:center}
+  .dl{padding:28px 18px}
+  .steps li{grid-template-columns:40px 1fr;gap:12px;padding:16px}
+  .steps li::before{width:40px;height:40px;font-size:17px}
+  .nav .btn{padding:9px 14px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#utama">Lewati ke konten</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3.6v16.8c0 .6.7 1 1.2.7l14-8.4c.5-.3.5-1.1 0-1.4l-14-8.4C5.7 2.6 5 3 5 3.6z"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/img/icon-192.png" alt="LaciQ" width="34" height="34">LaciQ</a>
+    <a class="btn btn-ghost" href="/">Beranda</a>
+  </div>
+</header>
+
+<main id="utama">
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Gratis • Microsoft Excel • Tanpa daftar</div>
+    <h1>Template Buku Kas UMKM <em>Excel Gratis</em></h1>
+    <p class="lead">Satu berkas Excel untuk mencatat kas masuk, kas keluar, ringkasan tiap bulan, dan utang piutang usahamu. Ada kolom khusus untuk memisahkan uang usaha dari uang yang kamu ambil untuk pribadi.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/unduh/template-buku-kas-umkm.xlsx" download><svg><use href="#i-down"/></svg>Unduh template (.xlsx)</a>
+      <a class="btn btn-ghost" href="#cara-pakai">Lihat cara pakai</a>
+    </div>
+    <ul class="meta">
+      <li><svg><use href="#i-check"/></svg>Tanpa makro</li>
+      <li><svg><use href="#i-check"/></svg>Tanpa email atau akun</li>
+      <li><svg><use href="#i-check"/></svg>Rumus otomatis</li>
+    </ul>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap prose">
+    <div class="sec-head">
+      <div class="tag">Masalahnya</div>
+      <h2>Uang pribadi dan uang usaha tercampur</h2>
+    </div>
+    <p>Banyak usaha kecil berawal dari satu dompet: hasil jualan masuk ke rekening yang sama dengan uang belanja, lalu bahan baku dibayar dari uang yang sama. Akhir bulan muncul pertanyaan yang sulit dijawab: <strong>usahaku sebenarnya untung atau tidak, dan berapa yang aman kuambil?</strong></p>
+    <p>Jawabannya mulai kelihatan kalau tiga hal dicatat terpisah: uang yang masuk ke usaha, uang yang keluar untuk usaha, dan uang yang kamu ambil untuk keperluan pribadi (di pembukuan disebut <strong>prive</strong>). Template ini disusun persis untuk itu.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">Isi berkas</div>
+      <h2>Empat lembar kerja, semuanya terhubung</h2>
+      <p>Kamu cukup mengisi kolom berlatar kuning. Sisanya dihitung otomatis.</p>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Kas Masuk</h3><p>Tanggal, keterangan, kategori (penjualan, jasa, modal, dan lainnya), asal uang, dan jumlah. Muat 1.000 baris.</p></div>
+      <div class="card"><h3>Kas Keluar</h3><p>Sama seperti Kas Masuk, ditambah kolom <strong>Untuk</strong>: pilih <em>Usaha</em> atau <em>Prive</em> supaya uang pribadi tidak ikut mengurangi laba usaha.</p></div>
+      <div class="card"><h3>Ringkasan Bulanan</h3><p>Kas masuk, kas keluar usaha, laba kas, prive, dan saldo akhir untuk Januari sampai Desember, plus total per kategori setahun.</p></div>
+      <div class="card"><h3>Utang Piutang</h3><p>Catat siapa berutang kepadamu dan kepada siapa kamu berutang. Sisa dan status (belum lunas, lunas, terlambat) terhitung dari kolom jatuh tempo dan pembayaran.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="cara-pakai" class="alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">Cara pakai</div>
+      <h2>Mulai dalam tiga langkah</h2>
+    </div>
+    <ol class="steps">
+      <li><div><b>Unduh dan hapus baris contoh</b><span>Buka berkasnya di Excel. Baris abu-abu bertulisan "Contoh:" hanya untuk memperlihatkan cara isi; hapus sebelum mulai.</span></div></li>
+      <li><div><b>Catat uang masuk dan keluar</b><span>Isi Kas Masuk dan Kas Keluar setiap hari atau setiap minggu. Pilih kategori dari daftar, dan pilih Usaha atau Prive di Kas Keluar.</span></div></li>
+      <li><div><b>Baca Ringkasan Bulanan</b><span>Isi tahun dan saldo awal, lalu lihat kas masuk, kas keluar, laba kas, prive, dan saldo tiap bulan.</span></div></li>
+    </ol>
+  </div>
+</section>
+
+<section id="unduh">
+  <div class="wrap">
+    <div class="dl">
+      <h2>Unduh template buku kas UMKM</h2>
+      <p>Satu berkas Excel (.xlsx), sekitar 70 KB. Langsung unduh, tanpa isi formulir.</p>
+      <a class="btn btn-primary" href="/unduh/template-buku-kas-umkm.xlsx" download><svg><use href="#i-down"/></svg>Unduh template-buku-kas-umkm.xlsx</a>
+      <small>Dirancang untuk Microsoft Excel. Ini pencatat uang tunai sederhana, bukan laporan laba rugi, neraca, atau perhitungan pajak.</small>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="promo">
+      <div>
+        <h2>Bosan mengetik di Excel?</h2>
+        <p>LaciQ mencatat dari HP dalam beberapa ketukan, memisahkan buku kas usaha dan pribadi, dan bisa mengekspor laporan ke Excel (fitur Premium). Tanpa akun, datanya tersimpan di HP-mu. Ada uji coba Ultimate 30 hari tanpa kartu bila kamu memilih memulainya.</p>
+      </div>
+      <a class="btn" href="https://play.google.com/store/apps/details?id=com.hardanti.lacipintar&amp;referrer=utm_source%3Dsitus%26utm_medium%3Dtemplate%26utm_campaign%3Dtemplate_umkm" target="_blank" rel="noopener"><svg><use href="#i-play"/></svg>Lihat di Google Play</a>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="tag">Pertanyaan umum</div>
+      <h2>Tanya jawab</h2>
+    </div>
+    <div class="faq">
+      <details><summary>Apakah template ini benar-benar gratis?</summary><p>Ya. Tidak ada biaya, tidak perlu email, dan tidak ada akun. Kamu boleh menyalin dan menyesuaikannya untuk usahamu sendiri.</p></details>
+      <details><summary>Bisa dibuka di Google Sheets atau LibreOffice?</summary><p>Berkas ini dirancang untuk Microsoft Excel. Google Sheets dan LibreOffice biasanya bisa membukanya, tetapi kami belum menguji semua fiturnya di sana, terutama daftar pilihan dan pewarnaan status.</p></details>
+      <details><summary>Kenapa ada kolom "Prive"?</summary><p>Prive adalah uang usaha yang diambil pemilik untuk keperluan pribadi. Dengan memisahkannya dari pengeluaran usaha, laba kas usahamu tidak tampak lebih kecil hanya karena kamu mengambil uang untuk belanja pribadi.</p></details>
+      <details><summary>Apakah ini bisa dipakai untuk laporan pajak?</summary><p>Tidak dimaksudkan untuk itu. Template ini mencatat uang tunai yang masuk dan keluar. Untuk pembukuan resmi atau kewajiban pajak, tanyakan kepada akuntan atau konsultan pajak.</p></details>
+      <details><summary>Bagaimana kalau catatanku lebih dari 1.000 baris?</summary><p>Buat salinan berkas untuk tahun atau semester berikutnya. Memisahkan berkas per tahun juga membuat Excel tetap ringan.</p></details>
+      <details><summary>Butuh bantuan?</summary><p>Tulis ke <a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a> dan jelaskan masalahnya secara singkat.</p></details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <ul>
+      <li><a href="/">Beranda LaciQ</a></li>
+      <li><a href="/privacy">Kebijakan Privasi</a></li>
+      <li><a href="mailto:support@hardan-ti.com">support@hardan-ti.com</a></li>
+    </ul>
+    <div class="legal">&copy; hardan-ti. Google Play dan logo Google Play adalah merek dagang Google LLC. Microsoft Excel adalah merek dagang Microsoft Corporation.</div>
+  </div>
+</footer>
+</body>
+</html>
