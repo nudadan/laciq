@@ -23,7 +23,7 @@ REPORT_DAILY_LIMIT = "5"
 # BAWAAN MATI. Sebelum menyalakan: `npx wrangler secret put TRIAL_HASH_SECRET` (acak panjang), lalu
 # ubah TRIAL_ENABLED menjadi "1" dan deploy. Rahasia itu TIDAK boleh berubah setelah dipakai:
 # mengubahnya membuat semua catatan perangkat tak terbaca (semua orang tampak baru).
-TRIAL_ENABLED = "0"
+TRIAL_ENABLED = "1"
 TRIAL_DAYS = "30"
 PREMIUM_ENTITLEMENT = "premium"
 # Kuota AI pengguna uji coba (hibah promosional); pelanggan berbayar memakai kuota di atas.
