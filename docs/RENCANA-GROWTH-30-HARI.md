@@ -46,8 +46,8 @@ Jangan bersaing di kata umum "catatan keuangan" saja; pesaing besar sudah mengua
 - [ ] Buka Play Console > Statistik/Listingan: catat **kata kunci pencarian** yang membawa tayangan (belum diperiksa) dan sebaran negara/perangkat.
 - [ ] Rekap lembar pelacakan (spreadsheet): tanggal, kanal, tautan UTM, tayangan, klik, pemasangan. Isi dengan data 4 minggu terakhir.
 - [ ] Kenali asal 22 pemasangan "berbayar/langsung": kanal mana yang sudah diposting (Instagram, WA, situs, QR)? Jawabannya menentukan kanal yang digandakan.
-- [ ] **Periksa status uji coba Ultimate**: nilai `TRIAL_ENABLED` di Worker produksi. Bila masih `"0"`, selesaikan syarat di `RILIS-1.1.0+15.md` (uji A4 ANDROID_ID, 24-48 jam stabil di 100%) lalu nyalakan; pantau `promo-cost` dan konversi trial ke berbayar di RevenueCat.
-- [ ] **ASO v1**: ubah judul dan deskripsi singkat ke kata yang dicari orang ("pencatat pengeluaran", "buku kas", "catat utang piutang", "anggaran"), pembeda tetap di kalimat pertama deskripsi lengkap. Pilih kata dari laporan pencarian, bukan tebakan. Catat tanggal perubahan untuk pembanding.
+- [x] **Periksa status uji coba Ultimate** (SELESAI 2026-10-28: A4 lulus, `TRIAL_ENABLED = "1"` di produksi, penawaran trial teruji di HP nyata). Catatan awal: nilai `TRIAL_ENABLED` di Worker produksi. Bila masih `"0"`, selesaikan syarat di `RILIS-1.1.0+15.md` (uji A4 ANDROID_ID, 24-48 jam stabil di 100%) lalu nyalakan; pantau `promo-cost` dan konversi trial ke berbayar di RevenueCat.
+- [x] **ASO v1** (TAYANG, terbaca 2026-10-28; jangan ubah judul/deskripsi singkat sampai 2026-11-11; lihat `ASO-DAN-MATERI-UMKM.md`): ubah judul dan deskripsi singkat ke kata yang dicari orang ("pencatat pengeluaran", "buku kas", "catat utang piutang", "anggaran"), pembeda tetap di kalimat pertama deskripsi lengkap. Pilih kata dari laporan pencarian, bukan tebakan. Catat tanggal perubahan untuk pembanding.
 - [ ] Buat **listing kustom** untuk segmen UMKM (screenshot 1-3: buku kas, scan struk, Excel).
 - [ ] Pantau selisih "dibuka vs dipasang": cek 3 layar pertama aplikasi dan waktu hingga transaksi pertama.
 

@@ -137,7 +137,9 @@ Akses diberikan lewat kode promo Play (Monetisasi > Kode promo). Jangan menjanji
 | Pertanyaan berulang dari komunitas | Catatan | Bahan artikel dan FAQ |
 
 ## 8. Keputusan menunggu pemilik
-- [ ] Setuju judul `LaciQ: Buku Kas & Catatan Uang` dan deskripsi singkat usulan? (perlu diubah di Play Console)
+- [x] Judul `LaciQ: Buku Kas & Catatan Uang` dan deskripsi singkat `Buku kas usaha & pribadi terpisah. Tanpa login, data di HP. Scan struk AI.` **tayang di Play, terbaca 2026-10-28** (tanggal persetujuan tepatnya tidak tercatat; pakai 2026-10-28 sebagai titik sebelum/sesudah). **Jangan ubah judul/deskripsi singkat sampai 2026-11-11** (14 hari). Baseline pembanding: 33 tayangan/hari, 921 tayangan penelusuran per 28 hari.
+- [x] Uji penawaran trial di HP nyata: berhasil (dikonfirmasi pemilik 2026-10-28).
+- Catatan: deskripsi LENGKAP di Play masih teks lama (belum ada pembuka UMKM/buku kas dan belum menyebut trial). Deskripsi lengkap tidak dibatasi aturan 14 hari untuk judul, tetapi mengubahnya bersamaan membuat efek judul sulit dibaca; usul: ubah di 2026-11-11.
 - [x] `TRIAL_ENABLED` di Worker produksi: dinyalakan 2026-10-28 (versi Worker `1a0fd0e7-6e36-4824-a02c-3b0e94b57598`). A4 lulus menurut pemilik. Pantau `trial_claim result=` (`npx wrangler tail`), `promo-cost:<bulan>` (anggaran Rp1.350.000), dan konversi di RevenueCat.
-- [ ] Setelah tinjauan listing selesai, tambahkan trial ke deskripsi lengkap Play dan screenshot.
+- [ ] Tinjauan listing sudah selesai (2026-10-28). Tambahkan trial dan pembuka UMKM ke deskripsi lengkap Play serta screenshot pada/setelah 2026-11-11.
 - [ ] Reels dan postingan mana yang sudah tayang sejak 7 Okt (untuk membaca asal 22 pemasangan langsung)?
