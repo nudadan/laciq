@@ -81,6 +81,12 @@ berlebihan (melanggar kebijakan metadata Play).
 > serta ada catatan utang piutang pelanggan (Premium). Data tersimpan di HP, tanpa daftar. Mau coba dan kasih
 > masukan jujur?
 
+**Kalimat uji coba (aktif sejak 2026-10-28; `TRIAL_ENABLED = "1"` di Worker produksi).** Tambahkan satu ke teks A, B, atau C:
+> Ada uji coba Ultimate 30 hari tanpa kartu (kamu yang memilih memulainya); kuota scan struk AI selama uji coba terbatas.
+
+Jujur soal batasnya: opt-in dari dalam aplikasi, 30 hari, tanpa kartu, kuota selama trial 60 scan dan 6 ringkasan (10 scan
+dan 2 ringkasan per hari). Jangan menulis "gratis selamanya" atau "tanpa batas".
+
 Cara mencari komunitas: cari di Facebook/WhatsApp/Telegram dengan frasa `komunitas UMKM [kota]`, `reseller [produk]`,
 `freelancer Indonesia`, `pelaku usaha rumahan`. Catat nama grup, jumlah anggota, aturan promosi, dan tanggal posting
 di lembar pelacakan. Satu grup per minggu, balas semua komentar dalam 24 jam.
@@ -132,5 +138,6 @@ Akses diberikan lewat kode promo Play (Monetisasi > Kode promo). Jangan menjanji
 
 ## 8. Keputusan menunggu pemilik
 - [ ] Setuju judul `LaciQ: Buku Kas & Catatan Uang` dan deskripsi singkat usulan? (perlu diubah di Play Console)
-- [ ] `TRIAL_ENABLED` di Worker produksi: hidup atau mati? Bila mati, kapan dinyalakan?
+- [x] `TRIAL_ENABLED` di Worker produksi: dinyalakan 2026-10-28 (versi Worker `1a0fd0e7-6e36-4824-a02c-3b0e94b57598`). A4 lulus menurut pemilik. Pantau `trial_claim result=` (`npx wrangler tail`), `promo-cost:<bulan>` (anggaran Rp1.350.000), dan konversi di RevenueCat.
+- [ ] Setelah tinjauan listing selesai, tambahkan trial ke deskripsi lengkap Play dan screenshot.
 - [ ] Reels dan postingan mana yang sudah tayang sejak 7 Okt (untuk membaca asal 22 pemasangan langsung)?
