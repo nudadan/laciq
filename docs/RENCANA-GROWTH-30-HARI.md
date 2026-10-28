@@ -54,8 +54,8 @@ Jangan bersaing di kata umum "catatan keuangan" saja; pesaing besar sudah mengua
 ### Minggu 2 (4 - 10 Nov): distribusi manual dan situs
 - [ ] Posting minimal 3 konten (Reels V3, V7, V2) dengan tautan UTM per kanal (format di `PAKET-KONTEN.md` bagian 0).
 - [ ] **Komunitas #1**: satu grup UMKM/freelance/penjual online. Baca aturan, pakai teks "cari masukan jujur", balas semua komentar dalam 24 jam. Jangan kirim ke banyak grup sekaligus.
-- [ ] Situs: halaman **template buku kas Excel UMKM** (unduhan gratis) dengan tombol Play Store dan UTM sendiri.
-- [ ] Artikel #1 (judul = kata kunci): "Cara memisahkan uang pribadi dan uang usaha".
+- [x] (TAYANG 2026-10-28 di `/template-buku-kas-umkm`) Situs: halaman **template buku kas Excel UMKM** (unduhan gratis) dengan tombol Play Store dan UTM sendiri.
+- [x] Artikel #1 (judul = kata kunci): "Cara memisahkan uang pribadi dan uang usaha". TAYANG 2026-10-28 di `/blog/cara-memisahkan-uang-pribadi-dan-uang-usaha` (UTM `blog`/`pisah_uang`).
 - [ ] Hubungi 5 pembuat konten literasi keuangan/UMKM skala kecil (1-20 ribu pengikut). Tawarkan akun Ultimate untuk dicoba. Tanpa syarat ulasan atau bintang.
 - [ ] Tinjauan minggu 1-2 (Jumat): tayangan, klik, pemasangan per sumber.
 
