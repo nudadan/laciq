@@ -5,6 +5,12 @@
 > `main` (skema **v11**, format backup **v8**, 759 tes Flutter lulus). Melengkapi
 > [MATRIKS-FITUR-PAKET.md](MATRIKS-FITUR-PAKET.md) dan [RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md](RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md).
 
+**Selaras dengan pemasaran yang sudah berjalan (28 Okt 2026):** segmen UMKM sudah dibidik lewat
+[ASO-DAN-MATERI-UMKM.md](ASO-DAN-MATERI-UMKM.md), [RENCANA-GROWTH-30-HARI.md](RENCANA-GROWTH-30-HARI.md), dan halaman
+template buku kas Excel gratis di situs. Janji di materi itu (memisahkan uang pribadi dan usaha, utang piutang) sudah dipenuhi
+aplikasi; Fase 1 menutup janji berikutnya yang wajar ditanyakan pengguna dari template itu: "untungnya berapa?". Uji coba
+Ultimate sudah dinyalakan (`TRIAL_ENABLED = "1"`), jadi pengguna UMKM baru bisa mencoba buku kas tambahan sebelum membayar.
+
 ## 1. Tujuan dan prinsip
 
 **Sasaran pengguna:** pedagang kecil, usaha rumahan, jasa, dan warung yang sekarang mencatat di buku tulis atau tidak sama
