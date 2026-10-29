@@ -10,6 +10,7 @@ import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../savings/savings_detail_page.dart';
+import 'open_transaction_form.dart';
 import 'receipt_viewer_page.dart';
 import 'transaction_form_page.dart';
 
@@ -27,9 +28,11 @@ class TransactionsPage extends ConsumerWidget {
             value: txs,
             builder: (list) {
               if (list.isEmpty) {
-                return const EmptyState(
+                return EmptyState(
                   icon: Icons.receipt_long_rounded,
                   message: 'Belum ada transaksi bulan ini.\nKetuk "Catat" untuk mulai.',
+                  actionLabel: 'Catat transaksi',
+                  onAction: () => openTransactionForm(context),
                 );
               }
               return _GroupedList(list);

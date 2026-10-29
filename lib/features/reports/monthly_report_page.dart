@@ -11,6 +11,7 @@ import '../../data/insights.dart';
 import '../../data/providers.dart';
 import '../ai/ai_extraction_service.dart' show AiQuotaExceeded;
 import '../security/lock_providers.dart' show keyValueStoreProvider;
+import '../transactions/open_transaction_form.dart';
 import '../subscription/trial_offer.dart';
 
 /// Laporan bulanan berbasis aturan (fitur Premium). Semua angka dan kalimat
@@ -34,13 +35,15 @@ class MonthlyReportPage extends ConsumerWidget {
             AsyncBody<MonthlyReport>(
               value: report,
               builder: (r) => r.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.only(top: 48),
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 48),
                       child: EmptyState(
                         icon: Icons.insights_rounded,
                         message:
                             'Belum ada transaksi di bulan ini. Catat beberapa '
                             'transaksi untuk melihat laporan.',
+                        actionLabel: 'Catat transaksi',
+                        onAction: () => openTransactionForm(context),
                       ),
                     )
                   : _ReportBody(r),

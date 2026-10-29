@@ -54,12 +54,16 @@ class SavingsPage extends ConsumerWidget {
         value: savings,
         builder: (list) {
           if (list.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.savings_outlined,
               message:
                   'Belum ada tabungan.\n'
                   'Saldonya terpisah dari dompetmu.\n'
                   'Ketuk "Tabungan Baru" untuk mulai.',
+              actionLabel: 'Tabungan baru',
+              onAction: () => ultimate
+                  ? openSavingsForm(context)
+                  : openSavingsUpgrade(context, ref),
             );
           }
           final active = list.where((s) => !s.savings.archived).toList();

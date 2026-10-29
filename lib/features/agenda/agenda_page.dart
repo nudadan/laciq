@@ -51,12 +51,14 @@ class AgendaPage extends ConsumerWidget {
           value: items,
           builder: (list) {
             if (list.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.event_note_rounded,
                 message:
                     'Belum ada agenda.\n'
                     'Cocok untuk servis kendaraan, servis AC, biaya '
                     'pendidikan: diingatkan otomatis sesuai jadwal.',
+                actionLabel: 'Tambah agenda',
+                onAction: () => _handleAdd(context, ref, 0, premium),
               );
             }
             final eligibleIds = premium

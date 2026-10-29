@@ -31,12 +31,14 @@ class GoalsPage extends ConsumerWidget {
       value: goals,
       builder: (list) {
         if (list.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.flag_outlined,
             message:
                 'Belum ada target tabungan.\n'
                 'Contoh: dana darurat, liburan, atau HP baru.\n'
                 'Ketuk "Target Baru" untuk mulai.',
+            actionLabel: 'Target baru',
+            onAction: () => openGoalForm(context),
           );
         }
         final active = list.where((g) => !g.goal.archived).toList();

@@ -8,6 +8,7 @@ import '../../core/widgets.dart';
 import '../../data/backup.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../dashboard/quick_start.dart';
 import '../settings/restore_confirm.dart';
 import '../transactions/receipt_storage.dart';
 import 'cloud_backup_reminder_service.dart';
@@ -77,6 +78,7 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
       if (await ref.read(cloudBackupOptionsProvider).includePhotos()) {
         await _uploadReceiptPhotos(db);
       }
+      ref.read(quickStartPrefsProvider.notifier).markBackupDone();
       if (mounted) setState(() {}); // refresh baris "terakhir backup"
       notify(messenger, 'Backup cloud tersimpan.');
     } on CloudBackupException catch (e) {

@@ -63,7 +63,7 @@ void main() {
     await settle(tester);
 
     // Kembali ke onboarding (bukan dashboard) — reset total.
-    expect(find.text('Catat transaksi dengan cepat'), findsOneWidget);
+    expect(find.text('Selamat datang di LaciQ'), findsOneWidget);
 
     final accounts = await tester.runAsync(
       () => h.db.watchAccountBalances().first,
@@ -88,7 +88,7 @@ void main() {
       await settle(tester);
 
       // PIN ikut tercabut: onboarding tampil tanpa diminta PIN dulu.
-      expect(find.text('Catat transaksi dengan cepat'), findsOneWidget);
+      expect(find.text('Selamat datang di LaciQ'), findsOneWidget);
     },
     preset: _setPin,
   );

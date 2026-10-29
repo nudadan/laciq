@@ -34,12 +34,19 @@ class RecurringPage extends ConsumerWidget {
           value: rules,
           builder: (list) {
             if (list.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.repeat,
                 message:
                     'Belum ada transaksi berulang.\n'
                     'Cocok untuk gaji, sewa, cicilan, atau langganan:\n'
                     'dicatat otomatis sesuai jadwal.',
+                actionLabel: 'Tambah transaksi berulang',
+                onAction: () => _open(
+                  context,
+                  const TransactionFormPage(
+                    initialFrequency: Frequency.monthly,
+                  ),
+                ),
               );
             }
             return ListView.builder(

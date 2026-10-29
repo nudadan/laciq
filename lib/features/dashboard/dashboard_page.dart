@@ -15,6 +15,7 @@ import '../../data/providers.dart';
 import '../../data/recurrence.dart';
 import '../agenda/agenda_page.dart';
 import '../subscription/trial_offer.dart';
+import 'quick_start.dart';
 import '../subscription/trial_status.dart';
 
 class DashboardPage extends ConsumerWidget {
@@ -65,6 +66,7 @@ class DashboardPage extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 6),
+        const QuickStartCard(),
         const TrialStatusCard(),
         const TrialOfferCard(),
         const _AgendaCard(),

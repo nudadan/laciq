@@ -14,6 +14,7 @@ import '../../data/profit_loss.dart';
 import '../../data/profit_loss_pdf.dart';
 import '../../data/profit_loss_statement.dart';
 import '../../data/providers.dart';
+import '../transactions/open_transaction_form.dart';
 import 'profit_loss_providers.dart';
 
 /// Laporan Laba Rugi sederhana berbasis kas (fitur Premium). Semua angka
@@ -46,13 +47,15 @@ class ProfitLossPage extends ConsumerWidget {
             AsyncBody<ProfitLossReport>(
               value: report,
               builder: (r) => r.current.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.only(top: 48),
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 48),
                       child: EmptyState(
                         icon: Icons.assessment_outlined,
                         message:
                             'Belum ada transaksi pada periode ini. Catat '
                             'penjualan dan biaya untuk melihat untung-rugi.',
+                        actionLabel: 'Catat transaksi',
+                        onAction: () => openTransactionForm(context),
                       ),
                     )
                   : _Body(r, business: business),

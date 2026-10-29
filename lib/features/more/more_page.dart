@@ -177,7 +177,7 @@ class MorePage extends ConsumerWidget {
             subtitle: 'Target tabungan: dana darurat, liburan, HP baru',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const _GoalsPageScaffold(),
+                builder: (_) => const GoalsPageScaffold(),
               ),
             ),
           ),
@@ -279,8 +279,8 @@ class _MoreTile extends StatelessWidget {
 /// (tanpa AppBar/FAB sendiri, karena dulu jadi salah satu tab navbar utama).
 /// Sekarang dibuka lewat [Navigator.push] dari [MorePage], jadi butuh
 /// Scaffold sendiri di sini.
-class _GoalsPageScaffold extends StatelessWidget {
-  const _GoalsPageScaffold();
+class GoalsPageScaffold extends StatelessWidget {
+  const GoalsPageScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {

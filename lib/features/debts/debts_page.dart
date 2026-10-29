@@ -33,12 +33,14 @@ class DebtsPage extends ConsumerWidget {
           value: items,
           builder: (list) {
             if (list.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.handshake_rounded,
                 message:
                     'Belum ada utang/piutang.\n'
                     'Catat uang yang kamu pinjam dari orang lain (utang) atau '
                     'pinjamkan ke orang lain (piutang).',
+                actionLabel: 'Catat utang atau piutang',
+                onAction: () => _open(context, const DebtFormPage()),
               );
             }
             return ListView.builder(

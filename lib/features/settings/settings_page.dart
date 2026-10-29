@@ -18,6 +18,7 @@ import '../../data/providers.dart';
 import '../ads/ad_consent_service.dart';
 import '../ads/privacy_options.dart';
 import '../cloud_backup/cloud_backup_page.dart';
+import '../dashboard/quick_start.dart';
 import '../onboarding/onboarding_page.dart';
 import '../onboarding/onboarding_providers.dart';
 import '../security/lock_providers.dart';
@@ -151,11 +152,14 @@ class SettingsPage extends ConsumerWidget {
                 leading: const Icon(Icons.explore_outlined),
                 title: const Text('Lihat panduan lagi'),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const OnboardingPage(standalone: true),
-                  ),
-                ),
+                onTap: () {
+                  ref.read(quickStartPrefsProvider.notifier).show();
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const OnboardingPage(standalone: true),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.star_outline_rounded),
@@ -300,6 +304,7 @@ class SettingsPage extends ConsumerWidget {
         mimeType: 'application/json',
         subject: 'Backup LaciQ',
       );
+      ref.read(quickStartPrefsProvider.notifier).markBackupDone();
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Backup gagal: $e')));
     }
@@ -402,6 +407,7 @@ class SettingsPage extends ConsumerWidget {
     ref.invalidate(lockControllerProvider);
     ref.invalidate(themeModeProvider);
     ref.invalidate(onboardingControllerProvider);
+    ref.invalidate(quickStartPrefsProvider);
     // _StartupGate (lib/app.dart) akan menampilkan OnboardingPage lagi begitu
     // onboardingControllerProvider selesai dibaca ulang (kosong = belum lihat).
     navigator.popUntil((r) => r.isFirst);

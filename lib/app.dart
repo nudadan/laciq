@@ -15,7 +15,7 @@ import 'features/budget/budget_page.dart';
 import 'features/dashboard/dashboard_page.dart';
 import 'features/ledgers/ledgers_page.dart' show LedgerChip;
 import 'features/more/more_page.dart';
-import 'features/onboarding/onboarding_page.dart';
+import 'features/onboarding/first_run_page.dart';
 import 'features/onboarding/onboarding_providers.dart';
 import 'features/security/lock_gate.dart';
 import 'features/subscription/trial_countdown.dart';
@@ -64,7 +64,7 @@ class _StartupGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final seen = ref.watch(onboardingControllerProvider);
     return seen.when(
-      data: (done) => done ? const HomeShell() : const OnboardingPage(),
+      data: (done) => done ? const HomeShell() : const FirstRunPage(),
       loading: () => const ColoredBox(color: Colors.transparent),
       // Gagal baca flag: JANGAN blokir pemakaian aplikasi, ini bukan fitur
       // keamanan seperti PIN — anggap saja sudah dilihat.

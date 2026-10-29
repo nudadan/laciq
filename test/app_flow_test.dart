@@ -68,6 +68,11 @@ void main() {
       }
       await settle(tester);
       expect(find.text('Transaksi dihapus'), findsNothing);
+
+      // Saat latar belakang frame berhenti, sehingga pohon widget tidak bisa
+      // dilepas dan stream Beranda menahan penutupan database di akhir tes.
+      b.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await settle(tester);
     },
     seed: (db) => db.addTransaction(
       type: TxType.expense,
