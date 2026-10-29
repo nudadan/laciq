@@ -1,5 +1,9 @@
-# Rilis 1.2.0 (kode +16 DIGANTI +17), disusun 2026-10-29
+# Rilis 1.2.0 (kode +16 DIGANTI +17, lalu +18), disusun 2026-10-29
 
+> **Pembaruan 2026-10-29 (malam): gunakan AAB `1.2.0+18`** (commit `1de0936`: 96.656.330 byte = 96,7 MB, SHA-256 diawali `4cac5fc21ea24140`, tanda tangan SHA-1 `86:E7:F6:…:A2:60`,
+> manifest identik dengan +17). +18 memuat perbaikan kartu ringkasan Laba Rugi (label "HPP + beban" menyesatkan, ditemukan di uji Redmi) di atas perbaikan pemulihan backup lama (+17).
+> **+16 dan +17 tidak boleh dipromosikan ke Produksi.** Rujukan "+16"/"+17" di bawah berlaku untuk **+18** kecuali disebut lain.
+>
 > **Pembaruan 2026-10-29 (sore):** uji Redmi menemukan bug pemulihan backup lama (< v9), diperbaiki di kode. **AAB +16 di jalur internal tidak boleh dipromosikan;
 > gunakan AAB `1.2.0+17`** (dibangun dari commit `41cfe12`: 96.655.853 byte = 96,7 MB, SHA-256 diawali `23ac533497328321`, tanda tangan SHA-1 `86:E7:F6:…:A2:60` sama dengan +15/+16,
 > manifest identik dengan +16). Nama berkas dokumen tetap "+16" agar tautan tidak putus; semua rujukan "+16" di bawah berlaku untuk **+17** kecuali disebut lain.
