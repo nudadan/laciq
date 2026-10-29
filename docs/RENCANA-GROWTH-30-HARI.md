@@ -44,6 +44,9 @@ Jangan bersaing di kata umum "catatan keuangan" saja; pesaing besar sudah mengua
 
 ### Minggu 1 (28 Okt - 3 Nov): ukur dan perbaiki fondasi
 - [ ] Buka Play Console > Statistik/Listingan: catat **kata kunci pencarian** yang membawa tayangan (belum diperiksa) dan sebaran negara/perangkat.
+  - **Sebaran negara diperiksa 2026-10-29** (Play Console > Statistik > audiens yang menginstal, per negara, 1-26 Okt): pengguna aktif harian naik dari 0 (6 Okt) ke 35 (26 Okt); **100% di Indonesia** pada 17-26 Okt (10 hari berturut-turut,
+    mis. 26 Okt 35 dari 35). Produksi tersedia di **1 negara/wilayah** (Indonesia), 33 peninstalan. Keterbatasan: data ini tidak bisa menunjukkan permintaan di luar Indonesia karena aplikasi memang tidak tersedia di sana.
+  - **Keputusan (rekomendasi 2026-10-29): tetap Indonesia saja.** Syarat membuka negara lain (lihat catatan keputusan di bawah): UMP rilis + pesan AdMob terbit, kebijakan privasi disesuaikan, harga per wilayah, sinyal permintaan nyata, terjemahan minimal.
 - [ ] Rekap lembar pelacakan (spreadsheet): tanggal, kanal, tautan UTM, tayangan, klik, pemasangan. Isi dengan data 4 minggu terakhir.
 - [ ] Kenali asal 22 pemasangan "berbayar/langsung": kanal mana yang sudah diposting (Instagram, WA, situs, QR)? Jawabannya menentukan kanal yang digandakan.
 - [x] **Periksa status uji coba Ultimate** (SELESAI 2026-10-28: A4 lulus, `TRIAL_ENABLED = "1"` di produksi, penawaran trial teruji di HP nyata). Catatan awal: nilai `TRIAL_ENABLED` di Worker produksi. Bila masih `"0"`, selesaikan syarat di `RILIS-1.1.0+15.md` (uji A4 ANDROID_ID, 24-48 jam stabil di 100%) lalu nyalakan; pantau `promo-cost` dan konversi trial ke berbayar di RevenueCat.
