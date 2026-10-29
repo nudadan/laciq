@@ -1,5 +1,10 @@
 # Rilis 1.2.0 (kode +16 DIGANTI +17, lalu +18), disusun 2026-10-29
 
+> **Pembaruan 2026-10-29 (+20, belum diunggah):** AAB `1.2.0+20` dibangun dari commit `36662e1`: 96.761.641 byte = 96,8 MB, SHA-256 diawali `3c5ad3dc2b5cff75`, tanda tangan SHA-1 `86:E7:F6:…:A2:60` (sama dengan +19).
+> Isi baru dibanding +19 (docs/RENCANA-IMPLEMENTASI-ONBOARDING.md): alur awal instalasi baru (sapaan, pilih pribadi/usaha, catat transaksi pertama), kartu "Mulai cepat" di Beranda, tombol aksi di halaman yang masih kosong.
+> 908 tes lulus. Alur instalasi baru terlihat benar di emulator (3 layar); emulator lalu crash di host (segfault, bukan di aplikasi), jadi Beranda + kartu diuji lewat tes widget dan perlu dicek di Redmi setelah pembaruan.
+> Catatan: tes `app_flow_test` ("geser hapus transaksi") sekarang mengembalikan status aplikasi ke `resumed` di akhir, karena frame berhenti saat `paused` dan menahan penutupan database tes.
+
 > **Pembaruan 2026-10-29 (+19, di jalur internal):** AAB `1.2.0+19` dibangun dari commit `f9d173d`: 96.696.752 byte = 96,7 MB, SHA-256 diawali `fb5884211e4d44ae`, tanda tangan SHA-1 `86:E7:F6:…:A2:60` (sama dengan +18).
 > Isi baru dibanding +18: sapaan "kamu" menggantikan "Anda" (67 string) dan persetujuan iklan Google UMP + tombol "Pilihan privasi iklan" di Pengaturan. 886 tes lulus; `flutter analyze` hanya 2 info lama di `database.dart`.
 > AAB +19 diterbitkan ke jalur Pengujian internal pada **2026-10-29 18.25** (status "Tersedia untuk penguji internal"; ukuran instal 21,6 MB, pembaruan 2,16 MB, tidak ada perangkat yang hilang). Belum dipromosikan ke Produksi.

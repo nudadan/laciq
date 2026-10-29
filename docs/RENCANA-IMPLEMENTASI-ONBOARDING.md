@@ -1,6 +1,6 @@
 # Rencana build 1.2.0+20: bantu pengguna baru mulai memakai LaciQ
 
-Disusun 2026-10-29. Status: **rencana, belum dikerjakan**. Build +19 (sapaan "kamu", persetujuan iklan UMP) sudah di jalur internal dan tidak diubah.
+Disusun 2026-10-29. Status: **dikerjakan di build +20 (commit `8c0ca1a`, versi `36662e1`); AAB belum diunggah**. Build +19 (sapaan "kamu", persetujuan iklan UMP) sudah di jalur internal dan tidak diubah.
 
 ## 1. Masalah
 
