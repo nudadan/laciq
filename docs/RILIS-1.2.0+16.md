@@ -3,6 +3,7 @@
 > **Pembaruan 2026-10-29 (+19, di jalur internal):** AAB `1.2.0+19` dibangun dari commit `f9d173d`: 96.696.752 byte = 96,7 MB, SHA-256 diawali `fb5884211e4d44ae`, tanda tangan SHA-1 `86:E7:F6:…:A2:60` (sama dengan +18).
 > Isi baru dibanding +18: sapaan "kamu" menggantikan "Anda" (67 string) dan persetujuan iklan Google UMP + tombol "Pilihan privasi iklan" di Pengaturan. 886 tes lulus; `flutter analyze` hanya 2 info lama di `database.dart`.
 > AAB +19 diterbitkan ke jalur Pengujian internal pada **2026-10-29 18.25** (status "Tersedia untuk penguji internal"; ukuran instal 21,6 MB, pembaruan 2,16 MB, tidak ada perangkat yang hilang). Belum dipromosikan ke Produksi.
+> **Uji Redmi +19 (2026-10-29 18.30):** pembaruan 18→19 lewat Play Store (jalur internal) berhasil, data dummy utuh, tidak ada crash. Sapaan "kamu" tampil di Pengaturan. Tile "Pilihan privasi iklan" tidak tampil, sesuai rancangan (pengguna Indonesia, masih masa uji coba Ultimate, pesan AdMob belum dibuat). Alur formulir UMP sendiri belum teruji di perangkat sampai pesan AdMob dibuat.
 > Sebelum +19 tayang di Produksi: buat pesan persetujuan di AdMob (Privasi & pesan), lalu tempel `docs/kebijakan-privasi/DRAFT-iklan-ump.html` ke kebijakan privasi. Pengguna di Indonesia tidak akan melihat formulir (UMP menjawab "tidak diperlukan").
 
 > **Pembaruan 2026-10-29 (malam): gunakan AAB `1.2.0+18`** (commit `1de0936`: 96.656.330 byte = 96,7 MB, SHA-256 diawali `4cac5fc21ea24140`, tanda tangan SHA-1 `86:E7:F6:…:A2:60`,
