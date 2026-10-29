@@ -1,5 +1,9 @@
 # Rilis 1.2.0 (kode +16 DIGANTI +17, lalu +18), disusun 2026-10-29
 
+> **Pembaruan 2026-10-29 (+19, belum diunggah):** AAB `1.2.0+19` dibangun dari commit `f9d173d`: 96.696.752 byte = 96,7 MB, SHA-256 diawali `fb5884211e4d44ae`, tanda tangan SHA-1 `86:E7:F6:…:A2:60` (sama dengan +18).
+> Isi baru dibanding +18: sapaan "kamu" menggantikan "Anda" (67 string) dan persetujuan iklan Google UMP + tombol "Pilihan privasi iklan" di Pengaturan. 886 tes lulus; `flutter analyze` hanya 2 info lama di `database.dart`.
+> Sebelum +19 tayang di Produksi: buat pesan persetujuan di AdMob (Privasi & pesan), lalu tempel `docs/kebijakan-privasi/DRAFT-iklan-ump.html` ke kebijakan privasi. Pengguna di Indonesia tidak akan melihat formulir (UMP menjawab "tidak diperlukan").
+
 > **Pembaruan 2026-10-29 (malam): gunakan AAB `1.2.0+18`** (commit `1de0936`: 96.656.330 byte = 96,7 MB, SHA-256 diawali `4cac5fc21ea24140`, tanda tangan SHA-1 `86:E7:F6:…:A2:60`,
 > manifest identik dengan +17). +18 memuat perbaikan kartu ringkasan Laba Rugi (label "HPP + beban" menyesatkan, ditemukan di uji Redmi) di atas perbaikan pemulihan backup lama (+17).
 > **+16 dan +17 tidak boleh dipromosikan ke Produksi.** Rujukan "+16"/"+17" di bawah berlaku untuk **+18** kecuali disebut lain.
