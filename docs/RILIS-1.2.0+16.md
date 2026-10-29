@@ -58,6 +58,8 @@ Baru: Mode usaha dan Laba Rugi (Premium). Kelompokkan kategori sebagai pendapata
 2. [x] **Uji internal**: AAB diunggah dan **diterbitkan ke jalur Pengujian internal pada 2026-10-29 13.43** (rilis "16 (1.2.0)", catatan rilis varian di atas; status "Tersedia untuk penguji internal").
        Pratinjau Play: tidak ada perangkat yang tidak lagi didukung; ukuran instal baru 21,6 MB (**+790 KB** vs +15), ukuran pembaruan 4,12 MB (sesuai perkiraan +0,75 MB).
        **Ekspor backup berkas dari build 15 sebelum memperbarui di Redmi.**
+       **Diganti +17:** AAB `1.2.0+17` diterbitkan ke jalur internal pada **2026-10-29 14.50** (status "Tersedia untuk penguji internal"; ukuran instal 21,6 MB, pembaruan 4,14 MB,
+       tidak ada perangkat yang hilang). +16 tidak boleh dipromosikan ke Produksi. Di Redmi: perbarui ke +17 tanpa menghapus aplikasi, lalu **pulihkan ulang backup lama** supaya kelompok kategori terisi.
 3. [ ] **Uji HP**: jalankan [UJI-HP-LABA-RUGI.md](UJI-HP-LABA-RUGI.md). Semua butir bertanda **WAJIB** harus lulus.
 4. [ ] **Listing**: samakan paragraf baru dengan listing yang tayang (lihat [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md), 2026-10-29). Jangan mengubah judul (jendela 14 hari).
 5. [ ] **Produksi bertahap**: promosikan **bundel yang sama** dari uji internal, mulai 10% → 50% → 100% sambil memantau Android vitals, ulasan, dan RevenueCat.
