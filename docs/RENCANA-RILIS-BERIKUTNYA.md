@@ -11,7 +11,7 @@
 > tersimpan (bila belum ada status sama sekali, iklan belum dimuat sampai sesi berikutnya). 886 tes lulus.
 > **Yang masih HARUS dikerjakan pemilik (konsol, tidak bisa saya kerjakan):** (1) AdMob > Privasi & pesan > buat **pesan persetujuan** untuk aplikasi LaciQ (Android) dan terbitkan
 > (tanpa ini formulir tidak pernah muncul bagi pengguna EEA/Inggris/Swiss); (2) uji dengan `ConsentDebugSettings` (geografi EEA) di build uji, belum dipasang di kode produksi sengaja;
-> (3) perbarui bagian iklan di kebijakan privasi (sebut pesan persetujuan dan pilihan privasi) dan cek ulang `DATA-SAFETY-PLAY.md`; (4) deploy kebijakan sebelum rilis.
+> (3) bagian iklan di kebijakan privasi: **teks sudah disiapkan** di `docs/kebijakan-privasi/DRAFT-iklan-ump.html` (sengaja BUKAN di `index.html` agar tidak ikut ter-deploy sebelum waktunya; tempel dan deploy bersama rilis build UMP + perbarui tanggal berlaku), dan cek ulang `DATA-SAFETY-PLAY.md` (UMP tidak menambah tipe data; periksa saat rilis); (4) deploy kebijakan sebelum rilis.
 **Latar:** AdMob (aplikasi terverifikasi 2026-10-08, peninjauan 2-3 hari) menyarankan platform pengelolaan izin yang
 disertifikasi Google untuk pengguna di EEA, Inggris Raya, dan Swiss. Aplikasi memakai `google_mobile_ads ^9.1.0` tetapi
 belum memanggil UMP (`ConsentInformation` / `ConsentForm` tidak ada di `lib/`). Sementara itu AdMob memakai "pesan
