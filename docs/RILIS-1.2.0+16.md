@@ -5,18 +5,18 @@
 > disetujui pemilik sebagai usulan (2026-10-29) tetapi **`pubspec.yaml` belum dinaikkan**: lihat langkah 0.
 > Kode sudah di `main` (873 tes otomatis lulus); yang belum ada adalah uji di HP nyata dan pembuatan AAB.
 
-## Artefak (isi setelah dibangun)
+## Artefak (dibangun 2026-10-29)
 | Hal | Nilai |
 |---|---|
-| AAB | `build/app/outputs/bundle/release/app-release.aab` (ukuran: ___ MB; **bandingkan dengan 87,4 MB milik +15**, paket `pdf` dan font tebal 96 KB ditambahkan) |
-| Versi | `1.2.0` (kode versi **16**; produksi sekarang 15) |
-| Penandatangan | harus sama dengan +15: SHA-1 `86:E7:F6:D6:FD:67:0A:E4:D1:DC:AD:20:6E:01:30:F6:21:2E:A2:60` |
-| Dibangun dari | `main` pada commit: ___ (+ commit penaikan versi) |
+| AAB | `build/app/outputs/bundle/release/app-release.aab` — **96.647.149 byte (96,6 MB; 92,2 MiB)**, SHA-256 diawali `4e2c135931b03990`. Pembanding +15 dibangun ulang dari commit `3fa6f29`: 91.622.387 byte (91,6 MB; 87,4 MiB, inilah angka "87,4 MB" di catatan +15, ternyata MiB). **Selisih +5,0 MB** pada AAB; sekitar 3,7 MB di antaranya simbol debug (`BUNDLE-METADATA`) yang tidak ikut terunduh pengguna. Per perangkat, kenaikan unduhan ≈ **0,75 MB** (`libapp.so` per ABI +0,75 MB karena kode Fase 1 dan paket `pdf`) + font tebal 44 KB terkompresi. Di bawah ambang 1 MB: cukup dicatat |
+| Versi | `1.2.0` (kode versi **16**; produksi sekarang 15); `pubspec.yaml` sudah dinaikkan (commit `f09df91`) |
+| Penandatangan | **terverifikasi sama dengan +15** (`keytool -printcert -jarfile`): `CN=DompetKu`, SHA-1 `86:E7:F6:D6:FD:67:0A:E4:D1:DC:AD:20:6E:01:30:F6:21:2E:A2:60`, berlaku sampai 7 Feb 2054 |
+| Dibangun dari | `main` pada commit `f09df91` (`chore: versi 1.2.0+16`); pohon kerja bersih untuk berkas yang dilacak |
 | Tes | 873 Flutter + 146 Worker lulus saat dokumen ini ditulis; `flutter analyze`: 2 info lama di `database.dart` |
 | Skema database | **v12** (migrasi dari v1-v11 diuji otomatis; hanya menambah kolom, tidak menghapus apa pun) |
 | Format backup | **v9** (backup dari 1.2.0 **tidak** bisa dipulihkan di +15 atau lebih lama; sebaliknya bisa) |
 | Worker | Tidak ada perubahan; tidak perlu deploy |
-| Izin / manifest | Tidak ada izin atau fitur perangkat baru (periksa dengan `aapt2 dump badging` seperti di +15) |
+| Izin / manifest | **Terverifikasi tidak berubah**: manifest dasar +15 dan +16 dibandingkan (nama izin, fitur perangkat, komponen); satu-satunya beda adalah `versionName` 1.1.0 → 1.2.0 (`versionCode` 16) |
 
 ## Isi (dibanding produksi +15)
 - **Mode usaha** (Lainnya > Mode usaha, semua paket): menandai buku sebagai buku usaha. Di Ultimate juga ada saklar "Buku usaha" di dialog buku kas.
@@ -46,7 +46,7 @@ Baru: Mode usaha dan Laba Rugi (Premium). Kelompokkan kategori sebagai pendapata
 | Data Safety | Tidak ada perubahan deklarasi (lihat [DATA-SAFETY-PLAY.md](DATA-SAFETY-PLAY.md), 2026-10-29) | Cek ulang halaman Konten aplikasi saat mengirim rilis |
 
 ## Urutan rilis
-0. [ ] **Naikkan versi**: `pubspec.yaml` ke `1.2.0+16`, commit `chore: versi 1.2.0+16 (Mode usaha, Laba Rugi)`. Bangun AAB rilis (tanpa `--dart-define` tambahan;
+0. [x] **Naikkan versi** (selesai 2026-10-29, AAB dibangun): `pubspec.yaml` ke `1.2.0+16`, commit `chore: versi 1.2.0+16 (Mode usaha, Laba Rugi)`. Bangun AAB rilis (tanpa `--dart-define` tambahan;
        alamat Worker AI sudah bawaan di kode). Jangan mencetak isi `android/key.properties`.
 1. [ ] **Kebijakan privasi**: deploy `docs/kebijakan-privasi/index.html` (bagian 7 menyebut PDF) ke `https://laciq.solusimandiri.id/privacy`. Tanggal berlaku:
        putuskan apakah perlu diperbarui (perubahan hanya penyebutan format ekspor). **Harus sebelum rilis tayang.**
