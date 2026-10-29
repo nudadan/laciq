@@ -13,6 +13,8 @@ import 'generated_migrations/schema_v6.dart' as v6;
 import 'generated_migrations/schema_v7.dart' as v7;
 import 'generated_migrations/schema_v8.dart' as v8;
 import 'generated_migrations/schema_v9.dart' as v9;
+import 'generated_migrations/schema_v10.dart' as v10;
+import 'generated_migrations/schema_v11.dart' as v11;
 
 /// Data pengguna nyata di setiap versi lama harus selamat dari semua migrasi.
 void main() {
@@ -20,9 +22,9 @@ void main() {
   late SchemaVerifier verifier;
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  const latest = 11;
+  const latest = 12;
 
-  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
     test(
       'skema hasil migrasi v$from -> v$latest identik dengan skema v$latest baru',
       () async {
@@ -491,6 +493,116 @@ void main() {
       expect(
         (await db.watchAccountBalances().first).single.balance,
         1000000 - 50000,
+      );
+      await db.close();
+    },
+  );
+
+  // Kelompok laporan kategori (v12): hanya kategori bawaan/sistem yang diisi,
+  // buatan pengguna dan sub-kategori dibiarkan kosong; buku berkategori
+  // "Penjualan" bawaan template Bisnis ditandai buku usaha.
+  Future<void> insertLedgersAndCategoriesV11(dynamic old) async {
+    await old.customStatement(
+      "INSERT INTO ledgers (id, name, icon, color, sort_order, archived, created_at, updated_at) "
+      "VALUES ('ledger-main', 'Buku Utama', 'savings', 1, 0, 0, 1700000000, 1700000000), "
+      "('ledger-biz', 'Toko', 'business', 2, 1, 0, 1700000000, 1700000000)",
+    );
+    await old.customStatement(
+      "INSERT INTO categories (id, name, type, icon, color, sort_order, archived, ledger_id, parent_id, updated_at) VALUES "
+      "('c1', 'Makan', 1, 'food', 1, 0, 0, 'ledger-main', NULL, 1700000000), "
+      "('c-sub', 'Warteg', 1, 'food', 1, 1, 0, 'ledger-main', 'c1', 1700000000), "
+      "('cat-exp-utang', 'Utang', 1, 'debt', 1, 2, 0, 'ledger-main', NULL, 1700000000), "
+      "('cat-inc-piutang', 'Piutang', 0, 'debt', 1, 3, 0, 'ledger-main', NULL, 1700000000), "
+      "('u-tab', 'Tabungan', 1, 'savings', 1, 4, 0, 'ledger-main', NULL, 1700000000), "
+      "('ledger-biz:cat-inc-penjualan', 'Penjualan', 0, 'business', 1, 0, 0, 'ledger-biz', NULL, 1700000000), "
+      "('ledger-biz:cat-exp-stok', 'Pembelian Stok / Bahan Baku', 1, 'shopping', 1, 0, 0, 'ledger-biz', NULL, 1700000000), "
+      "('ledger-biz:cat-inc-modal', 'Modal Masuk', 0, 'investment', 1, 1, 0, 'ledger-biz', NULL, 1700000000), "
+      "('ledger-biz:cat-exp-sewa', 'Sewa Tempat', 1, 'home', 1, 1, 0, 'ledger-biz', NULL, 1700000000)",
+    );
+  }
+
+  void expectV12Defaults(
+    Map<String, ReportGroup?> groups,
+    Map<String, LedgerKind> kinds,
+  ) {
+    expect(groups['c1'], isNull); // buatan pengguna: bawaan jenis
+    expect(groups['c-sub'], isNull); // sub-kategori mengikuti induk
+    expect(groups['cat-exp-utang'], ReportGroup.nonPnl);
+    expect(groups['cat-inc-piutang'], ReportGroup.nonPnl);
+    expect(groups['u-tab'], ReportGroup.nonPnl); // nama sistem dipakai ulang
+    expect(groups['ledger-biz:cat-inc-penjualan'], isNull);
+    expect(groups['ledger-biz:cat-exp-stok'], ReportGroup.cogs);
+    expect(groups['ledger-biz:cat-inc-modal'], ReportGroup.nonPnl);
+    expect(groups['ledger-biz:cat-exp-sewa'], isNull);
+    expect(kinds['ledger-main'], LedgerKind.personal);
+    expect(kinds['ledger-biz'], LedgerKind.business);
+  }
+
+  for (final from in [10, 11]) {
+    test(
+      'v$from -> v$latest: kelompok laporan kategori bawaan terisi, buku usaha dikenali, data lain utuh',
+      () async {
+        final schema = await verifier.schemaAt(from);
+        final dynamic old = from == 10
+            ? v10.DatabaseAtV10(schema.newConnection())
+            : v11.DatabaseAtV11(schema.newConnection());
+        await insertLedgersAndCategoriesV11(old);
+        await old.customStatement(
+          "INSERT INTO accounts (id, name, kind, initial_balance, archived, updated_at, ledger_id) "
+          "VALUES ('a1', 'BCA', 1, 1000000, 0, 1700000000, 'ledger-main')",
+        );
+        await old.customStatement(
+          "INSERT INTO transactions (id, type, amount, account_id, category_id, "
+          "transfer_to_account_id, date, note, created_at, updated_at, deleted_at) "
+          "VALUES ('t1', 1, 50000, 'a1', 'c1', NULL, 1700000000, 'kopi', 1700000000, 1700000000, NULL)",
+        );
+        await old.close();
+
+        final db = AppDatabase(schema.newConnection());
+        await verifier.migrateAndValidate(db, latest);
+
+        final groups = {
+          for (final c in await db.select(db.categories).get())
+            c.id: c.reportGroup,
+        };
+        final kinds = {
+          for (final l in await db.select(db.ledgers).get()) l.id: l.kind,
+        };
+        expectV12Defaults(groups, kinds);
+        expect(
+          (await db.watchAccountBalances().first).single.balance,
+          1000000 - 50000,
+        );
+        await db.close();
+      },
+    );
+  }
+
+  test(
+    'v9 (belum ada buku kas) -> v$latest: Buku Utama pribadi, kategori Utang/Piutang di luar laba rugi',
+    () async {
+      final schema = await verifier.schemaAt(9);
+      final old = v9.DatabaseAtV9(schema.newConnection());
+      await old.customStatement(
+        "INSERT INTO categories (id, name, type, icon, color, sort_order, archived, updated_at) VALUES "
+        "('c1', 'Makan', 1, 'food', 1, 0, 0, 1700000000), "
+        "('cat-exp-utang', 'Utang', 1, 'debt', 1, 1, 0, 1700000000), "
+        "('cat-inc-piutang', 'Piutang', 0, 'debt', 1, 2, 0, 1700000000)",
+      );
+      await old.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, latest);
+      final groups = {
+        for (final c in await db.select(db.categories).get())
+          c.id: c.reportGroup,
+      };
+      expect(groups['c1'], isNull);
+      expect(groups['cat-exp-utang'], ReportGroup.nonPnl);
+      expect(groups['cat-inc-piutang'], ReportGroup.nonPnl);
+      expect(
+        (await db.select(db.ledgers).get()).single.kind,
+        LedgerKind.personal,
       );
       await db.close();
     },

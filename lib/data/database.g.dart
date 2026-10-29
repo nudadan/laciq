@@ -99,6 +99,16 @@ class $LedgersTable extends Ledgers with TableInfo<$LedgersTable, Ledger> {
     requiredDuringInsert: true,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<LedgerKind, int> kind =
+      GeneratedColumn<int>(
+        'kind',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<LedgerKind>($LedgersTable.$converterkind);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     name,
@@ -108,6 +118,7 @@ class $LedgersTable extends Ledgers with TableInfo<$LedgersTable, Ledger> {
     archived,
     createdAt,
     updatedAt,
+    kind,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -217,6 +228,12 @@ class $LedgersTable extends Ledgers with TableInfo<$LedgersTable, Ledger> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      kind: $LedgersTable.$converterkind.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}kind'],
+        )!,
+      ),
     );
   }
 
@@ -224,6 +241,9 @@ class $LedgersTable extends Ledgers with TableInfo<$LedgersTable, Ledger> {
   $LedgersTable createAlias(String alias) {
     return $LedgersTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<LedgerKind, int, int> $converterkind =
+      const EnumIndexConverter<LedgerKind>(LedgerKind.values);
 }
 
 class Ledger extends DataClass implements Insertable<Ledger> {
@@ -235,6 +255,10 @@ class Ledger extends DataClass implements Insertable<Ledger> {
   final bool archived;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// [LedgerKind] (indeks). Default literal 0 = pribadi, bukan konstanta: berkas
+  /// skema tergenerasi menyalin ekspresi default apa adanya (lihat [kMainLedgerId]).
+  final LedgerKind kind;
   const Ledger({
     required this.id,
     required this.name,
@@ -244,6 +268,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
     required this.archived,
     required this.createdAt,
     required this.updatedAt,
+    required this.kind,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -256,6 +281,9 @@ class Ledger extends DataClass implements Insertable<Ledger> {
     map['archived'] = Variable<bool>(archived);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    {
+      map['kind'] = Variable<int>($LedgersTable.$converterkind.toSql(kind));
+    }
     return map;
   }
 
@@ -269,6 +297,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
       archived: Value(archived),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      kind: Value(kind),
     );
   }
 
@@ -286,6 +315,9 @@ class Ledger extends DataClass implements Insertable<Ledger> {
       archived: serializer.fromJson<bool>(json['archived']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      kind: $LedgersTable.$converterkind.fromJson(
+        serializer.fromJson<int>(json['kind']),
+      ),
     );
   }
   @override
@@ -300,6 +332,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
       'archived': serializer.toJson<bool>(archived),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'kind': serializer.toJson<int>($LedgersTable.$converterkind.toJson(kind)),
     };
   }
 
@@ -312,6 +345,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
     bool? archived,
     DateTime? createdAt,
     DateTime? updatedAt,
+    LedgerKind? kind,
   }) => Ledger(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -321,6 +355,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
     archived: archived ?? this.archived,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    kind: kind ?? this.kind,
   );
   Ledger copyWithCompanion(LedgersCompanion data) {
     return Ledger(
@@ -332,6 +367,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
       archived: data.archived.present ? data.archived.value : this.archived,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      kind: data.kind.present ? data.kind.value : this.kind,
     );
   }
 
@@ -345,7 +381,8 @@ class Ledger extends DataClass implements Insertable<Ledger> {
           ..write('sortOrder: $sortOrder, ')
           ..write('archived: $archived, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('kind: $kind')
           ..write(')'))
         .toString();
   }
@@ -360,6 +397,7 @@ class Ledger extends DataClass implements Insertable<Ledger> {
     archived,
     createdAt,
     updatedAt,
+    kind,
   );
   @override
   bool operator ==(Object other) =>
@@ -372,7 +410,8 @@ class Ledger extends DataClass implements Insertable<Ledger> {
           other.sortOrder == this.sortOrder &&
           other.archived == this.archived &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.kind == this.kind);
 }
 
 class LedgersCompanion extends UpdateCompanion<Ledger> {
@@ -384,6 +423,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
   final Value<bool> archived;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<LedgerKind> kind;
   final Value<int> rowid;
   const LedgersCompanion({
     this.id = const Value.absent(),
@@ -394,6 +434,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
     this.archived = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.kind = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LedgersCompanion.insert({
@@ -405,6 +446,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
     this.archived = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.kind = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -420,6 +462,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
     Expression<bool>? archived,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? kind,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -431,6 +474,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
       if (archived != null) 'archived': archived,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (kind != null) 'kind': kind,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -444,6 +488,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
     Value<bool>? archived,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<LedgerKind>? kind,
     Value<int>? rowid,
   }) {
     return LedgersCompanion(
@@ -455,6 +500,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
       archived: archived ?? this.archived,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      kind: kind ?? this.kind,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -486,6 +532,11 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (kind.present) {
+      map['kind'] = Variable<int>(
+        $LedgersTable.$converterkind.toSql(kind.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -503,6 +554,7 @@ class LedgersCompanion extends UpdateCompanion<Ledger> {
           ..write('archived: $archived, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('kind: $kind, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1094,6 +1146,15 @@ class $CategoriesTable extends Categories
       'REFERENCES categories (id)',
     ),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<ReportGroup?, int> reportGroup =
+      GeneratedColumn<int>(
+        'report_group',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<ReportGroup?>($CategoriesTable.$converterreportGroupn);
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -1116,6 +1177,7 @@ class $CategoriesTable extends Categories
     archived,
     ledgerId,
     parentId,
+    reportGroup,
     updatedAt,
   ];
   @override
@@ -1236,6 +1298,12 @@ class $CategoriesTable extends Categories
         DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
       ),
+      reportGroup: $CategoriesTable.$converterreportGroupn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}report_group'],
+        ),
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -1250,6 +1318,10 @@ class $CategoriesTable extends Categories
 
   static JsonTypeConverter2<TxType, int, int> $convertertype =
       const EnumIndexConverter<TxType>(TxType.values);
+  static JsonTypeConverter2<ReportGroup, int, int> $converterreportGroup =
+      const EnumIndexConverter<ReportGroup>(ReportGroup.values);
+  static JsonTypeConverter2<ReportGroup?, int?, int?> $converterreportGroupn =
+      JsonTypeConverter2.asNullable($converterreportGroup);
 }
 
 class Category extends DataClass implements Insertable<Category> {
@@ -1268,6 +1340,10 @@ class Category extends DataClass implements Insertable<Category> {
   /// Kategori induk (satu tingkat saja: sub-kategori tidak boleh punya
   /// sub-kategori lagi). Null = kategori tingkat atas.
   final String? parentId;
+
+  /// [ReportGroup] (indeks) pada laporan Laba Rugi. Null = bawaan dari jenis
+  /// ([ReportGroup.defaultFor]). Sub-kategori selalu null: ia mengikuti induknya.
+  final ReportGroup? reportGroup;
   final DateTime updatedAt;
   const Category({
     required this.id,
@@ -1279,6 +1355,7 @@ class Category extends DataClass implements Insertable<Category> {
     required this.archived,
     required this.ledgerId,
     this.parentId,
+    this.reportGroup,
     required this.updatedAt,
   });
   @override
@@ -1297,6 +1374,11 @@ class Category extends DataClass implements Insertable<Category> {
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
     }
+    if (!nullToAbsent || reportGroup != null) {
+      map['report_group'] = Variable<int>(
+        $CategoriesTable.$converterreportGroupn.toSql(reportGroup),
+      );
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -1314,6 +1396,9 @@ class Category extends DataClass implements Insertable<Category> {
       parentId: parentId == null && nullToAbsent
           ? const Value.absent()
           : Value(parentId),
+      reportGroup: reportGroup == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reportGroup),
       updatedAt: Value(updatedAt),
     );
   }
@@ -1335,6 +1420,9 @@ class Category extends DataClass implements Insertable<Category> {
       archived: serializer.fromJson<bool>(json['archived']),
       ledgerId: serializer.fromJson<String>(json['ledgerId']),
       parentId: serializer.fromJson<String?>(json['parentId']),
+      reportGroup: $CategoriesTable.$converterreportGroupn.fromJson(
+        serializer.fromJson<int?>(json['reportGroup']),
+      ),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -1353,6 +1441,9 @@ class Category extends DataClass implements Insertable<Category> {
       'archived': serializer.toJson<bool>(archived),
       'ledgerId': serializer.toJson<String>(ledgerId),
       'parentId': serializer.toJson<String?>(parentId),
+      'reportGroup': serializer.toJson<int?>(
+        $CategoriesTable.$converterreportGroupn.toJson(reportGroup),
+      ),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -1367,6 +1458,7 @@ class Category extends DataClass implements Insertable<Category> {
     bool? archived,
     String? ledgerId,
     Value<String?> parentId = const Value.absent(),
+    Value<ReportGroup?> reportGroup = const Value.absent(),
     DateTime? updatedAt,
   }) => Category(
     id: id ?? this.id,
@@ -1378,6 +1470,7 @@ class Category extends DataClass implements Insertable<Category> {
     archived: archived ?? this.archived,
     ledgerId: ledgerId ?? this.ledgerId,
     parentId: parentId.present ? parentId.value : this.parentId,
+    reportGroup: reportGroup.present ? reportGroup.value : this.reportGroup,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   Category copyWithCompanion(CategoriesCompanion data) {
@@ -1391,6 +1484,9 @@ class Category extends DataClass implements Insertable<Category> {
       archived: data.archived.present ? data.archived.value : this.archived,
       ledgerId: data.ledgerId.present ? data.ledgerId.value : this.ledgerId,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      reportGroup: data.reportGroup.present
+          ? data.reportGroup.value
+          : this.reportGroup,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -1407,6 +1503,7 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('archived: $archived, ')
           ..write('ledgerId: $ledgerId, ')
           ..write('parentId: $parentId, ')
+          ..write('reportGroup: $reportGroup, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -1423,6 +1520,7 @@ class Category extends DataClass implements Insertable<Category> {
     archived,
     ledgerId,
     parentId,
+    reportGroup,
     updatedAt,
   );
   @override
@@ -1438,6 +1536,7 @@ class Category extends DataClass implements Insertable<Category> {
           other.archived == this.archived &&
           other.ledgerId == this.ledgerId &&
           other.parentId == this.parentId &&
+          other.reportGroup == this.reportGroup &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -1451,6 +1550,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<bool> archived;
   final Value<String> ledgerId;
   final Value<String?> parentId;
+  final Value<ReportGroup?> reportGroup;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const CategoriesCompanion({
@@ -1463,6 +1563,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.archived = const Value.absent(),
     this.ledgerId = const Value.absent(),
     this.parentId = const Value.absent(),
+    this.reportGroup = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1476,6 +1577,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.archived = const Value.absent(),
     this.ledgerId = const Value.absent(),
     this.parentId = const Value.absent(),
+    this.reportGroup = const Value.absent(),
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1493,6 +1595,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<bool>? archived,
     Expression<String>? ledgerId,
     Expression<String>? parentId,
+    Expression<int>? reportGroup,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -1506,6 +1609,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (archived != null) 'archived': archived,
       if (ledgerId != null) 'ledger_id': ledgerId,
       if (parentId != null) 'parent_id': parentId,
+      if (reportGroup != null) 'report_group': reportGroup,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1521,6 +1625,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Value<bool>? archived,
     Value<String>? ledgerId,
     Value<String?>? parentId,
+    Value<ReportGroup?>? reportGroup,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -1534,6 +1639,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       archived: archived ?? this.archived,
       ledgerId: ledgerId ?? this.ledgerId,
       parentId: parentId ?? this.parentId,
+      reportGroup: reportGroup ?? this.reportGroup,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -1571,6 +1677,11 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
     }
+    if (reportGroup.present) {
+      map['report_group'] = Variable<int>(
+        $CategoriesTable.$converterreportGroupn.toSql(reportGroup.value),
+      );
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1592,6 +1703,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('archived: $archived, ')
           ..write('ledgerId: $ledgerId, ')
           ..write('parentId: $parentId, ')
+          ..write('reportGroup: $reportGroup, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -7441,6 +7553,7 @@ typedef $$LedgersTableCreateCompanionBuilder = LedgersCompanion Function({
   Value<bool> archived,
   required DateTime createdAt,
   required DateTime updatedAt,
+  Value<LedgerKind> kind,
   Value<int> rowid,
 });
 typedef $$LedgersTableUpdateCompanionBuilder = LedgersCompanion Function({
@@ -7452,6 +7565,7 @@ typedef $$LedgersTableUpdateCompanionBuilder = LedgersCompanion Function({
   Value<bool> archived,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<LedgerKind> kind,
   Value<int> rowid,
 });
 
@@ -7503,6 +7617,12 @@ class $$LedgersTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<LedgerKind, LedgerKind, int> get kind =>
+      $composableBuilder(
+        column: $table.kind,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 }
 
 class $$LedgersTableOrderingComposer
@@ -7553,6 +7673,11 @@ class $$LedgersTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LedgersTableAnnotationComposer
@@ -7587,6 +7712,9 @@ class $$LedgersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<LedgerKind, int> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
 }
 
 class $$LedgersTableTableManager
@@ -7625,6 +7753,7 @@ class $$LedgersTableTableManager
                 Value<bool> archived = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<LedgerKind> kind = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LedgersCompanion(
                 id: id,
@@ -7635,6 +7764,7 @@ class $$LedgersTableTableManager
                 archived: archived,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                kind: kind,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7647,6 +7777,7 @@ class $$LedgersTableTableManager
                 Value<bool> archived = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
+                Value<LedgerKind> kind = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LedgersCompanion.insert(
                 id: id,
@@ -7657,6 +7788,7 @@ class $$LedgersTableTableManager
                 archived: archived,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                kind: kind,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8335,6 +8467,7 @@ typedef $$CategoriesTableCreateCompanionBuilder = CategoriesCompanion Function({
   Value<bool> archived,
   Value<String> ledgerId,
   Value<String?> parentId,
+  Value<ReportGroup?> reportGroup,
   required DateTime updatedAt,
   Value<int> rowid,
 });
@@ -8348,6 +8481,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder = CategoriesCompanion Function({
   Value<bool> archived,
   Value<String> ledgerId,
   Value<String?> parentId,
+  Value<ReportGroup?> reportGroup,
   Value<DateTime> updatedAt,
   Value<int> rowid,
 });
@@ -8477,6 +8611,12 @@ class $$CategoriesTableFilterComposer
   ColumnFilters<String> get ledgerId => $composableBuilder(
     column: $table.ledgerId,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ReportGroup?, ReportGroup, int>
+  get reportGroup => $composableBuilder(
+    column: $table.reportGroup,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
@@ -8632,6 +8772,11 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reportGroup => $composableBuilder(
+    column: $table.reportGroup,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -8693,6 +8838,12 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<String> get ledgerId =>
       $composableBuilder(column: $table.ledgerId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ReportGroup?, int> get reportGroup =>
+      $composableBuilder(
+        column: $table.reportGroup,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -8838,6 +8989,7 @@ class $$CategoriesTableTableManager
                 Value<bool> archived = const Value.absent(),
                 Value<String> ledgerId = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
+                Value<ReportGroup?> reportGroup = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
@@ -8850,6 +9002,7 @@ class $$CategoriesTableTableManager
                 archived: archived,
                 ledgerId: ledgerId,
                 parentId: parentId,
+                reportGroup: reportGroup,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
@@ -8864,6 +9017,7 @@ class $$CategoriesTableTableManager
                 Value<bool> archived = const Value.absent(),
                 Value<String> ledgerId = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
+                Value<ReportGroup?> reportGroup = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
@@ -8876,6 +9030,7 @@ class $$CategoriesTableTableManager
                 archived: archived,
                 ledgerId: ledgerId,
                 parentId: parentId,
+                reportGroup: reportGroup,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),

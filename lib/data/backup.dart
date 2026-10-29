@@ -69,9 +69,11 @@ class BackupService {
   /// serta `tags`/`transactionTags`, v5 menambah `agendaReminders`, v6
   /// menambah `debts` (utang/piutang), v7 menambah `ledgers` (multi buku kas)
   /// dan `ledgerId` di dompet/kategori/target/agenda/utang, v8 menambah
-  /// `savingsAccounts` (tabungan) dan `savingsId` di transaksi. Backup versi
-  /// lama tetap bisa dipulihkan: semua isinya masuk ke Buku Utama.
-  static const formatVersion = 8;
+  /// `savingsAccounts` (tabungan) dan `savingsId` di transaksi, v9 menambah
+  /// `reportGroup` di kategori dan `kind` di buku kas (laporan Laba Rugi). Backup
+  /// versi lama tetap bisa dipulihkan: semua isinya masuk ke Buku Utama, kelompok
+  /// laporan kosong (= bawaan jenis) dan buku bersifat pribadi.
+  static const formatVersion = 9;
 
   Future<String> export() async {
     final ledgersList = await _db.select(_db.ledgers).get();
@@ -140,16 +142,24 @@ class BackupService {
         T Function(Map<String, dynamic>) from, {
         bool optional = false,
         bool withLedger = false,
+        Map<String, dynamic> defaults = const {},
       }) => [
         for (final e
             in (root[key] ?? (optional ? const [] : null)) as List<dynamic>)
           from({
             if (withLedger) 'ledgerId': kMainLedgerId,
+            ...defaults,
             ...(e as Map<String, dynamic>),
           }),
       ];
 
-      final ledgersRead = read('ledgers', Ledger.fromJson, optional: true);
+      // `kind` baru ada sejak backup v9; 0 = pribadi (LedgerKind.personal).
+      final ledgersRead = read(
+        'ledgers',
+        Ledger.fromJson,
+        optional: true,
+        defaults: {'kind': LedgerKind.personal.index},
+      );
       final data = BackupData(
         exportedAt: DateTime.tryParse('${root['exportedAt']}')?.toLocal(),
         ledgers: ledgersRead.isEmpty
@@ -213,6 +223,7 @@ class BackupService {
     color: 0xFF1E88E5,
     sortOrder: 0,
     archived: false,
+    kind: LedgerKind.personal,
     createdAt: now,
     updatedAt: now,
   );
@@ -309,6 +320,12 @@ class BackupService {
     // parentId: harus ada, bukan diri sendiri, sejenis, dan satu tingkat saja
     // (induknya tidak boleh punya induk lagi -> tidak ada cucu).
     for (final c in d.categories) {
+      final group = c.reportGroup;
+      // Kelompok laporan harus cocok dengan jenis, dan sub-kategori tidak punya
+      // kelompok sendiri (mengikuti induknya).
+      if (group != null && (c.parentId != null || !group.allowedFor(c.type))) {
+        throw corrupt;
+      }
       final parentId = c.parentId;
       if (parentId == null) continue;
       if (parentId == c.id || !categoryIds.contains(parentId)) throw corrupt;

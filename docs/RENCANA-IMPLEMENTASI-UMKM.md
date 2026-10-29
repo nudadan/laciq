@@ -146,7 +146,14 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
 ### 4.8 Urutan kerja Fase 1 (tiap langkah bisa dikomit terpisah)
 1. ~~Spike PDF + font~~ **selesai 2026-10-29**: font variabel cukup untuk teks biasa; huruf tebal butuh instans statis (§4.4).
    Belum diuji: tampilan PDF di HP nyata/WhatsApp (masuk daftar uji §8 butir 5), dan ukuran APK setelah paket `pdf` (periksa saat membangun AAB).
-2. `ReportGroup`, `LedgerKind`, skema v12, migrasi + tes migrasi + backup v9.
+2. ~~`ReportGroup`, `LedgerKind`, skema v12, migrasi + tes migrasi + backup v9~~ **selesai 2026-10-29** (783 tes lulus).
+   Rincian yang berbeda atau menambah dari rancangan §4.1: (a) migrasi mengisi kelompok untuk kategori bawaan/sistem lewat ID dasar
+   (`_seedReportGroups`) **dan** kategori buatan pengguna yang bernama persis Utang/Piutang/Tabungan/Penyesuaian Saldo
+   (nama yang dipakai ulang oleh fitur sistem); `pajak` tetap beban operasional; (b) buku yang sudah memuat kategori
+   "Penjualan" bawaan template Bisnis otomatis ditandai buku usaha; (c) sub-kategori tidak punya kelompok sendiri (mengikuti
+   induk), dijaga di API (`setCategoryReportGroup`, `addCategory`, `updateCategory`) dan di validasi backup; (d) kelompok
+   harus cocok dengan jenis (`ReportGroup.allowedFor`), juga divalidasi di backup; (e) API baru `setLedgerKind`;
+   (f) backup v9, backup lama tanpa kunci baru tetap terbaca (buku pribadi, kelompok kosong).
 3. `profit_loss.dart` + tes unit (belum ada UI).
 4. Pilihan kelompok di layar Kategori, saklar buku usaha, saran kelompok otomatis.
 5. Layar Laba Rugi + gating.

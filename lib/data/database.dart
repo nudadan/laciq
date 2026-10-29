@@ -18,6 +18,36 @@ enum ContributionKind { deposit, withdrawal }
 
 enum DebtType { debt, receivable }
 
+/// Kelompok sebuah kategori pada laporan Laba Rugi (lihat
+/// docs/RENCANA-IMPLEMENTASI-UMKM.md §4.1). Pemasukan hanya boleh
+/// [revenue]/[otherIncome]/[nonPnl]; pengeluaran hanya [cogs]/[opex]/
+/// [otherExpense]/[nonPnl] ([allowedFor]). [nonPnl] = di luar laba rugi (modal,
+/// prive, pembelian aset, utang/piutang, tabungan, penyesuaian saldo): tetap
+/// terhitung sebagai arus kas, tetapi bukan pendapatan atau beban.
+enum ReportGroup {
+  revenue,
+  cogs,
+  opex,
+  otherIncome,
+  otherExpense,
+  nonPnl;
+
+  /// Kelompok bawaan sebuah jenis, dipakai bila kolom `reportGroup` kosong.
+  static ReportGroup defaultFor(TxType type) =>
+      type == TxType.income ? revenue : opex;
+
+  bool allowedFor(TxType type) => switch (type) {
+    TxType.income => this == revenue || this == otherIncome || this == nonPnl,
+    TxType.expense =>
+      this == cogs || this == opex || this == otherExpense || this == nonPnl,
+    TxType.transfer => false,
+  };
+}
+
+/// Sifat sebuah buku kas: pribadi atau usaha. Hanya memengaruhi istilah dan
+/// laporan (bukan data); pengguna bebas mengubahnya.
+enum LedgerKind { personal, business }
+
 /// Isi awal sebuah buku kas baru (lihat docs/RENCANA-IMPLEMENTASI-MULTI-BUKU-KAS.md §5).
 enum LedgerTemplate { personal, business, blank }
 
@@ -46,6 +76,10 @@ class Ledgers extends Table {
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+
+  /// [LedgerKind] (indeks). Default literal 0 = pribadi, bukan konstanta: berkas
+  /// skema tergenerasi menyalin ekspresi default apa adanya (lihat [kMainLedgerId]).
+  IntColumn get kind => intEnum<LedgerKind>().withDefault(const Constant(0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -89,6 +123,10 @@ class Categories extends Table {
   /// sub-kategori lagi). Null = kategori tingkat atas.
   // ignore: recursive_getters
   TextColumn get parentId => text().nullable().references(Categories, #id)();
+
+  /// [ReportGroup] (indeks) pada laporan Laba Rugi. Null = bawaan dari jenis
+  /// ([ReportGroup.defaultFor]). Sub-kategori selalu null: ia mengikuti induknya.
+  IntColumn get reportGroup => intEnum<ReportGroup>().nullable()();
   DateTimeColumn get updatedAt => dateTime()();
 
   @override
@@ -627,6 +665,32 @@ String debtCategoryId(String ledgerId, DebtType type) => ledgerSeedId(
   type == DebtType.debt ? 'cat-exp-utang' : 'cat-inc-piutang',
 );
 
+/// Kelompok laporan kategori bawaan, menurut ID dasarnya (tanpa awalan buku, lihat
+/// [ledgerSeedId]). Yang tidak tercantum memakai bawaan jenisnya
+/// ([ReportGroup.defaultFor]). Dipakai seed buku baru dan migrasi v12.
+const _seedReportGroups = <String, ReportGroup>{
+  'cat-exp-utang': ReportGroup.nonPnl,
+  'cat-inc-piutang': ReportGroup.nonPnl,
+  'cat-exp-tabungan': ReportGroup.nonPnl,
+  'cat-inc-tabungan': ReportGroup.nonPnl,
+  'cat-exp-penyesuaian': ReportGroup.nonPnl,
+  'cat-inc-penyesuaian': ReportGroup.nonPnl,
+  'cat-exp-stok': ReportGroup.cogs,
+  'cat-exp-peralatan': ReportGroup.nonPnl,
+  'cat-exp-cicilan-usaha': ReportGroup.nonPnl,
+  'cat-inc-modal': ReportGroup.nonPnl,
+  'cat-inc-pendapatan-lain': ReportGroup.otherIncome,
+};
+
+/// Nama kategori sistem yang dipakai ulang bila pengguna sudah punya kategori
+/// bernama sama (lihat `_systemCategoryId`); semuanya di luar laba rugi.
+const _systemCategoryNames = {
+  'utang',
+  'piutang',
+  'tabungan',
+  'penyesuaian saldo',
+};
+
 /// Baris seed kategori: (kunci, nama, ikon, warna).
 typedef _SeedCategory = (String, String, String, int);
 
@@ -709,7 +773,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'dompet_pintar'));
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -827,6 +891,17 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(savingsAccounts);
         await m.addColumn(transactions, transactions.savingsId);
       }
+      if (from < 12) {
+        // Laba Rugi (docs/RENCANA-IMPLEMENTASI-UMKM.md §4.1). `categories` ada
+        // sejak v1 dan tidak pernah dibuat ulang di langkah mana pun, jadi
+        // addColumn selalu aman. `ledgers` baru ada sejak v10: bila migrasi
+        // mulai dari bawah v10, langkah v10 di atas membuatnya dengan definisi
+        // TERKINI (sudah punya `kind`), jadi addColumn kedua kalinya gagal
+        // "duplicate column" (gotcha yang sama dengan langkah v5/v6/v10).
+        await m.addColumn(categories, categories.reportGroup);
+        if (from >= 10) await m.addColumn(ledgers, ledgers.kind);
+        await _applyReportGroupDefaults();
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -851,6 +926,37 @@ class AppDatabase extends _$AppDatabase {
       ),
     );
     await _seedLedgerContent(kMainLedgerId, LedgerTemplate.personal, now: now);
+  }
+
+  /// Migrasi v12: mengisi kelompok laporan kategori yang sudah ada. Hanya
+  /// kategori bawaan/sistem (dikenali dari ID dasar atau nama sistem) yang
+  /// diisi; kategori buatan pengguna dibiarkan kosong (= bawaan jenis), dan
+  /// sub-kategori selalu kosong (mengikuti induk). Buku yang sudah memuat
+  /// kategori "Penjualan" bawaan template Bisnis ditandai buku usaha.
+  Future<void> _applyReportGroupDefaults() async {
+    final all = await select(categories).get();
+    final businessLedgers = <String>{};
+    for (final c in all) {
+      final base = c.id.contains(':')
+          ? c.id.substring(c.id.indexOf(':') + 1)
+          : c.id;
+      if (base == 'cat-inc-penjualan') businessLedgers.add(c.ledgerId);
+      if (c.parentId != null) continue;
+      final group =
+          _seedReportGroups[base] ??
+          (_systemCategoryNames.contains(c.name.toLowerCase())
+              ? ReportGroup.nonPnl
+              : null);
+      if (group == null || !group.allowedFor(c.type)) continue;
+      await (update(categories)..where((t) => t.id.equals(c.id))).write(
+        CategoriesCompanion(reportGroup: Value(group)),
+      );
+    }
+    for (final id in businessLedgers) {
+      await (update(ledgers)..where((l) => l.id.equals(id))).write(
+        LedgersCompanion(kind: Value(LedgerKind.business)),
+      );
+    }
   }
 
   /// Mengisi kategori dan satu dompet awal untuk buku [ledgerId] sesuai
@@ -882,6 +988,7 @@ class AppDatabase extends _$AppDatabase {
             color: c.$4,
             sortOrder: Value(i),
             ledgerId: Value(ledgerId),
+            reportGroup: Value(_seedReportGroups['cat-exp-${c.$1}']),
             updatedAt: now,
           ),
         for (final (i, c) in income.indexed)
@@ -893,6 +1000,7 @@ class AppDatabase extends _$AppDatabase {
             color: c.$4,
             sortOrder: Value(i),
             ledgerId: Value(ledgerId),
+            reportGroup: Value(_seedReportGroups['cat-inc-${c.$1}']),
             updatedAt: now,
           ),
       ]);
@@ -1301,10 +1409,12 @@ class AppDatabase extends _$AppDatabase {
     required int color,
     String? parentId,
     String ledgerId = kMainLedgerId,
+    ReportGroup? reportGroup,
   }) async {
     if (type == TxType.transfer) {
       throw const CategoryException('Transfer tidak memakai kategori.');
     }
+    _checkReportGroup(type, reportGroup, isSub: parentId != null);
     final clean = _cleanCategoryName(name);
     return transaction(() async {
       await _requireLedger(ledgerId);
@@ -1329,10 +1439,49 @@ class AppDatabase extends _$AppDatabase {
           sortOrder: Value((last?.sortOrder ?? -1) + 1),
           parentId: Value(parentId),
           ledgerId: Value(ledgerId),
+          reportGroup: Value(reportGroup),
           updatedAt: DateTime.now(),
         ),
       );
       return id;
+    });
+  }
+
+  /// [group] harus cocok dengan [type] ([ReportGroup.allowedFor]) dan tidak boleh
+  /// diisi untuk sub-kategori (ia mengikuti induknya). Null selalu sah.
+  static void _checkReportGroup(
+    TxType type,
+    ReportGroup? group, {
+    required bool isSub,
+  }) {
+    if (group == null) return;
+    if (isSub) {
+      throw const CategoryException(
+        'Sub-kategori mengikuti kelompok laporan induknya.',
+      );
+    }
+    if (!group.allowedFor(type)) {
+      throw const CategoryException(
+        'Kelompok laporan tidak sesuai dengan jenis kategori.',
+      );
+    }
+  }
+
+  /// Menentukan kelompok [id] pada laporan Laba Rugi; null = kembali ke bawaan
+  /// jenisnya. Hanya untuk kategori tingkat atas: sub-kategori mengikuti induk.
+  Future<void> setCategoryReportGroup(String id, ReportGroup? group) async {
+    await transaction(() async {
+      final current = await (select(
+        categories,
+      )..where((c) => c.id.equals(id))).getSingleOrNull();
+      if (current == null) throw StateError('Kategori $id tidak ditemukan.');
+      _checkReportGroup(current.type, group, isSub: current.parentId != null);
+      await (update(categories)..where((c) => c.id.equals(id))).write(
+        CategoriesCompanion(
+          reportGroup: Value(group),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
     });
   }
 
@@ -1375,6 +1524,10 @@ class AppDatabase extends _$AppDatabase {
           icon: Value(icon),
           color: Value(color),
           parentId: Value(parentId),
+          // Menjadi sub-kategori: kelompok laporan ditinggalkan (mengikuti induk).
+          reportGroup: parentId != null
+              ? const Value(null)
+              : const Value.absent(),
           updatedAt: Value(DateTime.now()),
         ),
       );
@@ -2417,7 +2570,16 @@ class AppDatabase extends _$AppDatabase {
       if (c.id == id) return id;
     }
     for (final c in sameType) {
-      if (c.name.toLowerCase() == name.toLowerCase()) return c.id;
+      if (c.name.toLowerCase() == name.toLowerCase()) {
+        // Kategori buatan pengguna yang dipakai ulang: pastikan di luar laba rugi
+        // bila pengguna belum menentukan kelompoknya sendiri.
+        if (c.reportGroup == null && c.parentId == null) {
+          await (update(categories)..where((t) => t.id.equals(c.id))).write(
+            const CategoriesCompanion(reportGroup: Value(ReportGroup.nonPnl)),
+          );
+        }
+        return c.id;
+      }
     }
     final last = sameType.fold<int>(
       -1,
@@ -2432,6 +2594,7 @@ class AppDatabase extends _$AppDatabase {
         color: color,
         sortOrder: Value(last + 1),
         ledgerId: Value(ledgerId),
+        reportGroup: const Value(ReportGroup.nonPnl),
         updatedAt: DateTime.now(),
       ),
     );
@@ -3340,6 +3503,11 @@ class AppDatabase extends _$AppDatabase {
           name: clean,
           icon: Value(icon),
           color: color,
+          kind: Value(
+            template == LedgerTemplate.business
+                ? LedgerKind.business
+                : LedgerKind.personal,
+          ),
           sortOrder: Value(
             all.fold<int>(0, (m, l) => l.sortOrder > m ? l.sortOrder : m) + 1,
           ),
@@ -3371,6 +3539,15 @@ class AppDatabase extends _$AppDatabase {
       );
       if (rows == 0) throw const LedgerException('Buku kas tidak ditemukan.');
     });
+  }
+
+  /// Mengubah sifat buku (pribadi/usaha). Hanya memengaruhi istilah dan laporan,
+  /// tidak menyentuh data, jadi boleh dibolak-balik.
+  Future<void> setLedgerKind(String id, LedgerKind kind) async {
+    final rows = await (update(ledgers)..where((l) => l.id.equals(id))).write(
+      LedgersCompanion(kind: Value(kind), updatedAt: Value(DateTime.now())),
+    );
+    if (rows == 0) throw const LedgerException('Buku kas tidak ditemukan.');
   }
 
   /// Mengarsipkan menyembunyikan buku dari pengalih; datanya tetap ada dan
