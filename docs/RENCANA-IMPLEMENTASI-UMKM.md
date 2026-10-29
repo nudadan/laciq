@@ -178,7 +178,16 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
    bawaan). Reaktif: transaksi atau kelompok yang berubah langsung memperbarui layar. **Penyimpangan dari §4.5:** penguncian
    mengikuti pola Laporan Bulanan (Gratis ditawari upgrade dari menu, tanpa pratinjau angka terkunci); pratinjau terkunci bisa
    ditambah kemudian bila ingin. Teks memakai "Anda"/netral. Ekspor Excel dan PDF menyusul di langkah 6.
-6. Lembar Excel dan PDF.
+6. ~~Lembar Excel dan PDF~~ **selesai 2026-10-29** (`profit_loss_statement.dart`, `profit_loss_pdf.dart`, lembar di
+   `excel_export.dart`; tombol bagikan di layar Laba Rugi). Satu sumber baris (`profitLossStatement`/`cashBridgeStatement`,
+   pengurang bernilai negatif) dipakai Excel dan PDF supaya selalu sama. Excel: lembar **"Laba Rugi"** disisipkan setelah
+   Ringkasan **hanya** bila diminta (buku usaha lewat Pengaturan > Ekspor Excel; layar Laba Rugi > Ekspor Excel) sehingga berkas buku
+   pribadi tidak berubah; angka asli (bukan teks), persen sebagai pecahan. PDF: A4 tegak, `MultiPage` (rincian panjang meluber
+   ke halaman berikutnya), font reguler variabel + tebal statis, kartu laba/rugi bersih + pembanding, tabel, jembatan ke kas,
+   penafian, nomor halaman; diperiksa visual dengan `pdftoppm`/`pdftotext` (A4, 1 halaman, huruf tebal tampil). Temuan sampingan
+   yang diperbaiki: alur ekspor Excel membaca nama buku dari provider yang bisa belum terisi (Riverpod menjeda yang tidak
+   terlihat), sehingga nama bisa jatuh ke "Buku Utama"; kini dibaca langsung dari database. Perubahan 0,0% ditulis "Sama dengan
+   periode sebelumnya", bukan "naik 0,0%". Belum diuji di HP/WhatsApp/Excel/Google Sheets nyata (daftar uji §8 butir 5).
 7. Perbarui matriks fitur, listing, catatan rilis; uji di HP (daftar §8).
 
 **Selesai bila:** pengguna Premium bisa menyalakan mode usaha di Buku Utama, melihat Laba Rugi satu bulan yang

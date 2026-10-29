@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../core/category_style.dart';
 import 'database.dart';
+import 'profit_loss.dart';
+import 'profit_loss_statement.dart';
 import 'xlsx_writer.dart';
 
 const xlsxMimeType =
@@ -22,10 +24,15 @@ Uint8List buildTransactionsXlsx(
   required String bookName,
   required String periodLabel,
   DateTime? generatedAt,
+
+  /// Bila diisi, lembar "Laba Rugi" disisipkan setelah Ringkasan (docs/
+  /// RENCANA-IMPLEMENTASI-UMKM.md §4.4). Tanpa ini, berkas persis seperti sebelumnya.
+  ProfitLoss? profitLoss,
 }) {
   final now = generatedAt ?? DateTime.now();
   return buildXlsx([
     _summarySheet(items, bookName, periodLabel, now),
+    if (profitLoss != null) _profitLossSheet(profitLoss, bookName, periodLabel),
     _transactionsSheet(items),
     _categorySheet(items),
     _monthSheet(items),
@@ -105,6 +112,62 @@ XlsxSheet _summarySheet(
     name: 'Ringkasan',
     rows: rows,
     columnWidths: const [38, 20, 12],
+  );
+}
+
+// -------------------------------------------------------------- laba rugi
+
+List<XlsxCell> _statementRow(StatementRow row) {
+  final strong = row.kind != StatementRowKind.detail;
+  final label = row.kind == StatementRowKind.detail
+      ? '    ${row.label}'
+      : row.label;
+  return [
+    XlsxCell(label, strong ? XlsxStyle.bold : XlsxStyle.normal),
+    XlsxCell(row.amount, strong ? XlsxStyle.boldRupiah : XlsxStyle.rupiah),
+    // Persen disimpan sebagai pecahan (0,26 = 26%) agar sel berformat persen benar.
+    XlsxCell(
+      row.percent == null ? null : row.percent! / 100,
+      XlsxStyle.percent,
+    ),
+  ];
+}
+
+/// Laporan Laba Rugi satu periode. Pengurang (HPP, beban) bernilai negatif sehingga
+/// kolom Nominal bisa dibaca sebagai penjumlahan; angka asli (bukan teks) agar bisa
+/// diolah di Excel.
+XlsxSheet _profitLossSheet(ProfitLoss r, String bookName, String periodLabel) {
+  final rows = <List<XlsxCell>>[
+    [const XlsxCell('Laporan Laba Rugi', XlsxStyle.title)],
+    [XlsxCell('Buku kas: $bookName', XlsxStyle.muted)],
+    [XlsxCell('Periode: $periodLabel', XlsxStyle.muted)],
+    [],
+    [
+      const XlsxCell('Uraian', XlsxStyle.header),
+      const XlsxCell('Nominal', XlsxStyle.header),
+      const XlsxCell('% pendapatan', XlsxStyle.header),
+    ],
+    for (final row in profitLossStatement(r)) _statementRow(row),
+    [],
+    [
+      const XlsxCell('Dari laba ke kas', XlsxStyle.header),
+      const XlsxCell('Nominal', XlsxStyle.header),
+    ],
+    for (final row in cashBridgeStatement(r))
+      _statementRow(row).take(2).toList(),
+    [],
+    [
+      const XlsxCell(
+        'Catatan manajemen berbasis kas, bukan laporan resmi atau laporan pajak. '
+        'Penjualan secara kredit baru terhitung saat uangnya diterima.',
+        XlsxStyle.muted,
+      ),
+    ],
+  ];
+  return XlsxSheet(
+    name: 'Laba Rugi',
+    rows: rows,
+    columnWidths: const [44, 18, 14],
   );
 }
 

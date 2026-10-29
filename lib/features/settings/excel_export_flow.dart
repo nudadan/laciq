@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/excel_export.dart';
+import '../../data/profit_loss.dart';
 import '../../data/providers.dart';
 import '../subscription/trial_offer.dart';
 
@@ -26,7 +27,6 @@ Future<void> startExcelExport(BuildContext context, WidgetRef ref) async {
   final db = ref.read(databaseProvider);
   final month = ref.read(selectedMonthProvider);
   final ledgerId = ref.read(activeLedgerIdProvider);
-  final bookName = ref.read(activeLedgerProvider)?.name ?? 'Buku Utama';
   final monthLabel = DateFormat('MMMM yyyy', 'id_ID').format(month);
 
   final scope = await showDialog<ExcelScope>(
@@ -95,10 +95,30 @@ Future<void> startExcelExport(BuildContext context, WidgetRef ref) async {
       notify(messenger, 'Tidak ada transaksi untuk diekspor.');
       return;
     }
+    // Buku dibaca langsung dari database: provider buku bisa belum terisi bila tidak
+    // ada widget yang sedang mendengarkannya (Riverpod menjeda yang tidak terlihat).
+    final ledger = (await db.watchLedgers().first)
+        .where((l) => l.id == ledgerId)
+        .firstOrNull;
+    final bookName = ledger?.name ?? 'Buku Utama';
+    // Buku usaha mendapat lembar "Laba Rugi" tambahan; buku pribadi tidak berubah.
+    ProfitLoss? profitLoss;
+    if (ledger?.kind == LedgerKind.business) {
+      // Transaksi urut dari yang terlama; "seluruh riwayat" memakai rentang datanya.
+      final first = items.first.tx.date;
+      final last = items.last.tx.date;
+      profitLoss = buildProfitLoss(
+        items: items,
+        categories: await db.watchLedgerCategories(ledgerId).first,
+        from: from ?? DateTime(first.year, first.month, first.day),
+        to: to ?? DateTime(last.year, last.month, last.day + 1),
+      );
+    }
     final bytes = buildTransactionsXlsx(
       items,
       bookName: bookName,
       periodLabel: periodLabel,
+      profitLoss: profitLoss,
     );
     await ref.read(binaryShareProvider)(
       fileName: 'laciq-laporan-$suffix.xlsx',

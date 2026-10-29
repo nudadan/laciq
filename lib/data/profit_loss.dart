@@ -119,6 +119,14 @@ double? _percent(int part, int whole) => whole <= 0 ? null : part * 100 / whole;
 double? changePercent(int current, int previous) =>
     previous == 0 ? null : (current - previous) * 100 / previous.abs();
 
+/// Arah perubahan untuk tampilan. Perubahan yang membulat ke 0,0% dianggap [flat]
+/// supaya tidak tertulis "naik 0,0%".
+enum Trend { up, down, flat }
+
+Trend trendOf(double changePercent) => changePercent.abs() < 0.05
+    ? Trend.flat
+    : (changePercent > 0 ? Trend.up : Trend.down);
+
 /// Kelompok laporan efektif [category]: pilihan pada kategori tingkat atasnya
 /// (induk bila sub-kategori), atau bawaan jenisnya bila kosong. Nilai yang tidak
 /// cocok dengan jenis ([ReportGroup.allowedFor]; seharusnya mustahil, dijaga

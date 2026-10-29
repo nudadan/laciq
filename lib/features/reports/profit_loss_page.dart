@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import '../../core/glass.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
+import '../../data/excel_export.dart';
 import '../../data/profit_loss.dart';
+import '../../data/profit_loss_pdf.dart';
+import '../../data/profit_loss_statement.dart';
 import '../../data/providers.dart';
 import 'profit_loss_providers.dart';
 
@@ -23,7 +28,13 @@ class ProfitLossPage extends ConsumerWidget {
     final ledger = ref.watch(activeLedgerProvider);
     final business = ledger?.kind == LedgerKind.business;
     return Scaffold(
-      appBar: AppBar(title: const Text('Laba Rugi')),
+      appBar: AppBar(
+        title: const Text('Laba Rugi'),
+        actions: [
+          // Bagikan hanya bila ada isi yang layak dibagikan.
+          if (report.value case final r? when !r.current.isEmpty) _ShareMenu(r),
+        ],
+      ),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -49,6 +60,89 @@ class ProfitLossPage extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------- bagikan
+
+/// Bagikan laporan yang sedang tampil sebagai PDF atau Excel lewat lembar bagikan
+/// Android. Berkas dibuat di perangkat; tidak ada data yang dikirim ke server.
+class _ShareMenu extends ConsumerWidget {
+  const _ShareMenu(this.report);
+
+  final ProfitLossReport report;
+
+  Future<void> _sharePdf(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final r = report.current;
+      final bookName = ref.read(activeLedgerProvider)?.name ?? 'Buku Utama';
+      final regular = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/PlusJakartaSans.ttf'),
+      );
+      final bold = pw.Font.ttf(
+        await rootBundle.load('assets/fonts/pdf/PlusJakartaSans-Bold.ttf'),
+      );
+      final bytes = await buildProfitLossPdf(
+        report: r,
+        previous: report.previous,
+        bookName: bookName,
+        periodLabel: rangeLabel(r.from, r.to),
+        regular: regular,
+        bold: bold,
+      );
+      await ref.read(binaryShareProvider)(
+        fileName: 'laciq-laba-rugi-${profitLossFileSuffix(r.from, r.to)}.pdf',
+        bytes: bytes,
+        mimeType: 'application/pdf',
+        subject: 'Laporan Laba Rugi - $bookName',
+      );
+    } catch (e) {
+      notify(messenger, 'Gagal membuat PDF: $e');
+    }
+  }
+
+  Future<void> _shareExcel(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final r = report.current;
+      final bookName = ref.read(activeLedgerProvider)?.name ?? 'Buku Utama';
+      final items = await ref
+          .read(databaseProvider)
+          .getTransactions(
+            from: r.from,
+            to: r.to,
+            ledgerId: ref.read(activeLedgerIdProvider),
+          );
+      final bytes = buildTransactionsXlsx(
+        items,
+        bookName: bookName,
+        periodLabel: rangeLabel(r.from, r.to),
+        profitLoss: r,
+      );
+      await ref.read(binaryShareProvider)(
+        fileName: 'laciq-laba-rugi-${profitLossFileSuffix(r.from, r.to)}.xlsx',
+        bytes: bytes,
+        mimeType: xlsxMimeType,
+        subject: 'Laporan Laba Rugi - $bookName',
+      );
+    } catch (e) {
+      notify(messenger, 'Ekspor gagal: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      tooltip: 'Bagikan laporan',
+      icon: const Icon(Icons.ios_share_rounded),
+      onSelected: (v) =>
+          v == 'pdf' ? _sharePdf(context, ref) : _shareExcel(context, ref),
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'pdf', child: Text('Bagikan PDF')),
+        PopupMenuItem(value: 'xlsx', child: Text('Ekspor Excel')),
+      ],
     );
   }
 }
@@ -287,7 +381,7 @@ class _Hero extends StatelessWidget {
     final net = r.netProfit;
     final color = net >= 0 ? palette.income : palette.expense;
     final change = changePercent(net, report.previous.netProfit);
-    final up = change != null && change >= 0;
+    final trend = change == null ? Trend.flat : trendOf(change);
     return GlassCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -313,10 +407,23 @@ class _Hero extends StatelessWidget {
           if (change != null && !report.previous.isEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              '${up ? '▲' : '▼'} ${_percent(change.abs())} dibanding periode '
-              'sebelumnya (${rupiah(report.previous.netProfit)})',
+              switch (trend) {
+                Trend.flat =>
+                  'Sama dengan periode sebelumnya '
+                      '(${rupiah(report.previous.netProfit)})',
+                Trend.up || Trend.down =>
+                  '${trend == Trend.up ? '▲' : '▼'} '
+                      '${_percent(change.abs())} dibanding periode '
+                      'sebelumnya (${rupiah(report.previous.netProfit)})',
+              },
               key: const Key('pl-change'),
-              style: TextStyle(color: up ? palette.income : palette.expense),
+              style: TextStyle(
+                color: switch (trend) {
+                  Trend.up => palette.income,
+                  Trend.down => palette.expense,
+                  Trend.flat => null,
+                },
+              ),
             ),
           ],
           const SizedBox(height: 14),

@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:archive/archive.dart';
 import 'package:dompet_pintar/core/money.dart';
 import 'package:dompet_pintar/data/database.dart';
+import 'package:dompet_pintar/data/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -354,4 +360,146 @@ void main() {
     subscription: FakeSubscriptionStatus(premium: true),
     seed: _seedBusiness,
   );
+
+  group('bagikan PDF dan Excel', () {
+    /// Tes dengan penangkap berkas milik tes itu sendiri (bukan bersama).
+    void shareTest(
+      String name,
+      Future<void> Function(WidgetTester tester, AppHarness h, _Shared shared)
+      body, {
+      Future<void> Function(AppDatabase db)? seed,
+    }) {
+      final shared = _Shared();
+      appTest(
+        name,
+        (tester, h) => body(tester, h, shared),
+        subscription: FakeSubscriptionStatus(premium: true),
+        seed: seed,
+        extraOverrides: [_capture(shared)],
+      );
+    }
+
+    Future<void> waitForShare(WidgetTester tester) async {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 600)),
+      );
+      await settle(tester);
+    }
+
+    String workbook(Uint8List bytes) => utf8.decode(
+      ZipDecoder().decodeBytes(bytes).findFile('xl/workbook.xml')!.content
+          as List<int>,
+    );
+
+    shareTest('menu bagikan tidak ada bila periode kosong', (
+      tester,
+      h,
+      shared,
+    ) async {
+      await _openProfitLoss(tester);
+      expect(find.byTooltip('Bagikan laporan'), findsNothing);
+    });
+
+    shareTest('Bagikan PDF: berkas PDF valid bernama menurut periode', (
+      tester,
+      h,
+      shared,
+    ) async {
+      await _openProfitLoss(tester);
+      await tester.tap(find.byTooltip('Bagikan laporan'));
+      await settle(tester);
+      await tester.tap(find.text('Bagikan PDF'));
+      await waitForShare(tester);
+
+      final f = shared.files.single;
+      expect(
+        f.name,
+        'laciq-laba-rugi-${_now.year}-${_now.month.toString().padLeft(2, '0')}.pdf',
+      );
+      expect(f.mime, 'application/pdf');
+      expect(String.fromCharCodes(f.bytes.take(5)), '%PDF-');
+    }, seed: _seedBusiness);
+
+    shareTest(
+      'Ekspor Excel: memuat lembar Laba Rugi untuk periode yang tampil',
+      (tester, h, shared) async {
+        await _openProfitLoss(tester);
+        await tester.tap(find.byTooltip('Bagikan laporan'));
+        await settle(tester);
+        await tester.tap(find.text('Ekspor Excel'));
+        await waitForShare(tester);
+
+        final f = shared.files.single;
+        expect(f.name, startsWith('laciq-laba-rugi-'));
+        expect(f.name, endsWith('.xlsx'));
+        expect(workbook(f.bytes), contains('name="Laba Rugi"'));
+      },
+      seed: _seedBusiness,
+    );
+
+    shareTest(
+      'ekspor Excel dari Pengaturan: buku usaha mendapat lembar Laba Rugi',
+      (tester, h, shared) async {
+        await tester.tap(find.byTooltip('Pengaturan'));
+        await settle(tester);
+        await tester.tap(find.text('Ekspor laporan (Excel)'));
+        await settle(tester);
+        await tester.tap(find.text('Seluruh riwayat'));
+        await waitForShare(tester);
+        expect(
+          workbook(shared.files.single.bytes),
+          contains('name="Laba Rugi"'),
+        );
+      },
+      seed: _seedBusiness,
+    );
+
+    shareTest(
+      'ekspor Excel dari Pengaturan: buku pribadi tetap tanpa lembar Laba Rugi',
+      (tester, h, shared) async {
+        await tester.tap(find.byTooltip('Pengaturan'));
+        await settle(tester);
+        await tester.tap(find.text('Ekspor laporan (Excel)'));
+        await settle(tester);
+        await tester.tap(find.text('Seluruh riwayat'));
+        await waitForShare(tester);
+        final wb = workbook(shared.files.single.bytes);
+        expect(wb, isNot(contains('Laba Rugi')));
+        expect(wb, contains('name="Ringkasan"'));
+      },
+      seed: (db) => _tx(db, TxType.income, 100000, 'cat-inc-usaha', _thisMonth),
+    );
+  });
+
+  appTest(
+    'laba sama dengan periode sebelumnya: "Sama dengan", bukan naik 0,0%',
+    (tester, h) async {
+      await _openProfitLoss(tester);
+      expect(
+        _text(tester, 'pl-change'),
+        'Sama dengan periode sebelumnya (${rupiah(100000)})',
+      );
+    },
+    subscription: FakeSubscriptionStatus(premium: true),
+    seed: (db) async {
+      await db.setLedgerKind(kMainLedgerId, LedgerKind.business);
+      await _tx(db, TxType.income, 100000, 'cat-inc-usaha', _thisMonth);
+      await _tx(db, TxType.income, 100000, 'cat-inc-usaha', _lastMonth);
+    },
+  );
+}
+
+class _Shared {
+  final files = <({String name, Uint8List bytes, String mime})>[];
+}
+
+Override _capture(_Shared s) {
+  return binaryShareProvider.overrideWithValue(({
+    required fileName,
+    required bytes,
+    required mimeType,
+    subject,
+  }) async {
+    s.files.add((name: fileName, bytes: bytes, mime: mimeType));
+  });
 }
