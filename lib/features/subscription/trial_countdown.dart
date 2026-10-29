@@ -261,7 +261,7 @@ class TrialReminderService {
       DateTime(endsAt.year, endsAt.month, endsAt.day - 7, _hour),
       current,
       'Uji coba Ultimate berakhir 7 hari lagi',
-      'Lihat apa yang akan berubah dan pilih paket yang cocok. Data Anda tetap aman.',
+      'Lihat apa yang akan berubah dan pilih paket yang cocok. Datamu tetap aman.',
     );
     await _scheduleAt(
       idLastDays,

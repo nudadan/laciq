@@ -126,7 +126,7 @@ class _MissingReceipt extends StatelessWidget {
             ),
             SizedBox(height: 8),
             Text(
-              'Bila Anda baru memulihkan data, pulihkan dari Backup Cloud '
+              'Bila kamu baru memulihkan data, pulihkan dari Backup Cloud '
               'agar foto ikut kembali.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70),

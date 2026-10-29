@@ -138,7 +138,7 @@ class _ReportBody extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
           child: Text(
-            'Ringkasan ini dihitung otomatis di perangkat Anda dari catatan '
+            'Ringkasan ini dihitung otomatis di perangkatmu dari catatan '
             'transaksi. Tidak ada data yang dikirim ke mana pun. Ini gambaran '
             'kebiasaan belanja, bukan nasihat keuangan.',
             style: text.bodySmall,

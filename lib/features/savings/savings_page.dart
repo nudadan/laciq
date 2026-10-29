@@ -58,7 +58,7 @@ class SavingsPage extends ConsumerWidget {
               icon: Icons.savings_outlined,
               message:
                   'Belum ada tabungan.\n'
-                  'Saldonya terpisah dari dompet Anda.\n'
+                  'Saldonya terpisah dari dompetmu.\n'
                   'Ketuk "Tabungan Baru" untuk mulai.',
             );
           }
@@ -98,7 +98,7 @@ class SavingsPage extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    'Tabungan adalah fitur Ultimate. Paket Anda saat ini tidak '
+                    'Tabungan adalah fitur Ultimate. Paketmu saat ini tidak '
                     'bisa menyetor atau membuat tabungan baru, tetapi saldo '
                     'yang ada tetap bisa ditarik ke dompet.',
                     style: Theme.of(context).textTheme.bodySmall

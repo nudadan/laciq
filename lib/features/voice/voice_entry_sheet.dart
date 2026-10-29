@@ -27,14 +27,14 @@ Future<bool> ensureVoiceConsent(
     builder: (context) => AlertDialog(
       title: const Text('Catat dengan suara'),
       content: const Text(
-        'Suara Anda diubah menjadi teks oleh layanan pengenalan suara bawaan '
-        'Android. LaciQ tidak merekam, menyimpan, atau mengirim suara Anda '
+        'Suaramu diubah menjadi teks oleh layanan pengenalan suara bawaan '
+        'Android. LaciQ tidak merekam, menyimpan, atau mengirim suaramu '
         'ke server kami; hanya teks hasilnya yang dipakai untuk mengisi '
         'formulir.\n\n'
-        'Bila HP Anda tidak punya model suara offline untuk bahasa '
+        'Bila HP-mu tidak punya model suara offline untuk bahasa '
         'Indonesia, Android dapat mengirim suara ke layanan pengenalan suara '
-        'Google untuk dikenali, sesuai pengaturan suara di HP Anda.\n\n'
-        'Mikrofon hanya aktif saat Anda menekan tombol mikrofon.',
+        'Google untuk dikenali, sesuai pengaturan suara di HP-mu.\n\n'
+        'Mikrofon hanya aktif saat kamu menekan tombol mikrofon.',
       ),
       actions: [
         TextButton(
@@ -193,7 +193,7 @@ class _VoiceSheetState extends ConsumerState<_VoiceSheet> {
       const SizedBox(height: 8),
       Text(
         _transcript.isEmpty
-            ? 'Ucapkan transaksi Anda, mis. "makan siang dua puluh lima ribu" '
+            ? 'Ucapkan transaksimu, mis. "makan siang dua puluh lima ribu" '
                   'atau "gajian lima juta".'
             : _transcript,
         key: const Key('voice-transcript'),

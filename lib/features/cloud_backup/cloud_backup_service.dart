@@ -148,7 +148,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
 
   Future<drive.DriveApi> _driveApi() async {
     final user = _currentUser;
-    if (user == null) throw const CloudBackupException('Anda belum masuk.');
+    if (user == null) throw const CloudBackupException('Kamu belum masuk.');
     final headers = await user.authorizationClient.authorizationHeaders([
       drive.DriveApi.driveAppdataScope,
     ], promptIfNecessary: true);
@@ -192,7 +192,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
       key,
       _backupFileName,
       utf8.encode(plainJson),
-      errorMessage: 'Gagal mengunggah backup. Periksa koneksi internet Anda.',
+      errorMessage: 'Gagal mengunggah backup. Periksa koneksi internetmu.',
     );
   }
 
@@ -206,7 +206,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
       _backupFileName,
       corruptMessage:
           'Backup tidak bisa dibaca (kunci tidak cocok atau file rusak).',
-      errorMessage: 'Gagal mengunduh backup. Periksa koneksi internet Anda.',
+      errorMessage: 'Gagal mengunduh backup. Periksa koneksi internetmu.',
     );
     if (bytes == null) {
       throw const CloudBackupException('Belum ada backup cloud tersimpan.');
@@ -223,8 +223,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
       key,
       fileName,
       bytes,
-      errorMessage:
-          'Gagal mengunggah foto struk. Periksa koneksi internet Anda.',
+      errorMessage: 'Gagal mengunggah foto struk. Periksa koneksi internetmu.',
     );
   }
 
@@ -238,8 +237,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
       fileName,
       corruptMessage:
           'Foto struk tidak bisa dibaca (kunci tidak cocok atau file rusak).',
-      errorMessage:
-          'Gagal mengunduh foto struk. Periksa koneksi internet Anda.',
+      errorMessage: 'Gagal mengunduh foto struk. Periksa koneksi internetmu.',
     );
   }
 
@@ -327,7 +325,7 @@ class GoogleDriveCloudBackupService implements CloudBackupService {
       );
     } catch (_) {
       throw const CloudBackupException(
-        'Gagal menyiapkan kunci backup. Periksa koneksi internet Anda.',
+        'Gagal menyiapkan kunci backup. Periksa koneksi internetmu.',
       );
     }
     return _cacheAndReturn(newKeyB64);
@@ -390,7 +388,7 @@ String signInFailureMessage(
       'Proses masuk terputus. Coba lagi.',
     GoogleSignInExceptionCode.userMismatch =>
       'Akun Google yang dipilih berbeda dari sebelumnya. Coba lagi.',
-    _ => 'Gagal masuk dengan Google. Periksa koneksi internet Anda.',
+    _ => 'Gagal masuk dengan Google. Periksa koneksi internetmu.',
   };
   return '$hint (kode: $tag)';
 }

@@ -52,7 +52,7 @@ const _slides = [
   _Slide(
     Icons.receipt_long_rounded,
     'Catat transaksi dengan cepat',
-    'Semua catatan keuangan Anda di satu tempat, tanpa perlu membuat akun.',
+    'Semua catatan keuanganmu di satu tempat, tanpa perlu membuat akun.',
     features: [
       _Feature(
         Icons.swap_vert_rounded,
@@ -71,7 +71,7 @@ const _slides = [
       _Feature(
         Icons.category_rounded,
         'Kategori, sub-kategori, dan tag',
-        'Kelompokkan sesuai kebutuhan Anda; nama, ikon, dan warna bisa '
+        'Kelompokkan sesuai kebutuhanmu; nama, ikon, dan warna bisa '
             'diatur sendiri.',
       ),
       _Feature(
@@ -89,7 +89,7 @@ const _slides = [
       _Feature(
         Icons.document_scanner_rounded,
         'Scan struk',
-        'Foto struk dibaca di HP Anda: nominal, toko, dan tanggal terisi '
+        'Foto struk dibaca di HP-mu: nominal, toko, dan tanggal terisi '
             'otomatis. Foto tersimpan bersama transaksi dan tampil sebagai '
             'miniatur yang bisa dibuka kembali.',
         _Plan.premium,
@@ -98,7 +98,7 @@ const _slides = [
         Icons.mic_rounded,
         'Catat dengan suara',
         'Ucapkan, mis. "makan siang dua puluh lima ribu": jenis, nominal, '
-            'catatan, tanggal, dan kategori terisi di formulir, tinggal Anda '
+            'catatan, tanggal, dan kategori terisi di formulir, tinggal kamu '
             'periksa lalu simpan. Pengenalan suara memakai layanan bawaan '
             'Android; LaciQ tidak menyimpan rekaman.',
         _Plan.premium,
@@ -108,7 +108,7 @@ const _slides = [
   _Slide(
     Icons.donut_large_rounded,
     'Anggaran dan tren yang mudah dibaca',
-    'Pahami ke mana uang Anda pergi, dan tetap dalam batas yang Anda tetapkan.',
+    'Pahami ke mana uangmu pergi, dan tetap dalam batas yang kamu tetapkan.',
     features: [
       _Feature(
         Icons.dashboard_rounded,
@@ -140,7 +140,7 @@ const _slides = [
         'Laporan Bulanan',
         'Sorotan otomatis tiap bulan: naik atau turunnya pengeluaran '
             'dibanding bulan lalu, kategori terbesar, anggaran yang hampir '
-            'habis, dan taksiran akhir bulan. Dihitung di HP Anda. Ada di '
+            'habis, dan taksiran akhir bulan. Dihitung di HP-mu. Ada di '
             'menu Lainnya.',
         _Plan.premium,
       ),
@@ -154,14 +154,14 @@ const _slides = [
       _Feature(
         Icons.file_download_rounded,
         'Ekspor CSV',
-        'Bawa data transaksi ke spreadsheet kapan pun Anda perlu.',
+        'Bawa data transaksi ke spreadsheet kapan pun kamu perlu.',
       ),
     ],
   ),
   _Slide(
     Icons.event_note_rounded,
     'Rencanakan keuangan ke depan',
-    'Siapkan dana untuk tagihan yang akan datang dan catat kewajiban Anda.',
+    'Siapkan dana untuk tagihan yang akan datang dan catat kewajibanmu.',
     features: [
       _Feature(
         Icons.event_note_rounded,
@@ -180,7 +180,7 @@ const _slides = [
       _Feature(
         Icons.timeline_rounded,
         'Simulasi arus kas',
-        'Cek apakah dana Anda cukup sampai tanggal tertentu di akhir bulan.',
+        'Cek apakah danamu cukup sampai tanggal tertentu di akhir bulan.',
         _Plan.premium,
       ),
       _Feature(
@@ -194,8 +194,8 @@ const _slides = [
   ),
   _Slide(
     Icons.lock_rounded,
-    'Data Anda tetap di HP Anda',
-    'Catatan keuangan disimpan di HP Anda sendiri, tanpa akun dan tanpa '
+    'Datamu tetap di HP-mu',
+    'Catatan keuangan disimpan di HP-mu sendiri, tanpa akun dan tanpa '
         'server penyimpanan.',
     features: [
       _Feature(
@@ -211,7 +211,7 @@ const _slides = [
       _Feature(
         Icons.cloud_upload_rounded,
         'Backup Cloud terenkripsi',
-        'Cadangan dienkripsi lalu disimpan di Google Drive Anda sendiri, '
+        'Cadangan dienkripsi lalu disimpan di Google Drive-mu sendiri, '
             'bisa dipulihkan di HP baru dengan akun yang sama.',
         _Plan.premium,
       ),
@@ -231,8 +231,8 @@ const _slides = [
         Icons.savings_outlined,
         'Tabungan',
         'Simpan uang di tabungan yang saldonya terpisah dari dompet. Saat '
-            'Anda menyetor, nominalnya tercatat sebagai pengeluaran dan '
-            'mengurangi saldo dompet asal. Saat Anda menarik, tercatat '
+            'Kamu menyetor, nominalnya tercatat sebagai pengeluaran dan '
+            'mengurangi saldo dompet asal. Saat kamu menarik, tercatat '
             'sebagai pemasukan dan menambah saldo dompet tujuan. Buat '
             'beberapa tabungan sekaligus, mis. dana darurat dan liburan. '
             'Ada di menu Lainnya.',
@@ -252,7 +252,7 @@ const _slides = [
         'Scan struk dengan AI',
         'Nama toko, kategori, total, dan tanggal terisi otomatis (300 scan '
             'per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke '
-            'server AI dan tidak disimpan. Anda diminta menyetujuinya '
+            'server AI dan tidak disimpan. Kamu diminta menyetujuinya '
             'sebelum pertama kali dipakai.',
         _Plan.ultimate,
       ),
@@ -261,7 +261,7 @@ const _slides = [
         'Ringkasan AI untuk Laporan Bulanan',
         'Rangkuman beberapa kalimat dari angka bulan ini (30 per bulan). '
             'Hanya total dan nama kategori yang dikirim, bukan catatan atau '
-            'foto. Dibuat AI dan bisa keliru; Anda bisa melaporkannya. Anda '
+            'foto. Dibuat AI dan bisa keliru; kamu bisa melaporkannya. Kamu '
             'diminta menyetujuinya sebelum pertama kali dipakai.',
         _Plan.ultimate,
       ),
@@ -270,9 +270,9 @@ const _slides = [
   _Slide(
     Icons.stars_rounded,
     'Pilih paket yang cocok',
-    'Mulai gratis, tingkatkan kapan pun Anda butuh.',
+    'Mulai gratis, tingkatkan kapan pun kamu butuh.',
     plans: [
-      _PlanCard('Gratis', 'Semua yang Anda butuhkan untuk mencatat keuangan.', [
+      _PlanCard('Gratis', 'Semua yang kamu butuhkan untuk mencatat keuangan.', [
         'Transaksi, dompet, kategori, tag, dan transaksi berulang',
         'Anggaran, ringkasan, target tabungan, dan ekspor CSV',
         'Kunci PIN dan sidik jari, backup ke berkas',
@@ -284,7 +284,7 @@ const _slides = [
         'Tanpa iklan, dengan perencanaan dan perlindungan data.',
         [
           'Semua fitur Gratis, tanpa iklan',
-          'Backup Cloud terenkripsi ke Google Drive Anda',
+          'Backup Cloud terenkripsi ke Google Drive-mu',
           'Analisa Tren 6 dan 12 bulan, Agenda tanpa batas',
           'Proyeksi bulanan dan simulasi arus kas',
           'Utang dan Piutang beserta cicilan',
@@ -302,7 +302,7 @@ const _slides = [
     ],
     footer:
         'Langganan lewat Google Play dan bisa dibatalkan kapan saja. Lihat '
-        'dan kelola paket Anda di Pengaturan.',
+        'dan kelola paketmu di Pengaturan.',
   ),
 ];
 

@@ -70,7 +70,7 @@ class TrialStatusCard extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   ended
-                      ? 'Data Anda aman. Berlangganan untuk membuka kembali fitur Ultimate.'
+                      ? 'Datamu aman. Berlangganan untuk membuka kembali fitur Ultimate.'
                       : 'Semua fitur Premium dan Ultimate terbuka sampai tanggal itu.',
                   style: text.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,
@@ -285,11 +285,7 @@ class TrialMilestoneDialog extends ConsumerWidget {
           '${ended ? 'berhenti' : 'berhenti'}',
       'Iklan ${ended ? 'kembali tampil' : 'akan kembali tampil'}',
     ];
-    const stays = [
-      'Seluruh data Anda',
-      'Pencatatan di Buku Utama',
-      'Ekspor CSV',
-    ];
+    const stays = ['Seluruh datamu', 'Pencatatan di Buku Utama', 'Ekspor CSV'];
 
     final text = Theme.of(context).textTheme;
     return AlertDialog(

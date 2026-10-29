@@ -23,6 +23,11 @@ pengganti" bawaan (setelan akun *Maksimalkan cakupan pesan*, aktif default), jad
 **Selesai bila:** pengguna EEA mendapat dialog izin sebelum iklan pertama; pengguna non-EEA tidak melihat perubahan.
 
 ## 2. Sapaan "kamu" di teks aplikasi
+> **DIKERJAKAN di kode 2026-10-29 (belum dirilis; masuk build berikutnya, +19):** 67 kemunculan "Anda" di string aplikasi diganti "kamu"/"-mu" lewat skrip lalu ditinjau satu per satu
+> (kepemilikan: "HP-mu", "datamu", "Google Drive-mu"; subjek: "kamu menekan"; awal kalimat: "Kamu belum masuk."); komentar kode tidak diubah; 4 berkas tes disesuaikan; 875 tes lulus.
+> **Belum diselaraskan:** deskripsi listing Play (baru dikirim dengan "Anda"), kebijakan privasi (formal sengaja tetap "Anda"), teks Worker (tidak tampil ke pengguna).
+> Sesuai saran di bawah, samakan listing saat perubahan deskripsi berikutnya (mis. 2026-11-11) bila nada "kamu" dipertahankan.
+
 **Latar:** situs `laciq.solusimandiri.id` dan materi Instagram sudah memakai "kamu" (2026-10-08). Teks di dalam aplikasi
 masih "Anda" (sekitar 58 kemunculan di `lib/**/*.dart`, 0 "kamu"), sehingga pengguna merasakan beda nada antara situs dan app.
 

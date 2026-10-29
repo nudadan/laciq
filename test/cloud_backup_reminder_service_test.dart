@@ -133,9 +133,7 @@ void main() {
       'untuk pengguna yang sudah masuk dengan backup basi',
       (tester, h) async {
         expect(
-          h.notifications.sent.any(
-            (n) => n.title == 'Waktunya backup data Anda',
-          ),
+          h.notifications.sent.any((n) => n.title == 'Waktunya backup datamu'),
           isTrue,
         );
       },

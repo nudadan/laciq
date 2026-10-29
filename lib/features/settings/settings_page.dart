@@ -132,7 +132,7 @@ class SettingsPage extends ConsumerWidget {
                 title: Text('LaciQ'),
                 subtitle: Text(
                   'Data tersimpan di perangkat ini. Bila ganti HP atau menghapus '
-                  'aplikasi, data hilang kecuali Anda sudah membuat backup.',
+                  'aplikasi, data hilang kecuali kamu sudah membuat backup.',
                 ),
               ),
               ListTile(
@@ -354,7 +354,7 @@ class SettingsPage extends ConsumerWidget {
           'dihapus PERMANEN. PIN, sidik jari, dan tema juga dicabut — aplikasi '
           'kembali seperti baru dipasang.\n\n'
           'Tindakan ini TIDAK BISA dibatalkan. Buat backup dulu lewat '
-          '"Backup data" kalau Anda ingin menyimpannya.',
+          '"Backup data" kalau kamu ingin menyimpannya.',
         ),
         actions: [
           TextButton(
@@ -629,7 +629,7 @@ class _CloudBackupTile extends ConsumerWidget {
     return ListTile(
       leading: const Icon(Icons.cloud_upload_rounded),
       title: const Text('Backup cloud terenkripsi'),
-      subtitle: const Text('Simpan otomatis lewat akun email Anda'),
+      subtitle: const Text('Simpan otomatis lewat akun emailmu'),
       trailing: const Icon(Icons.chevron_right_rounded),
       onTap: () => Navigator.of(
         context,

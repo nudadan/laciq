@@ -37,7 +37,7 @@ class DebtsPage extends ConsumerWidget {
                 icon: Icons.handshake_rounded,
                 message:
                     'Belum ada utang/piutang.\n'
-                    'Catat uang yang Anda pinjam dari orang lain (utang) atau '
+                    'Catat uang yang kamu pinjam dari orang lain (utang) atau '
                     'pinjamkan ke orang lain (piutang).',
               );
             }

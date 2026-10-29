@@ -252,7 +252,7 @@ class GoalDetailPage extends ConsumerWidget {
             content: const Text(
               'Target beserta seluruh riwayat setoran dan penarikannya '
               'dihapus permanen dan tidak bisa dikembalikan.\n\n'
-              'Saldo dompet Anda tidak terpengaruh. '
+              'Saldo dompetmu tidak terpengaruh. '
               'Untuk menyimpannya tanpa menghapus, pilih Arsipkan.',
             ),
             actions: [

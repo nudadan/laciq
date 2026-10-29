@@ -151,7 +151,7 @@ void main() {
       'kartu dan dialog akhir, isinya dalam bentuk lampau',
       (tester, h) async {
         expect(find.text('Uji coba Ultimate berakhir'), findsWidgets);
-        expect(find.textContaining('Data Anda aman'), findsOneWidget);
+        expect(find.textContaining('Datamu aman'), findsOneWidget);
         expect(find.text('Yang berubah:'), findsOneWidget);
         expect(
           find.textContaining('terkunci (datanya tetap aman)'),

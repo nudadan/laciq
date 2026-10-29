@@ -181,7 +181,7 @@ class _TierCard extends StatelessWidget {
     ),
     (
       Icons.cloud_upload_rounded,
-      'Backup cloud terenkripsi ke Google Drive Anda sendiri',
+      'Backup cloud terenkripsi ke Google Drive-mu sendiri',
     ),
     (Icons.event_note_rounded, 'Agenda pengingat tanpa batas (gratis: 3 item)'),
     (

@@ -14,7 +14,7 @@ String reportGroupLabel(ReportGroup g) => switch (g) {
 
 /// Penjelasan satu kalimat dengan contoh, supaya pengguna awam paham bedanya.
 String reportGroupHint(ReportGroup g) => switch (g) {
-  ReportGroup.revenue => 'Hasil jualan barang atau jasa utama usaha Anda.',
+  ReportGroup.revenue => 'Hasil jualan barang atau jasa utama usahamu.',
   ReportGroup.cogs => 'Biaya langsung barang yang dijual: stok, bahan baku.',
   ReportGroup.opex => 'Biaya menjalankan usaha: sewa, gaji, listrik, iklan.',
   ReportGroup.otherIncome => 'Pemasukan di luar jualan: bunga, hadiah.',

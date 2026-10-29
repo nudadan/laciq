@@ -76,7 +76,7 @@ String trialClaimMessage(TrialClaimResult r) {
     TrialClaimOutcome.active => 'Uji coba Ultimate sudah aktif.',
     TrialClaimOutcome.alreadyUsed =>
       'Uji coba sudah pernah dipakai di perangkat ini.',
-    TrialClaimOutcome.alreadyUltimate => 'Anda sudah berlangganan Ultimate.',
+    TrialClaimOutcome.alreadyUltimate => 'Kamu sudah berlangganan Ultimate.',
     TrialClaimOutcome.paused =>
       'Uji coba sedang dijeda karena banyak peminat. Coba lagi besok.',
     TrialClaimOutcome.budgetExhausted =>
@@ -191,8 +191,8 @@ class _TrialOfferSheetState extends ConsumerState<_TrialOfferSheet> {
               ),
             const SizedBox(height: 12),
             Text(
-              'Setelah 30 hari Anda kembali ke paket Gratis kecuali berlangganan. '
-              'Data Anda tetap ada; buku kas tambahan hanya terkunci.',
+              'Setelah 30 hari kamu kembali ke paket Gratis kecuali berlangganan. '
+              'Datamu tetap ada; buku kas tambahan hanya terkunci.',
               style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: 6),
@@ -202,7 +202,7 @@ class _TrialOfferSheetState extends ConsumerState<_TrialOfferSheet> {
               // ditekan; kalimat ini harus jujur soal itu. Selaras dengan
               // kebijakan privasi bagian 6c.
               'Agar uji coba hanya diberikan sekali per perangkat, aplikasi '
-              'memeriksa kelayakan dengan mengirim pengenal perangkat Anda '
+              'memeriksa kelayakan dengan mengirim pengenal perangkatmu '
               '(disimpan ber-hash di server, bukan nilai aslinya). Tidak ada '
               'data keuangan yang dikirim.',
               style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),

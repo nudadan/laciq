@@ -377,7 +377,7 @@ void main() {
         await _menu(tester, 'Hapus target');
         expect(find.text('Hapus "Liburan"?'), findsOneWidget);
         expect(
-          find.textContaining('Saldo dompet Anda tidak terpengaruh'),
+          find.textContaining('Saldo dompetmu tidak terpengaruh'),
           findsOneWidget,
         );
         await tester.tap(find.text('Hapus'));

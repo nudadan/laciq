@@ -57,7 +57,7 @@ Future<bool> confirmAndRestore(
     return true;
   } catch (e) {
     // Transaksi dibatalkan penuh: data lama tidak berubah.
-    say('Pemulihan gagal, data Anda tidak diubah. ($e)');
+    say('Pemulihan gagal, datamu tidak diubah. ($e)');
     return false;
   }
 }

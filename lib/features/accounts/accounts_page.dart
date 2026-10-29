@@ -443,7 +443,7 @@ class _AdjustDialogState extends State<_AdjustDialog> {
             Text(
               'Saldo di aplikasi saat ini ${rupiah(widget.account.balance)}. '
               'Masukkan saldo yang sebenarnya; selisihnya dicatat sebagai '
-              'transaksi "Penyesuaian Saldo" dan riwayat Anda tidak berubah.',
+              'transaksi "Penyesuaian Saldo" dan riwayatmu tidak berubah.',
               style: Theme.of(context).textTheme.bodySmall
                   ?.copyWith(color: scheme.onSurfaceVariant),
             ),

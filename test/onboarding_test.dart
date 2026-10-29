@@ -23,7 +23,7 @@ void main() {
       const titles = [
         'Anggaran dan tren yang mudah dibaca',
         'Rencanakan keuangan ke depan',
-        'Data Anda tetap di HP Anda',
+        'Datamu tetap di HP-mu',
         'Ultimate untuk pembukuan serius',
         'Pilih paket yang cocok',
       ];

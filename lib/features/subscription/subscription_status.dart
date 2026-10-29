@@ -222,7 +222,7 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
       return [for (final p in packages) ?_toPackage(p)];
     } catch (e) {
       throw const SubscriptionException(
-        'Gagal memuat paket langganan. Periksa koneksi internet Anda.',
+        'Gagal memuat paket langganan. Periksa koneksi internetmu.',
       );
     }
   }
@@ -380,7 +380,7 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
       restored = await Purchases.restorePurchases();
     } catch (e) {
       throw const SubscriptionException(
-        'Gagal memulihkan pembelian. Periksa koneksi internet Anda.',
+        'Gagal memulihkan pembelian. Periksa koneksi internetmu.',
       );
     }
     _pushedInfo.add(restored);

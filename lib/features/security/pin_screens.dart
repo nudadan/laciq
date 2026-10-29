@@ -244,7 +244,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
             message:
                 _message ??
                 (_first == null
-                    ? 'PIN diminta saat aplikasi dibuka.\nJangan lupa PIN Anda: tidak bisa dipulihkan.'
+                    ? 'PIN diminta saat aplikasi dibuka.\nJangan lupa PIN-mu: tidak bisa dipulihkan.'
                     : null),
             isError: _isError,
             onCompleted: _onPin,

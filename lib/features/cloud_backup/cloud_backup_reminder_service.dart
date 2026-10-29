@@ -67,11 +67,11 @@ class CloudBackupReminderService {
     await _sender.init();
     await _sender.show(
       id: _notificationId,
-      title: 'Waktunya backup data Anda',
+      title: 'Waktunya backup datamu',
       body: lastBackup == null
-          ? 'Anda belum pernah backup ke Google Drive. Cadangkan data sekarang.'
+          ? 'Kamu belum pernah backup ke Google Drive. Cadangkan data sekarang.'
           : 'Backup terakhir ${DateFormat('d MMM yyyy', 'id_ID').format(lastBackup)}. '
-                'Cadangkan data terbaru Anda.',
+                'Cadangkan data terbarumu.',
     );
     await _store.write(_kLastShown, n.toIso8601String());
   }

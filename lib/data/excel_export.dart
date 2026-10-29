@@ -102,7 +102,7 @@ XlsxSheet _summarySheet(
     ..add([])
     ..add([
       const XlsxCell(
-        'Dibuat di perangkat Anda oleh LaciQ. Berkas ini tidak terenkripsi; '
+        'Dibuat di perangkatmu oleh LaciQ. Berkas ini tidak terenkripsi; '
         'simpan dan bagikan dengan hati-hati.',
         XlsxStyle.muted,
       ),

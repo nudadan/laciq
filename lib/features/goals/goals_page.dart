@@ -47,7 +47,7 @@ class GoalsPage extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                'Target hanya penanda dana yang Anda sisihkan. '
+                'Target hanya penanda dana yang kamu sisihkan. '
                 'Saldo dompet tidak berubah.',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

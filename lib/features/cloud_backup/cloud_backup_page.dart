@@ -185,7 +185,7 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
     return ListView(
       children: [
         Text(
-          'Simpan backup terenkripsi ke Google Drive Anda sendiri, bisa '
+          'Simpan backup terenkripsi ke Google Drive-mu sendiri, bisa '
           'dipulihkan lagi kapan saja lewat akun Google yang sama di HP mana '
           'pun. Kami tidak pernah menyimpan salinannya.',
           style: textTheme.titleMedium,
@@ -259,10 +259,10 @@ class _CloudBackupPageState extends ConsumerState<CloudBackupPage> {
             secondary: const Icon(Icons.receipt_long_rounded),
             title: const Text('Sertakan foto struk'),
             subtitle: const Text(
-              'Foto ikut dicadangkan terenkripsi ke Google Drive Anda dan '
-              'kembali saat Anda memulihkan. Matikan bila foto tidak boleh '
+              'Foto ikut dicadangkan terenkripsi ke Google Drive-mu dan '
+              'kembali saat kamu memulihkan. Matikan bila foto tidak boleh '
               'keluar dari HP ini. Foto yang sudah terunggah tetap ada di '
-              'Drive Anda sampai Anda menghapusnya.',
+              'Drive-mu sampai kamu menghapusnya.',
             ),
             value: _includePhotos,
             onChanged: (v) async {
