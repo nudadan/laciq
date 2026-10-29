@@ -197,7 +197,7 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
 **Selesai bila:** pengguna Premium bisa menyalakan mode usaha di Buku Utama, melihat Laba Rugi satu bulan yang
 rekonsiliasinya cocok dengan perubahan saldo dompet, membagikannya sebagai PDF, dan semua tes lulus.
 
-## 5. Fase 2 — Pelanggan, pemasok, nota (garis besar; rincikan sebelum dikerjakan)
+## 5. Fase 2 — Pelanggan, pemasok, nota (garis besar; **rinciannya sudah ditulis di [RENCANA-IMPLEMENTASI-UMKM-FASE2.md](RENCANA-IMPLEMENTASI-UMKM-FASE2.md), 2026-10-29**)
 
 | Butir | Gagasan | Catatan desain |
 |---|---|---|
