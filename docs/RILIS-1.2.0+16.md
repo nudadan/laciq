@@ -53,8 +53,12 @@ Baru: Mode usaha dan Laba Rugi (Premium). Kelompokkan kategori sebagai pendapata
 ## Urutan rilis
 0. [x] **Naikkan versi** (selesai 2026-10-29, AAB dibangun): `pubspec.yaml` ke `1.2.0+16`, commit `chore: versi 1.2.0+16 (Mode usaha, Laba Rugi)`. Bangun AAB rilis (tanpa `--dart-define` tambahan;
        alamat Worker AI sudah bawaan di kode). Jangan mencetak isi `android/key.properties`.
-1. [ ] **Kebijakan privasi**: deploy `docs/kebijakan-privasi/index.html` (bagian 7 menyebut PDF) ke `https://laciq.solusimandiri.id/privacy`. Tanggal berlaku:
+1. [x] **Kebijakan privasi (DEPLOYED 2026-10-29 14.52)**: deploy `docs/kebijakan-privasi/index.html` (bagian 7 menyebut PDF) ke `https://laciq.solusimandiri.id/privacy`. Tanggal berlaku:
        putuskan apakah perlu diperbarui (perubahan hanya penyebutan format ekspor). **Harus sebelum rilis tayang.**
+       Dikerjakan: `scp` ke `dimas@10.9.0.208:/var/www/laciq.solusimandiri.id/privacy/index.html` (lewat VPN; cadangan berkas lama `index.html.bak-20261029`, diganti dengan `mv` agar atomik).
+       Selisih dengan versi tayang sebelumnya hanya satu kalimat (bagian 7: "...laporan Excel (.xlsx), **laporan PDF**, dan backup file..."). Terverifikasi di
+       `https://laciq.solusimandiri.id/privacy` (HTTP 200, kalimat baru ada; selisih lain dengan berkas asal hanya penyamaran email oleh Cloudflare). **Tanggal berlaku tidak diubah**
+       (tetap 15 Oktober 2026; perubahan hanya memperjelas jenis berkas ekspor; ubah bila Anda ingin). Halaman lama `https://dompetku.hardan-ti.com/privacy` tidak diubah.
 2. [x] **Uji internal**: AAB diunggah dan **diterbitkan ke jalur Pengujian internal pada 2026-10-29 13.43** (rilis "16 (1.2.0)", catatan rilis varian di atas; status "Tersedia untuk penguji internal").
        Pratinjau Play: tidak ada perangkat yang tidak lagi didukung; ukuran instal baru 21,6 MB (**+790 KB** vs +15), ukuran pembaruan 4,12 MB (sesuai perkiraan +0,75 MB).
        **Ekspor backup berkas dari build 15 sebelum memperbarui di Redmi.**
