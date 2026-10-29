@@ -161,7 +161,15 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
    `reconciles` benar-benar menguji pengelompokan (diuji dengan 60 seed acak, oracle terpisah, uji mutasi, dan database nyata
    dengan template Bisnis, termasuk Utang/Piutang/Penyesuaian Saldo). Baris laporan digabung ke kategori **induk**
    (sub-kategori tidak ditampilkan terpisah di Laba Rugi). Rentang pembanding bulan-utuh mundur tepat sejumlah bulan.
-4. Pilihan kelompok di layar Kategori, saklar buku usaha, saran kelompok otomatis.
+4. ~~Pilihan kelompok di layar Kategori, saklar buku usaha, saran kelompok otomatis~~ **selesai 2026-10-29**
+   (836 tes lulus). Keputusan implementasi: (a) **saklar "Mode usaha"** ada di **Lainnya** untuk SEMUA paket (bukan hanya
+   Ultimate), karena pelaku UMKM pemula memakai Buku Utama; di Ultimate juga ada saklar "Buku usaha" di dialog buat/ubah buku
+   (template Bisnis menyalakannya otomatis, tetapi saklar yang sudah disentuh tidak lagi ikut template); (b) pilihan **"Masuk ke
+   laporan sebagai"** dan label kelompok di daftar kategori **hanya muncul di buku usaha** agar pengguna pribadi tidak dibebani
+   istilah usaha; (c) **saran dari nama** (`suggestReportGroup`, kata kunci konservatif, "di luar laba rugi" dicek lebih dulu,
+   "bahan bakar" bukan HPP) hanya untuk kategori **baru** dan berhenti begitu pengguna memilih sendiri; kategori yang diubah
+   namanya tidak berubah kelompoknya; (d) sub-kategori tidak punya pilihan (mengikuti induk); (e) `updateCategory` menerima
+   `Value<ReportGroup?>` (absen = tidak diubah). Teks baru memakai "Anda" agar seragam dengan aplikasi sampai sapaan "kamu" diganti.
 5. Layar Laba Rugi + gating.
 6. Lembar Excel dan PDF.
 7. Perbarui matriks fitur, listing, catatan rilis; uji di HP (daftar §8).

@@ -1,11 +1,14 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/category_style.dart';
 import '../../core/glass.dart';
+import '../../core/report_group_labels.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../../data/report_group_suggestion.dart';
 
 /// Menambah ([category] null) atau mengubah satu kategori, termasuk
 /// mengarsipkan dan memulihkannya. Menutup halaman dengan `String?` pesan.
@@ -24,6 +27,15 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
   late String _icon = widget.category?.icon ?? 'other';
   late int _color = widget.category?.color ?? categoryColors.first;
   late String? _parentId = widget.category?.parentId;
+
+  /// Kelompok pada laporan Laba Rugi (hanya dipakai di buku usaha). Null = otomatis.
+  late ReportGroup? _group = widget.category?.reportGroup;
+
+  /// Pengguna sudah memilih kelompok sendiri, jadi saran dari nama berhenti.
+  bool _groupTouched = false;
+
+  /// [_group] berasal dari tebakan nama, bukan pilihan pengguna.
+  bool _groupSuggested = false;
   String? _error;
 
   bool get _isEdit => widget.category != null;
@@ -51,9 +63,32 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
     if (mounted) Navigator.of(context).pop(successMessage);
   }
 
+  /// Buku pemilik kategori ini bersifat usaha: hanya di sini pilihan kelompok
+  /// laporan ditawarkan, supaya pengguna pribadi tidak dibebani istilah usaha.
+  bool _isBusinessLedger() {
+    final ledgerId =
+        widget.category?.ledgerId ?? ref.read(activeLedgerIdProvider);
+    final ledgers = ref.read(ledgersProvider).value ?? const <Ledger>[];
+    return ledgers.any(
+      (l) => l.id == ledgerId && l.kind == LedgerKind.business,
+    );
+  }
+
+  void _onNameChanged(String text) {
+    // Saran hanya untuk kategori baru di buku usaha dan selama pengguna belum memilih.
+    if (_isEdit || _groupTouched || !_isBusinessLedger()) return;
+    final suggestion = suggestReportGroup(widget.type, text);
+    if (suggestion == _group) return;
+    setState(() {
+      _group = suggestion;
+      _groupSuggested = suggestion != null;
+    });
+  }
+
   Future<void> _save() {
     final db = ref.read(databaseProvider);
     final existing = widget.category;
+    final useGroup = _isBusinessLedger() && _parentId == null;
     return existing == null
         ? _run(
             () => db.addCategory(
@@ -63,6 +98,7 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
               icon: _icon,
               color: _color,
               parentId: _parentId,
+              reportGroup: useGroup ? _group : null,
             ),
             'Kategori ditambahkan',
           )
@@ -73,6 +109,7 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
               icon: _icon,
               color: _color,
               parentId: _parentId,
+              reportGroup: useGroup ? Value(_group) : const Value.absent(),
             ),
             'Perubahan disimpan',
           );
@@ -128,6 +165,65 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
     'Kategori dipulihkan',
   );
 
+  /// "Masuk ke laporan sebagai": kelompok Laba Rugi untuk kategori ini.
+  Widget _reportGroupField(ColorScheme scheme, bool archived) {
+    if (_parentId != null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Text(
+          'Sub-kategori mengikuti kelompok laporan kategori induknya.',
+          style: TextStyle(color: scheme.outline),
+        ),
+      );
+    }
+    final auto = ReportGroup.defaultFor(widget.type);
+    final shown = _group ?? auto;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DropdownButtonFormField<ReportGroup?>(
+            key: ValueKey('report-group-${_group?.name}'),
+            initialValue: _group,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Masuk ke laporan sebagai',
+            ),
+            items: [
+              DropdownMenuItem(
+                value: null,
+                child: Text('Otomatis (${reportGroupLabel(auto)})'),
+              ),
+              for (final g in reportGroupChoices(widget.type))
+                DropdownMenuItem(value: g, child: Text(reportGroupLabel(g))),
+            ],
+            onChanged: archived
+                ? null
+                : (v) => setState(() {
+                    _group = v;
+                    _groupTouched = true;
+                    _groupSuggested = false;
+                  }),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            reportGroupHint(shown),
+            style: TextStyle(color: scheme.outline, fontSize: 12),
+          ),
+          if (_groupSuggested)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Disarankan dari nama kategori. Ubah bila perlu.',
+                style: TextStyle(color: scheme.primary, fontSize: 12),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -175,6 +271,7 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
               enabled: !archived,
               maxLength: 60,
               textCapitalization: TextCapitalization.words,
+              onChanged: _onNameChanged,
               decoration: const InputDecoration(labelText: 'Nama kategori'),
             ),
             if (parentOptions.isNotEmpty) ...[
@@ -197,6 +294,8 @@ class _CategoryEditorPageState extends ConsumerState<CategoryEditorPage> {
                     : (v) => setState(() => _parentId = v),
               ),
             ],
+            if (ref.watch(ledgersProvider).hasValue && _isBusinessLedger())
+              _reportGroupField(scheme, archived),
             const SizedBox(height: 8),
             Text('Ikon', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),

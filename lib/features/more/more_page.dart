@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/glass.dart';
+import '../../data/database.dart' show LedgerKind;
 import '../../data/providers.dart';
 import '../agenda/agenda_page.dart';
 import '../categories/categories_page.dart';
@@ -59,6 +60,7 @@ class MorePage extends ConsumerWidget {
                       upgradeOnly: isPremiumTier,
                     ),
             ),
+          const _BusinessModeTile(),
           _MoreTile(
             icon: Icons.category_rounded,
             title: 'Kategori',
@@ -196,6 +198,39 @@ class _MoreGroup extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Saklar "Mode usaha" untuk buku aktif. Tersedia untuk semua paket supaya
+/// pelaku usaha yang hanya memakai Buku Utama juga bisa mengelompokkan kategori
+/// untuk laporan Laba Rugi (docs/RENCANA-IMPLEMENTASI-UMKM.md §4.2). Hanya
+/// mengubah istilah dan laporan, bukan data, jadi boleh dibolak-balik.
+class _BusinessModeTile extends ConsumerWidget {
+  const _BusinessModeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ledger = ref.watch(activeLedgerProvider);
+    if (ledger == null) return const SizedBox.shrink();
+    final multi = ref.watch(multiLedgerEnabledProvider);
+    final on = ledger.kind == LedgerKind.business;
+    return SwitchListTile(
+      secondary: const Icon(Icons.storefront_rounded),
+      title: Text(multi ? 'Mode usaha · ${ledger.name}' : 'Mode usaha'),
+      subtitle: Text(
+        on
+            ? 'Kategori dikelompokkan untuk laporan Laba Rugi.'
+            : 'Nyalakan bila buku ini untuk usaha: kategori bisa '
+                  'dikelompokkan (HPP, beban, dll.).',
+      ),
+      value: on,
+      onChanged: (v) => ref
+          .read(databaseProvider)
+          .setLedgerKind(
+            ledger.id,
+            v ? LedgerKind.business : LedgerKind.personal,
+          ),
     );
   }
 }

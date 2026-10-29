@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/category_style.dart';
 import '../../core/glass.dart';
+import '../../core/report_group_labels.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
+import '../../data/profit_loss.dart' show effectiveReportGroup;
 import '../../data/providers.dart';
 import 'category_editor_page.dart';
 
@@ -77,6 +79,9 @@ class _CategoryList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(allCategoriesProvider(type));
+    // Di buku usaha, tiap kategori utama menampilkan kelompok laporannya.
+    final showGroup =
+        ref.watch(activeLedgerProvider)?.kind == LedgerKind.business;
     return AsyncBody<List<Category>>(
       value: categories,
       builder: (list) {
@@ -94,7 +99,7 @@ class _CategoryList extends ConsumerWidget {
           padding: const EdgeInsets.only(bottom: 96),
           children: [
             for (final c in topLevel) ...[
-              _CategoryTile(c),
+              _CategoryTile(c, showGroup: showGroup),
               for (final child in childrenOf[c.id] ?? const [])
                 _CategoryTile(child, indented: true),
             ],
@@ -107,7 +112,7 @@ class _CategoryList extends ConsumerWidget {
                       ?.copyWith(color: Theme.of(context).colorScheme.outline),
                 ),
               ),
-              for (final c in archived) _CategoryTile(c),
+              for (final c in archived) _CategoryTile(c, showGroup: showGroup),
             ],
           ],
         );
@@ -117,10 +122,17 @@ class _CategoryList extends ConsumerWidget {
 }
 
 class _CategoryTile extends StatelessWidget {
-  const _CategoryTile(this.category, {this.indented = false});
+  const _CategoryTile(
+    this.category, {
+    this.indented = false,
+    this.showGroup = false,
+  });
 
   final Category category;
   final bool indented;
+
+  /// Tampilkan kelompok laporan Laba Rugi (buku usaha, kategori utama saja).
+  final bool showGroup;
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +152,13 @@ class _CategoryTile extends StatelessWidget {
               size: indented ? 36 : 44,
             ),
             title: Text(c.name),
+            subtitle: showGroup && c.parentId == null
+                ? Text(
+                    c.reportGroup == null
+                        ? '${reportGroupLabel(effectiveReportGroup(c))} · otomatis'
+                        : reportGroupLabel(c.reportGroup!),
+                  )
+                : null,
             trailing: const Icon(Icons.chevron_right_rounded),
           ),
         ),

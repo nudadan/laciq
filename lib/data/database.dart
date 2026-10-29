@@ -1493,6 +1493,9 @@ class AppDatabase extends _$AppDatabase {
     required String icon,
     required int color,
     String? parentId,
+    // Absen = kelompok laporan tidak diubah; `Value(null)` = kembali ke bawaan
+    // jenis. Diabaikan bila [parentId] terisi (sub-kategori mengikuti induk).
+    Value<ReportGroup?> reportGroup = const Value.absent(),
   }) async {
     final clean = _cleanCategoryName(name);
     await transaction(() async {
@@ -1507,6 +1510,9 @@ class AppDatabase extends _$AppDatabase {
         exceptId: id,
       );
       await _checkParent(current.type, parentId, current.ledgerId, selfId: id);
+      if (parentId == null && reportGroup.present) {
+        _checkReportGroup(current.type, reportGroup.value, isSub: false);
+      }
       if (parentId != null) {
         final children = await (select(
           categories,
@@ -1525,9 +1531,7 @@ class AppDatabase extends _$AppDatabase {
           color: Value(color),
           parentId: Value(parentId),
           // Menjadi sub-kategori: kelompok laporan ditinggalkan (mengikuti induk).
-          reportGroup: parentId != null
-              ? const Value(null)
-              : const Value.absent(),
+          reportGroup: parentId != null ? const Value(null) : reportGroup,
           updatedAt: Value(DateTime.now()),
         ),
       );

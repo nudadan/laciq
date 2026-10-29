@@ -194,14 +194,20 @@ class LedgersPage extends ConsumerWidget {
     );
     if (result == null) return;
     try {
-      final id = await ref
-          .read(databaseProvider)
-          .addLedger(
-            name: result.name,
-            icon: result.icon,
-            color: result.color,
-            template: result.template,
-          );
+      final db = ref.read(databaseProvider);
+      final id = await db.addLedger(
+        name: result.name,
+        icon: result.icon,
+        color: result.color,
+        template: result.template,
+      );
+      // Template Bisnis sudah menjadikannya buku usaha; selain itu ikuti saklar.
+      if (result.business != (result.template == LedgerTemplate.business)) {
+        await db.setLedgerKind(
+          id,
+          result.business ? LedgerKind.business : LedgerKind.personal,
+        );
+      }
       await ref.read(activeLedgerPrefProvider.notifier).select(id);
       if (context.mounted) notify(messenger, 'Buku kas ditambahkan');
     } on LedgerException catch (e) {
@@ -217,14 +223,19 @@ class LedgersPage extends ConsumerWidget {
     );
     if (result == null) return;
     try {
-      await ref
-          .read(databaseProvider)
-          .updateLedger(
-            id: l.id,
-            name: result.name,
-            icon: result.icon,
-            color: result.color,
-          );
+      final db = ref.read(databaseProvider);
+      await db.updateLedger(
+        id: l.id,
+        name: result.name,
+        icon: result.icon,
+        color: result.color,
+      );
+      if (result.business != (l.kind == LedgerKind.business)) {
+        await db.setLedgerKind(
+          l.id,
+          result.business ? LedgerKind.business : LedgerKind.personal,
+        );
+      }
       if (context.mounted) notify(messenger, 'Buku kas diperbarui');
     } on LedgerException catch (e) {
       if (context.mounted) notify(messenger, e.message);
@@ -440,6 +451,7 @@ typedef _LedgerForm = ({
   String icon,
   int color,
   LedgerTemplate template,
+  bool business,
 });
 
 /// Dialog buat/ubah buku. Memiliki controller-nya sendiri agar tidak disposed
@@ -458,6 +470,10 @@ class _LedgerDialogState extends State<_LedgerDialog> {
   late var _icon = widget.existing?.icon ?? ledgerIconKeys.first;
   late var _color = widget.existing?.color ?? categoryColors[5];
   var _template = LedgerTemplate.personal;
+  late var _business = widget.existing?.kind == LedgerKind.business;
+
+  /// Pengguna sudah mengatur saklar sendiri, jadi ia tidak lagi mengikuti template.
+  var _businessTouched = false;
 
   bool get _editing => widget.existing != null;
 
@@ -473,6 +489,7 @@ class _LedgerDialogState extends State<_LedgerDialog> {
       icon: _icon,
       color: _color,
       template: _template,
+      business: _business,
     ));
   }
 
@@ -497,7 +514,12 @@ class _LedgerDialogState extends State<_LedgerDialog> {
               const Text('Isi awal'),
               RadioGroup<LedgerTemplate>(
                 groupValue: _template,
-                onChanged: (v) => setState(() => _template = v ?? _template),
+                onChanged: (v) => setState(() {
+                  _template = v ?? _template;
+                  if (!_businessTouched) {
+                    _business = _template == LedgerTemplate.business;
+                  }
+                }),
                 child: Column(
                   children: [
                     for (final t in LedgerTemplate.values)
@@ -512,6 +534,20 @@ class _LedgerDialogState extends State<_LedgerDialog> {
                 ),
               ),
             ],
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              title: const Text('Buku usaha'),
+              subtitle: const Text(
+                'Kategori dikelompokkan untuk laporan Laba Rugi '
+                '(pendapatan, HPP, beban).',
+              ),
+              value: _business,
+              onChanged: (v) => setState(() {
+                _business = v;
+                _businessTouched = true;
+              }),
+            ),
             const SizedBox(height: 8),
             const Text('Ikon'),
             const SizedBox(height: 6),

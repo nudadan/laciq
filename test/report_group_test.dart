@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:dompet_pintar/data/backup.dart';
 import 'package:dompet_pintar/data/database.dart';
@@ -251,6 +251,27 @@ void main() {
         parentId: 'cat-exp-makan',
       );
       expect((await groups())[id], isNull);
+    });
+
+    test('updateCategory: menetapkan, mengosongkan, dan menolak kelompok yang tidak cocok', () async {
+      Future<void> update(Value<ReportGroup?> g) => db.updateCategory(
+        id: 'cat-exp-makan',
+        name: 'Makanan & Minuman',
+        icon: 'food',
+        color: 1,
+        reportGroup: g,
+      );
+      await update(const Value(ReportGroup.cogs));
+      expect((await groups())['cat-exp-makan'], ReportGroup.cogs);
+      await update(const Value.absent()); // tidak diubah
+      expect((await groups())['cat-exp-makan'], ReportGroup.cogs);
+      await expectLater(
+        update(const Value(ReportGroup.revenue)),
+        categoryError(),
+      );
+      expect((await groups())['cat-exp-makan'], ReportGroup.cogs);
+      await update(const Value(null)); // kembali ke bawaan
+      expect((await groups())['cat-exp-makan'], isNull);
     });
 
     test('mengubah nama/ikon kategori tidak mengubah kelompoknya', () async {
