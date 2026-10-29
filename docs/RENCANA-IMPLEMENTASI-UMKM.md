@@ -154,7 +154,13 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
    induk), dijaga di API (`setCategoryReportGroup`, `addCategory`, `updateCategory`) dan di validasi backup; (d) kelompok
    harus cocok dengan jenis (`ReportGroup.allowedFor`), juga divalidasi di backup; (e) API baru `setLedgerKind`;
    (f) backup v9, backup lama tanpa kunci baru tetap terbaca (buku pribadi, kelompok kosong).
-3. `profit_loss.dart` + tes unit (belum ada UI).
+3. ~~`profit_loss.dart` + tes unit (belum ada UI)~~ **selesai 2026-10-29** (`lib/data/profit_loss.dart`, `test/profit_loss_test.dart`,
+   26 tes). API: `buildProfitLoss(items, categories, from, to)` -> `ProfitLoss` (bagian pendapatan/HPP/beban/lain/di luar laba rugi,
+   `grossProfit`, `operatingProfit`, `netProfit`, `nonPnlNet`, `cashChange`, `reconciles`, margin), `previousPeriod`,
+   `changePercent`, `effectiveReportGroup`. Catatan: `cashIn/cashOut` dihitung terpisah langsung dari transaksi sehingga
+   `reconciles` benar-benar menguji pengelompokan (diuji dengan 60 seed acak, oracle terpisah, uji mutasi, dan database nyata
+   dengan template Bisnis, termasuk Utang/Piutang/Penyesuaian Saldo). Baris laporan digabung ke kategori **induk**
+   (sub-kategori tidak ditampilkan terpisah di Laba Rugi). Rentang pembanding bulan-utuh mundur tepat sejumlah bulan.
 4. Pilihan kelompok di layar Kategori, saklar buku usaha, saran kelompok otomatis.
 5. Layar Laba Rugi + gating.
 6. Lembar Excel dan PDF.
