@@ -81,6 +81,13 @@ nginx (`location = /`, lihat `docs/situs-beranda/`). Bila suatu saat ingin menam
 ## Catatan 2026-10-04: ekspor Excel dan Laporan Bulanan
 Keduanya dihitung dan dibuat sepenuhnya di perangkat (tanpa jaringan, tanpa izin baru, tanpa SDK baru). Berkas Excel baru keluar dari HP bila pengguna membagikannya sendiri lewat lembar bagikan Android, sama seperti CSV dan backup berkas. **Tidak ada perubahan deklarasi Data Safety.** Kebijakan privasi bagian 7 hanya ditambah penyebutan ekspor Excel.
 
+## Catatan 2026-10-29: Mode usaha, Laba Rugi, dan PDF
+Seluruhnya dihitung dan dibuat di perangkat: tanpa jaringan, tanpa izin baru, tanpa SDK baru (paket `pdf` hanya pustaka Dart untuk
+menulis berkas). PDF/Excel keluar dari HP hanya bila pengguna membagikannya sendiri lewat lembar bagikan Android, sama seperti CSV, Excel,
+dan backup berkas. Kolom baru di database lokal (`categories.reportGroup`, `ledgers.kind`) tidak dikirim ke mana pun; ikut backup berkas/Drive
+terenkripsi yang sudah dideklarasikan. **Tidak ada perubahan deklarasi Data Safety.** Kebijakan privasi bagian 7 ditambah penyebutan PDF
+(perlu di-deploy bersama rilis 1.2.0+16). Fase 2 (data pelanggan/pemasok) akan mengubah penilaian ini; periksa ulang saat itu.
+
 ## Pembaruan 2026-10-04 (tahap 3 dan 4): input suara dan ringkasan laporan AI
 **PERIKSA ULANG di Play Console sebelum merilis.** Poin di bawah adalah pemahaman saya, bukan keputusan Google.
 

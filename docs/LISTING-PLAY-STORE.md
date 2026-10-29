@@ -27,7 +27,7 @@ Catat pemasukan & pengeluaran, atur anggaran. Data tersimpan di HP Anda.
 
 ## Deskripsi lengkap
 ```
-LaciQ membantu Anda mencatat dan memahami keuangan pribadi dengan cepat, tanpa perlu membuat akun. Data keuangan Anda disimpan di HP Anda sendiri.
+LaciQ membantu Anda mencatat dan memahami keuangan pribadi maupun usaha kecil dengan cepat, tanpa perlu membuat akun. Data keuangan Anda disimpan di HP Anda sendiri.
 
 CATAT DENGAN CEPAT
 • Catat pemasukan, pengeluaran, dan transfer antar dompet dalam beberapa ketukan
@@ -57,6 +57,7 @@ FITUR PREMIUM (BERLANGGANAN)
 • Scan struk: foto struk dibaca langsung di HP Anda
 • Ekspor laporan ke Excel (.xlsx): ringkasan, per kategori, per bulan, per dompet
 • Laporan Bulanan: sorotan otomatis dari catatan Anda, dihitung di HP
+• Mode usaha dan Laba Rugi: kelompokkan kategori (pendapatan, HPP, beban) lalu lihat untung-rugi per bulan, 3 bulan, atau tahun, dihitung di HP. Bagikan sebagai PDF atau Excel
 • Catat dengan Suara: ucapkan "makan siang dua puluh lima ribu", formulir terisi. Pengenalan suara oleh layanan bawaan Android; LaciQ tidak menyimpan rekaman
 
 FITUR ULTIMATE (BERLANGGANAN)
@@ -72,6 +73,13 @@ LaciQ mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi
 Kebijakan privasi: https://laciq.solusimandiri.id/privacy
 Bantuan: support@hardan-ti.com
 ```
+
+## Pembaruan 2026-10-29: Mode usaha dan Laba Rugi (untuk rilis 1.2.0+16)
+Deskripsi lengkap di atas sudah memuat dua perubahan: kalimat pembuka ("keuangan pribadi maupun usaha kecil") dan satu butir Premium
+(Mode usaha dan Laba Rugi). **Pasang ke Play Console bersamaan dengan rilis 1.2.0+16**, bukan sebelumnya. Perkiraan panjang
+deskripsi lengkap di berkas ini kini 2.960 karakter (batas 4.000). Listing yang sedang tayang mengikuti
+[ASO-DAN-MATERI-UMKM.md](ASO-DAN-MATERI-UMKM.md) (ASO v1, 2026-10-28): samakan penambahan ini dengan teks yang tayang itu, jangan menimpanya
+dengan draf lama di berkas ini. Judul dan deskripsi singkat tidak diubah (jendela 14 hari tanpa ubah judul).
 
 ## Ultimate sudah masuk ke deskripsi di atas (diperbarui 2026-10-01)
 Blok "FITUR ULTIMATE" dan kalimat privasi yang sudah dilunakkan sudah menyatu di deskripsi lengkap. **Pasang ke

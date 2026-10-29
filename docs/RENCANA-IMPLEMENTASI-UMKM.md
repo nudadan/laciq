@@ -188,7 +188,11 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
    yang diperbaiki: alur ekspor Excel membaca nama buku dari provider yang bisa belum terisi (Riverpod menjeda yang tidak
    terlihat), sehingga nama bisa jatuh ke "Buku Utama"; kini dibaca langsung dari database. Perubahan 0,0% ditulis "Sama dengan
    periode sebelumnya", bukan "naik 0,0%". Belum diuji di HP/WhatsApp/Excel/Google Sheets nyata (daftar uji §8 butir 5).
-7. Perbarui matriks fitur, listing, catatan rilis; uji di HP (daftar §8).
+7. ~~Perbarui matriks fitur, listing, catatan rilis; uji di HP (daftar §8)~~ **dokumen selesai 2026-10-29**: baris baru di
+   [MATRIKS-FITUR-PAKET.md](MATRIKS-FITUR-PAKET.md), butir Premium baru dan kalimat pembuka di [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md)
+   (deskripsi 2.960 karakter; jangan menimpa listing ASO yang tayang), catatan Data Safety (tidak berubah) dan kata "PDF" di kebijakan
+   privasi bagian 7 (perlu di-deploy), rancangan [RILIS-1.2.0+16.md](RILIS-1.2.0+16.md), dan daftar uji [UJI-HP-LABA-RUGI.md](UJI-HP-LABA-RUGI.md)
+   (L1-L13, data uji berangka). **Yang BELUM: uji di HP, naik versi di `pubspec.yaml`, membangun AAB.**
 
 **Selesai bila:** pengguna Premium bisa menyalakan mode usaha di Buku Utama, melihat Laba Rugi satu bulan yang
 rekonsiliasinya cocok dengan perubahan saldo dompet, membagikannya sebagai PDF, dan semua tes lulus.
