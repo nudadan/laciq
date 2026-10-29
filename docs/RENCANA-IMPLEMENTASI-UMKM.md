@@ -114,9 +114,13 @@ Baris rekonsiliasi adalah **uji kebenaran** di tes: selisihnya harus selalu nol.
 - **Excel:** tambah lembar "Laba Rugi" pada `buildTransactionsXlsx`; lembar lama tidak berubah.
 - **PDF (baru):** satu halaman A4 "Laporan Laba Rugi" (nama usaha = nama buku, periode, tabel, keterangan "dibuat oleh
   LaciQ, catatan manajemen, bukan laporan resmi"), dibagikan lewat lembar bagikan yang sudah ada (`share_file.dart`).
-  Memerlukan paket `pdf` (murni Dart, tanpa izin baru). **Risiko yang harus diuji lebih dulu (spike):** font variabel
-  `PlusJakartaSans.ttf` yang dibundel mungkin tidak dirender benar oleh paket `pdf`; bila ya, tambahkan versi statis
-  (OFL, lisensi sudah ada di `assets/fonts/`) khusus PDF.
+  Memakai paket `pdf` 3.13.1 (murni Dart, tanpa izin baru). **Hasil spike (2026-10-29):** font variabel
+  `PlusJakartaSans.ttf` yang dibundel **terrender benar** (huruf Latin beraksen, tanda baca, angka, "Rp", dan tersemat di PDF)
+  tetapi hanya pada bobot bawaannya (400; `SpaceGrotesk.ttf` bawaannya 300/Light, jadi tidak cocok untuk badan teks PDF).
+  Paket `pdf` tidak bisa memilih bobot sumbu variabel, sehingga **huruf tebal memakai instans statis**
+  `assets/fonts/pdf/PlusJakartaSans-Bold.ttf` (96 KB, dibuat dengan `fonttools varLib.instancer ... wght=700
+  --update-name-table`, lisensi OFL yang sama, tanpa Reserved Font Name). Dideklarasikan di bagian `assets:` pubspec, bukan
+  `fonts:`, agar bobot teks di aplikasi tidak berubah. Dijaga oleh `test/pdf_fonts_test.dart`.
 - Teks keuangan Indonesia: format Rupiah memakai `lib/core/money.dart`; tanggal `intl` lokal `id`.
 
 ### 4.5 Gating dan tampilan paket
@@ -140,7 +144,8 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
 [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md).
 
 ### 4.8 Urutan kerja Fase 1 (tiap langkah bisa dikomit terpisah)
-1. Spike PDF + font (hasil: ya/tidak butuh font statis).
+1. ~~Spike PDF + font~~ **selesai 2026-10-29**: font variabel cukup untuk teks biasa; huruf tebal butuh instans statis (§4.4).
+   Belum diuji: tampilan PDF di HP nyata/WhatsApp (masuk daftar uji §8 butir 5), dan ukuran APK setelah paket `pdf` (periksa saat membangun AAB).
 2. `ReportGroup`, `LedgerKind`, skema v12, migrasi + tes migrasi + backup v9.
 3. `profit_loss.dart` + tes unit (belum ada UI).
 4. Pilihan kelompok di layar Kategori, saklar buku usaha, saran kelompok otomatis.

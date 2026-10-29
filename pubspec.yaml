@@ -66,6 +66,7 @@ dependencies:
   in_app_review: ^2.0.12
   archive: ^4.3.0
   speech_to_text: ^7.5.0
+  pdf: ^3.13.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -92,6 +93,13 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Font statis khusus PDF: paket `pdf` hanya membaca bobot bawaan font variabel,
+  # jadi huruf tebal butuh instans statis (dibuat dari PlusJakartaSans.ttf dengan
+  # wght=700; lisensi OFL sama, lihat assets/fonts/). Sengaja BUKAN di bagian
+  # `fonts:` agar tidak mengubah bobot teks di aplikasi.
+  assets:
+    - assets/fonts/pdf/
 
   # Font variabel (lisensi SIL OFL, teks lisensi ada di assets/fonts/).
   # Bobot dipilih lewat FontVariation('wght') di lib/core/theme.dart.
