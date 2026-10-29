@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../data/providers.dart';
+import 'ad_consent_service.dart';
 import 'ad_unit_ids.dart';
 
 /// Gerbang tampil/tidaknya banner iklan di bawah navigasi utama. Hanya
@@ -20,14 +21,14 @@ class HomeAdSlot extends ConsumerWidget {
   }
 }
 
-class _HomeBannerAd extends StatefulWidget {
+class _HomeBannerAd extends ConsumerStatefulWidget {
   const _HomeBannerAd();
 
   @override
-  State<_HomeBannerAd> createState() => _HomeBannerAdState();
+  ConsumerState<_HomeBannerAd> createState() => _HomeBannerAdState();
 }
 
-class _HomeBannerAdState extends State<_HomeBannerAd> {
+class _HomeBannerAdState extends ConsumerState<_HomeBannerAd> {
   static bool _sdkInitialized = false;
 
   BannerAd? _ad;
@@ -39,6 +40,10 @@ class _HomeBannerAdState extends State<_HomeBannerAd> {
   }
 
   Future<void> _load() async {
+    // Persetujuan (UMP) SEBELUM SDK iklan diinisialisasi atau iklan diminta. Di luar
+    // wilayah yang mewajibkan, jawabannya langsung "boleh" tanpa formulir.
+    final canRequest = await ref.read(adConsentServiceProvider).gatherConsent();
+    if (!canRequest || !mounted) return;
     if (!_sdkInitialized) {
       await MobileAds.instance.initialize();
       _sdkInitialized = true;

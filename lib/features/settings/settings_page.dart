@@ -15,6 +15,8 @@ import '../../data/backup.dart';
 import '../../data/csv_export.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
+import '../ads/ad_consent_service.dart';
+import '../ads/privacy_options.dart';
 import '../cloud_backup/cloud_backup_page.dart';
 import '../onboarding/onboarding_page.dart';
 import '../onboarding/onboarding_providers.dart';
@@ -110,6 +112,16 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => _restore(context, ref),
               ),
               const _CloudBackupTile(),
+              if (ref.watch(privacyOptionsRequiredProvider).value ?? false)
+                ListTile(
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: const Text('Pilihan privasi iklan'),
+                  subtitle: const Text(
+                    'Ubah atau cabut persetujuan iklan yang kamu berikan.',
+                  ),
+                  onTap: () =>
+                      ref.read(adConsentServiceProvider).showPrivacyOptions(),
+                ),
               ListTile(
                 leading: Icon(
                   Icons.delete_forever_rounded,

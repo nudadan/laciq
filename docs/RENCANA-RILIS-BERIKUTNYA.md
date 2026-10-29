@@ -4,6 +4,14 @@
 > (satu peninjauan Play, bukan beberapa). Urutkan ulang sesuai kebutuhan.
 
 ## 1. Pesan persetujuan iklan (CMP / Google UMP)
+> **KODE SELESAI 2026-10-29 (belum dirilis; masuk build berikutnya, +19):** `lib/features/ads/ad_consent_service.dart` (`UmpAdConsentService` di atas gateway plugin, 8 tes),
+> banner iklan meminta persetujuan SEBELUM `MobileAds.initialize()` dan iklan pertama (`banner_ad_widget.dart`), dan tombol **"Pilihan privasi iklan"** di Pengaturan > Data hanya tampil bila
+> pengguna memang melihat iklan DAN UMP menyatakan wajib (`privacy_options.dart`, 3 tes UI). Pengguna berbayar dan yang masih masa tenggang 30 hari **tidak pernah menyentuh UMP**.
+> Perilaku aman: tanpa pesan di AdMob atau di luar wilayah yang mewajibkan (mis. Indonesia), UMP menjawab "tidak diperlukan" dan iklan tampil seperti sekarang; gagal/tanpa jaringan jatuh ke status
+> tersimpan (bila belum ada status sama sekali, iklan belum dimuat sampai sesi berikutnya). 886 tes lulus.
+> **Yang masih HARUS dikerjakan pemilik (konsol, tidak bisa saya kerjakan):** (1) AdMob > Privasi & pesan > buat **pesan persetujuan** untuk aplikasi LaciQ (Android) dan terbitkan
+> (tanpa ini formulir tidak pernah muncul bagi pengguna EEA/Inggris/Swiss); (2) uji dengan `ConsentDebugSettings` (geografi EEA) di build uji, belum dipasang di kode produksi sengaja;
+> (3) perbarui bagian iklan di kebijakan privasi (sebut pesan persetujuan dan pilihan privasi) dan cek ulang `DATA-SAFETY-PLAY.md`; (4) deploy kebijakan sebelum rilis.
 **Latar:** AdMob (aplikasi terverifikasi 2026-10-08, peninjauan 2-3 hari) menyarankan platform pengelolaan izin yang
 disertifikasi Google untuk pengguna di EEA, Inggris Raya, dan Swiss. Aplikasi memakai `google_mobile_ads ^9.1.0` tetapi
 belum memanggil UMP (`ConsentInformation` / `ConsentForm` tidak ada di `lib/`). Sementara itu AdMob memakai "pesan
