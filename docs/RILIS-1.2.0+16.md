@@ -70,8 +70,12 @@ Baru: Mode usaha dan Laba Rugi (Premium). Kelompokkan kategori sebagai pendapata
        tidak ada perangkat yang hilang). +16 tidak boleh dipromosikan ke Produksi. Di Redmi: perbarui ke +17 tanpa menghapus aplikasi, lalu **pulihkan ulang backup lama** supaya kelompok kategori terisi.
        **Diganti +18:** AAB `1.2.0+18` diterbitkan ke jalur internal pada **2026-10-29 15.49** (status "Tersedia untuk penguji internal"; ukuran pembaruan 4,13 MB, tidak ada perangkat yang hilang). +16 dan +17 tidak boleh dipromosikan.
 3. [ ] **Uji HP**: jalankan [UJI-HP-LABA-RUGI.md](UJI-HP-LABA-RUGI.md). Semua butir bertanda **WAJIB** harus lulus.
-4. [ ] **Listing**: samakan paragraf baru dengan listing yang tayang (lihat [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md), 2026-10-29). Jangan mengubah judul (jendela 14 hari).
-5. [ ] **Produksi bertahap**: promosikan **bundel yang sama** dari uji internal, mulai 10% → 50% → 100% sambil memantau Android vitals, ulasan, dan RevenueCat.
+4. [~] **Listing (DIKIRIM UNTUK DITINJAU 2026-10-29)**: deskripsi lengkap baru dikirim (judul dan deskripsi singkat tidak diubah); teks di [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md). Semula: samakan paragraf baru dengan listing yang tayang (lihat [LISTING-PLAY-STORE.md](LISTING-PLAY-STORE.md), 2026-10-29). Jangan mengubah judul (jendela 14 hari).
+5. [~] **Produksi bertahap (DIKIRIM UNTUK DITINJAU 2026-10-29)**: rilis **18 (1.2.0)** dipromosikan dari Pengujian internal ke Produksi dengan **peluncuran bertahap 50%**
+       (basis 33 instal aktif, sekitar 17 yang ditargetkan; bundel yang sama dengan uji internal). Di Ringkasan publikasi statusnya "Perubahan yang sedang ditinjau"
+       (bersama perubahan listing, langkah 4). Pemilik mengirim; Google meninjau (beberapa jam sampai beberapa hari). Setelah tayang: pantau Android vitals,
+       ulasan, RevenueCat 24-48 jam; naikkan ke 100% dari Produksi > Kelola rilis; jeda peluncuran bila ada masalah berat. Rencana awal yang tertulis di bawah (mulai 10%) diganti keputusan pemilik 50%.
+       Semula: promosikan **bundel yang sama** dari uji internal, mulai 10% → 50% → 100% sambil memantau Android vitals, ulasan, dan RevenueCat.
 6. [ ] Setelah tayang: perbarui dokumen ini dengan tanggal publikasi; perbarui status di [MATRIKS-FITUR-PAKET.md](MATRIKS-FITUR-PAKET.md) (🟡 → ✅ sesuai hasil uji).
 
 ## Dibawa ke rilis yang sama (keputusan U6, belum diputuskan)

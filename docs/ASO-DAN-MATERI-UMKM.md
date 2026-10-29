@@ -150,5 +150,5 @@ Akses diberikan lewat kode promo Play (Monetisasi > Kode promo). Jangan menjanji
 - [x] Uji penawaran trial di HP nyata: berhasil (dikonfirmasi pemilik 2026-10-28).
 - Catatan: deskripsi LENGKAP di Play masih teks lama (belum ada pembuka UMKM/buku kas dan belum menyebut trial). Deskripsi lengkap tidak dibatasi aturan 14 hari untuk judul, tetapi mengubahnya bersamaan membuat efek judul sulit dibaca; usul: ubah di 2026-11-11.
 - [x] `TRIAL_ENABLED` di Worker produksi: dinyalakan 2026-10-28 (versi Worker `1a0fd0e7-6e36-4824-a02c-3b0e94b57598`). A4 lulus menurut pemilik. Pantau `trial_claim result=` (`npx wrangler tail`), `promo-cost:<bulan>` (anggaran Rp1.350.000), dan konversi di RevenueCat.
-- [ ] Tinjauan listing sudah selesai (2026-10-28). Tambahkan trial dan pembuka UMKM ke deskripsi lengkap Play serta screenshot pada/setelah 2026-11-11.
+- [~] Tinjauan listing sudah selesai (2026-10-28). Deskripsi LENGKAP baru (pembuka usaha kecil, Laba Rugi, Tabungan, trial Ultimate) **dikirim untuk ditinjau 2026-10-29** (lebih cepat dari saran 2026-11-11; catat sebagai titik perubahan kedua saat membaca efek ASO: judul/singkat 2026-10-28, deskripsi lengkap 2026-10-29). Screenshot kustom UMKM masih menunggu.
 - [ ] Reels dan postingan mana yang sudah tayang sejak 7 Okt (untuk membaca asal 22 pemasangan langsung)?

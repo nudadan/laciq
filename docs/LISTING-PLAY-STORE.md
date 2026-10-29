@@ -83,7 +83,7 @@ Dasar: deskripsi yang tayang di Play per 2026-10-29 (dibaca dari halaman publik)
 4. Kalimat **uji coba Ultimate 30 hari tanpa kartu** (trial dinyalakan 2026-10-28).
 
 Panjang 3318 karakter (batas 4.000). Sapaan tetap "Anda" (seragam dengan aplikasi). Teks di bawah ini yang dimasukkan ke formulir Play Console pada 2026-10-29
-(belum disimpan/dikirim saat dokumen ini ditulis).
+**Status 2026-10-29:** disimpan dan **dikirim untuk ditinjau** oleh pemilik (Ringkasan publikasi: "Listingan Play Store, Indonesia - id, Mengubah deskripsi lengkap", bersama rilis Produksi 18 (1.2.0) 50%). Pemilik memilih memasang sekarang, bukan menunggu 2026-11-11.
 
 **Waktu pemasangan:** [ASO-DAN-MATERI-UMKM.md](ASO-DAN-MATERI-UMKM.md) menyarankan menunda perubahan deskripsi lengkap sampai **2026-11-11** agar efek ubah judul/deskripsi singkat (28 Okt) terbaca bersih.
 Mengubah deskripsi lengkap sekarang boleh, tetapi membuat pembacaan efek ASO v1 kurang bersih; catat tanggalnya di lembar pelacakan.
