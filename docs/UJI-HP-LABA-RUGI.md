@@ -115,6 +115,28 @@ Pemilik menghapus aplikasi build 15 dari Redmi, memasang 1.2.0 dari jalur intern
 kembali pribadi. Perbaikan: `BackupService.parse` menerapkan kelompok bawaan yang sama dengan migrasi v12 untuk backup < v9 (tes: `report_group_test.dart`, pemulihan backup v8 -> Laba Rugi benar).
 Berlaku untuk **build 1.2.0+16 yang sudah di jalur internal** (data yang dipulihkan dari backup lama di build itu perlu dipulihkan ulang atau dikelompokkan manual); perbaikan ikut build berikutnya (+17).
 
+## 3d. Hasil uji Redmi (2026-10-29 sore, build 1.2.0+17 dari Play, uji coba Ultimate aktif)
+Dikerjakan lewat adb (ketukan dan pembacaan layar aplikasi); data di HP adalah data dummy milik pemilik. Berkas **backup uji format v8** (12 transaksi, 2 buku: Buku Utama pribadi
+dan "Warung Bu Sari" template Bisnis, tanpa kolom `kind`/`reportGroup`) dibuat di PC dan dipulihkan lewat Pengaturan > Pulihkan.
+
+| Butir | Hasil |
+|---|---|
+| Pembaruan 16 → 17 dari Play (tanpa menghapus) | **Lulus**: `firstInstallTime` tetap (14:03:28), `lastUpdateTime` 15:00:07 |
+| L11 pulihkan backup lama (v8) | **Lulus**: Buku Utama Total Saldo Rp 6.050.000 (BCA 6.400.000 + Tunai -350.000), Pemasukan 5.000.000, Pengeluaran 950.000; Warung Bu Sari Rp 1.350.000 |
+| L1b perbaikan +17 pada pemulihan backup lama | **Lulus**: "Warung Bu Sari" otomatis **Mode usaha** menyala; di Kategori: Pembelian Stok = HPP, Peralatan dan Cicilan Usaha = Di luar laba rugi; lainnya "Beban operasional · otomatis" |
+| L4 angka Laba Rugi (Oktober) | **Lulus**: pendapatan 1.000.000, HPP -200.000, laba kotor 800.000 (80,0%), beban -300.000, laba operasional 500.000, pendapatan lain +50.000, **laba bersih 550.000 (55,0%)** |
+| L5 rekonsiliasi kas | **Lulus**: Laba bersih 550.000 + Modal Masuk 500.000 - Peralatan 150.000 - Utang 100.000 = **Perubahan kas 800.000** |
+| L7 periode | **Lulus**: Bulan, 3 Bulan (1 Agu-31 Okt: laba 1.100.000, 61,1%), Tahun (1 Jan-31 Des: 1.100.000); pembanding "Sama dengan periode sebelumnya (Rp 550.000)" benar (September juga 550.000); label rentang benar |
+| L7b buku pribadi | **Lulus**: kartu "Buku ini belum Mode usaha" + tombol; angka bawaan tetap terbaca (3 bulan: laba 4.050.000) |
+| L3 saran nama | **Lulus**: "Prive" otomatis "Di luar laba rugi" + penjelasan |
+| L8 PDF | **Sebagian**: pembuatan PDF di HP berhasil (lembar bagikan Android menampilkan `laciq-laba-rugi-20260801_20261031.pdf`, nama sesuai periode). **Tampilan visual PDF belum diperiksa** (butuh dibuka di aplikasi PDF/WhatsApp oleh pemilik) |
+| L9 Excel | **Sebagian**: pembuatan Excel berhasil (`laciq-laba-rugi-20260801_20261031.xlsx` di lembar bagikan). **Isi lembar belum diperiksa** di Google Sheets/Excel |
+| L2, L6, L10, L12, L13 | Belum diuji di HP (saklar Mode usaha tampil benar di Lainnya; ubah kelompok manual; akun Gratis; tema terang/huruf besar; ukuran) |
+
+**Temuan dari uji ini (sudah diperbaiki di kode, belum di build):** kartu ringkas di atas layar memberi label "HPP + beban" untuk angka yang sudah dikurangi pendapatan lain
+(Rp 450.000 padahal HPP 200.000 + beban 300.000 = 500.000), sehingga menyesatkan. Kini kartu menampilkan **Total pendapatan** (pendapatan usaha + pendapatan lain, 1.050.000) dan **Total biaya**
+(HPP + beban + beban lain, 500.000): selisihnya selalu sama dengan laba bersih. Tes ditambahkan. Perlu build +18.
+
 ## 4. Catatan hasil
 | Butir | Lulus? | Perangkat / versi | Catatan |
 |---|---|---|---|

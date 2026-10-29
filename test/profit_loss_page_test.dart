@@ -116,14 +116,20 @@ void main() {
         expect(find.text('Laba operasional'), findsOneWidget);
         expect(find.text('- ${rupiah(200000)}'), findsWidgets);
         expect(find.text(rupiah(800000)), findsOneWidget); // laba kotor
-        expect(find.text(rupiah(500000)), findsOneWidget); // laba operasional
+        expect(
+          find.text(rupiah(500000)),
+          findsNWidgets(2),
+        ); // laba operasional + total biaya
 
         // Dari laba ke kas: bayar utang di luar laba rugi; kas = 450.000.
         expect(find.text('Utang'), findsOneWidget);
         expect(find.text('- ${rupiah(100000)}'), findsOneWidget);
         expect(_rowAmount(tester, 'pl-cash'), rupiah(450000));
 
-        // Kartu ringkas.
+        // Kartu ringkas: total pendapatan (1.000.000 + 50.000 lain) dikurangi total biaya
+        // (200.000 + 300.000) = laba bersih 550.000; pendapatan lain tidak dikurangkan dari biaya.
+        expect(_text(tester, 'pl-total-income'), rupiah(1050000));
+        expect(_text(tester, 'pl-total-cost'), rupiah(500000));
         expect(find.text(rupiah(1000000)), findsWidgets); // pendapatan
       },
       subscription: FakeSubscriptionStatus(premium: true),

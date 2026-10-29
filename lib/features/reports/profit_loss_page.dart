@@ -430,22 +430,24 @@ class _Hero extends StatelessWidget {
           Row(
             children: [
               Expanded(
+                // Total pendapatan - total biaya = laba bersih, supaya kedua angka ini
+                // dan angka besar di atasnya selalu cocok (pendapatan lain ikut di sini,
+                // bukan dikurangkan dari biaya).
                 child: _Figure(
-                  label: 'Pendapatan',
-                  value: rupiah(r.revenue.total),
+                  label: 'Total pendapatan',
+                  value: rupiah(r.revenue.total + r.otherIncome.total),
                   color: palette.income,
+                  valueKey: const Key('pl-total-income'),
                 ),
               ),
               Expanded(
                 child: _Figure(
-                  label: 'HPP + beban',
+                  label: 'Total biaya',
                   value: rupiah(
-                    r.cogs.total +
-                        r.opex.total +
-                        r.otherExpense.total -
-                        r.otherIncome.total,
+                    r.cogs.total + r.opex.total + r.otherExpense.total,
                   ),
                   color: palette.expense,
+                  valueKey: const Key('pl-total-cost'),
                 ),
               ),
             ],
@@ -461,11 +463,13 @@ class _Figure extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
+    this.valueKey,
   });
 
   final String label;
   final String value;
   final Color color;
+  final Key? valueKey;
 
   @override
   Widget build(BuildContext context) {
@@ -474,7 +478,11 @@ class _Figure extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: text.labelMedium),
-        Text(value, style: text.titleMedium?.copyWith(color: color)),
+        Text(
+          value,
+          key: valueKey,
+          style: text.titleMedium?.copyWith(color: color),
+        ),
       ],
     );
   }
