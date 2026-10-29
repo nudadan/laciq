@@ -11,6 +11,7 @@ import '../goals/goals_page.dart';
 import '../ledgers/ledgers_page.dart';
 import '../recurring/recurring_page.dart';
 import '../reports/monthly_report_page.dart';
+import '../reports/profit_loss_page.dart';
 import '../savings/savings_page.dart';
 import '../subscription/trial_offer.dart';
 import '../subscription/subscription_plans.dart' show ActiveTier;
@@ -105,6 +106,20 @@ class MorePage extends ConsumerWidget {
                 ? Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const MonthlyReportPage(),
+                    ),
+                  )
+                : openUpgradeOrTrial(context, ref),
+          ),
+          _MoreTile(
+            icon: Icons.assessment_outlined,
+            title: 'Laba Rugi',
+            subtitle: premium
+                ? 'Untung-rugi usaha: pendapatan, HPP, beban, laba bersih'
+                : 'Fitur Premium',
+            onTap: () => premium
+                ? Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ProfitLossPage(),
                     ),
                   )
                 : openUpgradeOrTrial(context, ref),

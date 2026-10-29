@@ -63,8 +63,8 @@ void main() {
     await _openMore(tester);
     expect(find.textContaining('gratis 3 bulan terakhir'), findsOneWidget);
     expect(find.textContaining('gratis 3 item'), findsOneWidget);
-    // Utang & Piutang dan Laporan Bulanan.
-    expect(find.text('Fitur Premium'), findsNWidgets(2));
+    // Utang & Piutang, Laporan Bulanan, dan Laba Rugi.
+    expect(find.text('Fitur Premium'), findsNWidgets(3));
 
     await tester.tap(find.text('Kategori'));
     await settle(tester);

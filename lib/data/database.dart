@@ -1330,6 +1330,11 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
+  /// Semua kategori buku [ledgerId] (pemasukan dan pengeluaran, termasuk yang
+  /// diarsipkan), untuk mencari induk sub-kategori pada laporan.
+  Stream<List<Category>> watchLedgerCategories(String ledgerId) =>
+      (select(categories)..where((c) => c.ledgerId.equals(ledgerId))).watch();
+
   static String _cleanCategoryName(String name) {
     final n = name.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (n.isEmpty) throw const CategoryException('Nama kategori wajib diisi.');
@@ -2329,6 +2334,18 @@ class AppDatabase extends _$AppDatabase {
       to: monthEnd(month),
       ledgerId: ledgerId,
     );
+    return q.query.watch().map((rows) => rows.map(q.map).toList());
+  }
+
+  /// Transaksi aktif buku [ledgerId] dalam rentang [from, to) (from termasuk, to
+  /// tidak), diperbarui otomatis. Dipakai laporan Laba Rugi yang rentangnya bukan
+  /// satu bulan kalender.
+  Stream<List<TxView>> watchTransactionsRange(
+    DateTime from,
+    DateTime to, {
+    String ledgerId = kMainLedgerId,
+  }) {
+    final q = _txQuery(from: from, to: to, ledgerId: ledgerId);
     return q.query.watch().map((rows) => rows.map(q.map).toList());
   }
 

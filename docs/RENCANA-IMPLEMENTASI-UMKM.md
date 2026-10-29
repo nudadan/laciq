@@ -170,7 +170,14 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
    "bahan bakar" bukan HPP) hanya untuk kategori **baru** dan berhenti begitu pengguna memilih sendiri; kategori yang diubah
    namanya tidak berubah kelompoknya; (d) sub-kategori tidak punya pilihan (mengikuti induk); (e) `updateCategory` menerima
    `Value<ReportGroup?>` (absen = tidak diubah). Teks baru memakai "Anda" agar seragam dengan aplikasi sampai sapaan "kamu" diganti.
-5. Layar Laba Rugi + gating.
+5. ~~Layar Laba Rugi + gating~~ **selesai 2026-10-29** (`lib/features/reports/profit_loss_page.dart`,
+   `profit_loss_providers.dart`, tile "Laba Rugi" di Lainnya; 852 tes lulus). Isi: pilihan periode **Bulan / 3 Bulan / Tahun /
+   Kustom** (bulan dan tahun memakai penggeser yang sudah ada), kartu laba/rugi bersih + margin + perbandingan dengan periode
+   sebelumnya, tabel bertingkat (bagian kosong disembunyikan), blok "Dari laba ke kas" (rekonsiliasi), catatan "otomatis" untuk
+   kategori yang kelompoknya bawaan, dan ajakan menyalakan Mode usaha di buku pribadi (laporan tetap terbaca dengan kelompok
+   bawaan). Reaktif: transaksi atau kelompok yang berubah langsung memperbarui layar. **Penyimpangan dari §4.5:** penguncian
+   mengikuti pola Laporan Bulanan (Gratis ditawari upgrade dari menu, tanpa pratinjau angka terkunci); pratinjau terkunci bisa
+   ditambah kemudian bila ingin. Teks memakai "Anda"/netral. Ekspor Excel dan PDF menyusul di langkah 6.
 6. Lembar Excel dan PDF.
 7. Perbarui matriks fitur, listing, catatan rilis; uji di HP (daftar §8).
 
