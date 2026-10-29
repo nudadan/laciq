@@ -137,6 +137,10 @@ dan "Warung Bu Sari" template Bisnis, tanpa kolom `kind`/`reportGroup`) dibuat d
 (Rp 450.000 padahal HPP 200.000 + beban 300.000 = 500.000), sehingga menyesatkan. Kini kartu menampilkan **Total pendapatan** (pendapatan usaha + pendapatan lain, 1.050.000) dan **Total biaya**
 (HPP + beban + beban lain, 500.000): selisihnya selalu sama dengan laba bersih. Tes ditambahkan. Perlu build +18.
 
+**Tindak lanjut (2026-10-29 15.52): build 1.2.0+18 di Redmi.** Pembaruan 17 → 18 dari Play **lulus tanpa menghapus aplikasi** (`firstInstallTime` tetap 14:03:28). Kartu ringkasan Laba Rugi
+"Warung Bu Sari" kini: **Laba bersih Rp 550.000 (55,0%)**, **Total pendapatan Rp 1.050.000**, **Total biaya Rp 500.000** (selisihnya = laba bersih): temuan "HPP + beban" **tertutup**.
+Masih menunggu pemeriksaan pemilik: tampilan PDF (L8) dan isi Excel di Google Sheets (L9), serta L2/L6/L10/L12.
+
 ## 4. Catatan hasil
 | Butir | Lulus? | Perangkat / versi | Catatan |
 |---|---|---|---|
