@@ -75,19 +75,69 @@ Bantuan: support@hardan-ti.com
 ```
 
 ## Deskripsi lengkap TERBARU untuk dipasang (disusun 2026-10-29, dari teks yang TAYANG di Play)
-Dasar: deskripsi yang tayang di Play per 2026-10-29 (dibaca dari halaman publik; sudah memakai judul  dan deskripsi singkat
-; **tidak diubah**). Perubahan dibanding yang tayang, hanya empat:
+Dasar: deskripsi yang tayang di Play per 2026-10-29 (dibaca dari halaman publik). Judul `LaciQ: Buku Kas & Catatan Uang` dan deskripsi singkat
+`Buku kas usaha & pribadi terpisah. Tanpa login, data di HP. Scan struk AI.` **tidak diubah**. Perubahan dibanding yang tayang, hanya empat:
 1. Kalimat pembuka: "keuangan pribadi **maupun usaha kecil**".
 2. Butir Premium baru: **Mode usaha dan Laba Rugi** (setelah Laporan Bulanan).
 3. Butir Ultimate baru: **Tabungan berdompet** (sudah dirilis di 1.1.0+15 tetapi belum ada di listing).
 4. Kalimat **uji coba Ultimate 30 hari tanpa kartu** (trial dinyalakan 2026-10-28).
-Panjang 3318 karakter (batas 4.000). Sapaan tetap "Anda" (seragam dengan aplikasi). Berkas ini di bawah adalah teks yang dimasukkan ke formulir Play Console pada 2026-10-29
-(belum disimpan/dikirim saat dokumen ini ditulis; lihat status di bagian bawah catatan ini).
+
+Panjang 3318 karakter (batas 4.000). Sapaan tetap "Anda" (seragam dengan aplikasi). Teks di bawah ini yang dimasukkan ke formulir Play Console pada 2026-10-29
+(belum disimpan/dikirim saat dokumen ini ditulis).
 
 **Waktu pemasangan:** [ASO-DAN-MATERI-UMKM.md](ASO-DAN-MATERI-UMKM.md) menyarankan menunda perubahan deskripsi lengkap sampai **2026-11-11** agar efek ubah judul/deskripsi singkat (28 Okt) terbaca bersih.
-Mengubah deskripsi lengkap sekarang memang boleh, tetapi membuat pembacaan efek ASO v1 kurang bersih; catat tanggalnya di lembar pelacakan.
+Mengubah deskripsi lengkap sekarang boleh, tetapi membuat pembacaan efek ASO v1 kurang bersih; catat tanggalnya di lembar pelacakan.
 
+```
+LaciQ membantu Anda mencatat dan memahami keuangan pribadi maupun usaha kecil dengan cepat, tanpa perlu membuat akun. Data keuangan Anda disimpan di HP Anda sendiri.
 
+CATAT DENGAN CEPAT
+• Catat pemasukan, pengeluaran, dan transfer antar dompet dalam beberapa ketukan
+• Banyak dompet: tunai, rekening bank, e-wallet
+• Kategori dan tag yang bisa Anda atur sendiri
+• Transaksi berulang untuk gaji, cicilan, dan langganan
+
+PAHAMI ARUS UANG ANDA
+• Dasbor saldo total, arus kas bulan ini, dan grafik per kategori
+• Anggaran bulanan per kategori dengan pengingat saat mendekati batas
+• Target tabungan untuk tujuan yang ingin Anda capai
+• Ekspor data ke CSV
+
+PRIVASI DAN KEAMANAN
+• Tidak perlu daftar atau login
+• Kunci aplikasi dengan PIN atau sidik jari
+• Data keuangan tersimpan di perangkat Anda dan tidak kami simpan di server. Pengecualian hanya untuk fitur AI Ultimate dan hanya setelah Anda menyetujuinya: teks hasil scan struk, atau angka total dan nama kategori untuk Ringkasan AI, dikirim untuk diproses dan tidak disimpan
+• Hapus semua data kapan saja dari menu Pengaturan
+
+FITUR PREMIUM (BERLANGGANAN)
+• Bebas iklan
+• Backup Cloud ke Google Drive Anda sendiri, terenkripsi
+• Analisa Tren pengeluaran per kategori untuk 6 dan 12 bulan
+• Pengingat transaksi berulang dan agenda (servis kendaraan, tagihan tahunan, dan lainnya)
+• Proyeksi pengeluaran bulan ini dan simulasi apakah dana cukup sampai akhir bulan
+• Catatan utang dan piutang
+• Scan struk: foto struk dibaca langsung di HP Anda
+• Laporan Bulanan: sorotan otomatis dari catatan Anda, dihitung di HP
+• Mode usaha dan Laba Rugi: kelompokkan kategori (pendapatan, HPP, beban) lalu lihat untung-rugi per bulan, 3 bulan, atau tahun, dihitung di HP. Bagikan sebagai PDF atau Excel
+• Ekspor laporan ke Excel (.xlsx): ringkasan, per kategori, per bulan, per dompet
+• Catat dengan Suara: ucapkan "makan siang dua puluh lima ribu" dan formulir terisi. Suara diubah menjadi teks oleh layanan pengenalan suara bawaan Android; LaciQ tidak menyimpan rekaman
+
+FITUR ULTIMATE (BERLANGGANAN)
+• Semua fitur Premium
+• Multi buku kas: pisahkan pembukuan pribadi dan bisnis, masing-masing dengan dompet, kategori, anggaran, dan laporan sendiri (sampai 5 buku)
+• Scan struk dengan AI: nama toko, kategori, total, dan tanggal terisi otomatis (300 scan per bulan). Hanya teks hasil scan, bukan foto, yang dikirim ke server AI kami untuk diproses, dan tidak disimpan
+• Tabungan berdompet: saldo tabungan terpisah dari dompet; setoran tercatat sebagai pengeluaran dan penarikan sebagai pemasukan
+• Ringkasan AI untuk Laporan Bulanan: rangkuman beberapa kalimat dari angka bulan ini (hanya total dan nama kategori yang dikirim, bukan catatan atau foto). Dibuat AI dan bisa keliru; bukan nasihat keuangan
+
+Uji coba Ultimate 30 hari tanpa kartu kredit (bila tersedia untuk perangkat Anda) ditawarkan di dalam aplikasi dan berakhir otomatis tanpa tagihan.
+
+Paket gratis menampilkan iklan banner dan sudah mencakup pencatatan, dompet, anggaran, target tabungan, serta sebagian fitur Agenda dan Analisa Tren. Langganan dapat dibatalkan kapan saja lewat Google Play.
+
+LaciQ mencatat keuangan Anda; aplikasi ini tidak memindahkan uang, tidak memberi pinjaman, dan bukan layanan penasihat keuangan.
+
+Kebijakan privasi: https://laciq.solusimandiri.id/privacy
+Bantuan: support@hardan-ti.com
+```
 
 ## Ultimate sudah masuk ke deskripsi di atas (diperbarui 2026-10-01)
 Blok "FITUR ULTIMATE" dan kalimat privasi yang sudah dilunakkan sudah menyatu di deskripsi lengkap. **Pasang ke
