@@ -139,7 +139,8 @@ dan "Warung Bu Sari" template Bisnis, tanpa kolom `kind`/`reportGroup`) dibuat d
 
 **Tindak lanjut (2026-10-29 15.52): build 1.2.0+18 di Redmi.** Pembaruan 17 → 18 dari Play **lulus tanpa menghapus aplikasi** (`firstInstallTime` tetap 14:03:28). Kartu ringkasan Laba Rugi
 "Warung Bu Sari" kini: **Laba bersih Rp 550.000 (55,0%)**, **Total pendapatan Rp 1.050.000**, **Total biaya Rp 500.000** (selisihnya = laba bersih): temuan "HPP + beban" **tertutup**.
-Masih menunggu pemeriksaan pemilik: tampilan PDF (L8) dan isi Excel di Google Sheets (L9), serta L2/L6/L10/L12.
+**Pemeriksaan pemilik (2026-10-29): PDF (L8) dan Excel (L9) baik** (dibuka dari HP; PDF dan lembar "Laba Rugi" tampil sesuai). Sisa L2/L6/L10/L12 bersifat opsional.
+Ringkasan butir WAJIB: L1b, L4, L5, L8, L11 **lulus**; L1 (pembaruan di tempat dari build 15) lulus di gladi emulator dan pembaruan Play 16→17→18 di Redmi, bukan dari 15 langsung.
 
 ## 4. Catatan hasil
 | Butir | Lulus? | Perangkat / versi | Catatan |
