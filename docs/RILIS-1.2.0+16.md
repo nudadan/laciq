@@ -1,4 +1,8 @@
-# Rilis 1.2.0+16 (RANCANGAN, disusun 2026-10-29)
+# Rilis 1.2.0 (kode +16 DIGANTI +17), disusun 2026-10-29
+
+> **Pembaruan 2026-10-29 (sore):** uji Redmi menemukan bug pemulihan backup lama (< v9), diperbaiki di kode. **AAB +16 di jalur internal tidak boleh dipromosikan;
+> gunakan AAB `1.2.0+17`** (dibangun dari commit `41cfe12`: 96.655.853 byte = 96,7 MB, SHA-256 diawali `23ac533497328321`, tanda tangan SHA-1 `86:E7:F6:…:A2:60` sama dengan +15/+16,
+> manifest identik dengan +16). Nama berkas dokumen tetap "+16" agar tautan tidak putus; semua rujukan "+16" di bawah berlaku untuk **+17** kecuali disebut lain.
 
 > **Belum dibangun dan belum dirilis.** Berisi Fase 1 pembukuan UMKM: Mode usaha, pengelompokan kategori, laporan Laba Rugi, dan ekspor
 > PDF/Excel ([RENCANA-IMPLEMENTASI-UMKM.md](RENCANA-IMPLEMENTASI-UMKM.md)). Pengganti produksi **1.1.0+15**. Nomor versi `1.2.0+16`
