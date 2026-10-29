@@ -107,6 +107,14 @@ aplikasi baseline dibuka dan membaca data dengan benar (Total Saldo Rp 10.307.00
 **Belum tercakup gladi ini (tetap perlu uji HP):** layar Laba Rugi dan ekspor PDF/Excel (butuh Premium; emulator tanpa langganan), pembaruan dari build **Play**
 yang bertanda tangan Play (L1 sebenarnya), tampilan di layar HP nyata, WhatsApp/Excel/Google Sheets.
 
+## 3c. Hasil uji Redmi (2026-10-29, rilis internal 1.2.0+16)
+Pemilik menghapus aplikasi build 15 dari Redmi, memasang 1.2.0 dari jalur internal Play, lalu **memulihkan backup berkas** (format v8): **saldo dan angka sama** dengan sebelum
+(menutup pemulihan backup lama ke v12). Karena aplikasi dihapus lebih dulu (terbukti dari `firstInstallTime` = `lastUpdateTime`), **pembaruan di tempat di Redmi tidak teruji**; itu tercakup gladi emulator (3b).
+
+**Temuan dari uji ini (bug, sudah diperbaiki di kode):** backup format < 9 dipulihkan dengan kelompok laporan kosong, jadi kategori sistem tidak berstatus "di luar laba rugi" dan buku usaha
+kembali pribadi. Perbaikan: `BackupService.parse` menerapkan kelompok bawaan yang sama dengan migrasi v12 untuk backup < v9 (tes: `report_group_test.dart`, pemulihan backup v8 -> Laba Rugi benar).
+Berlaku untuk **build 1.2.0+16 yang sudah di jalur internal** (data yang dipulihkan dari backup lama di build itu perlu dipulihkan ulang atau dikelompokkan manual); perbaikan ikut build berikutnya (+17).
+
 ## 4. Catatan hasil
 | Butir | Lulus? | Perangkat / versi | Catatan |
 |---|---|---|---|

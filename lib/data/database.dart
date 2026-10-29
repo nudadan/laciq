@@ -691,6 +691,32 @@ const _systemCategoryNames = {
   'penyesuaian saldo',
 };
 
+/// ID dasar sebuah ID seed: tanpa awalan buku (lihat [ledgerSeedId]).
+String _seedBaseId(String id) =>
+    id.contains(':') ? id.substring(id.indexOf(':') + 1) : id;
+
+/// Kelompok laporan bawaan untuk kategori yang SUDAH ada, bagi data yang dibuat
+/// sebelum kolom `reportGroup` ada (migrasi skema v12 dan pemulihan backup format
+/// < 9). Hanya kategori bawaan/sistem (dikenali dari ID dasar atau nama sistem)
+/// yang mendapat nilai; kategori buatan pengguna dan sub-kategori null (= bawaan
+/// jenis, atau mengikuti induk). Null pula bila nilainya tidak cocok dengan jenis.
+ReportGroup? seedReportGroupFor(Category c) {
+  if (c.parentId != null) return null;
+  final group =
+      _seedReportGroups[_seedBaseId(c.id)] ??
+      (_systemCategoryNames.contains(c.name.toLowerCase())
+          ? ReportGroup.nonPnl
+          : null);
+  return group != null && group.allowedFor(c.type) ? group : null;
+}
+
+/// Buku yang memuat kategori "Penjualan" bawaan template Bisnis: dianggap buku
+/// usaha pada data lama (skema v12 dan backup format < 9).
+Set<String> businessLedgerIdsOf(Iterable<Category> categories) => {
+  for (final c in categories)
+    if (_seedBaseId(c.id) == 'cat-inc-penjualan') c.ledgerId,
+};
+
 /// Baris seed kategori: (kunci, nama, ikon, warna).
 typedef _SeedCategory = (String, String, String, int);
 
@@ -935,24 +961,14 @@ class AppDatabase extends _$AppDatabase {
   /// kategori "Penjualan" bawaan template Bisnis ditandai buku usaha.
   Future<void> _applyReportGroupDefaults() async {
     final all = await select(categories).get();
-    final businessLedgers = <String>{};
     for (final c in all) {
-      final base = c.id.contains(':')
-          ? c.id.substring(c.id.indexOf(':') + 1)
-          : c.id;
-      if (base == 'cat-inc-penjualan') businessLedgers.add(c.ledgerId);
-      if (c.parentId != null) continue;
-      final group =
-          _seedReportGroups[base] ??
-          (_systemCategoryNames.contains(c.name.toLowerCase())
-              ? ReportGroup.nonPnl
-              : null);
-      if (group == null || !group.allowedFor(c.type)) continue;
+      final group = seedReportGroupFor(c);
+      if (group == null) continue;
       await (update(categories)..where((t) => t.id.equals(c.id))).write(
         CategoriesCompanion(reportGroup: Value(group)),
       );
     }
-    for (final id in businessLedgers) {
+    for (final id in businessLedgerIdsOf(all)) {
       await (update(ledgers)..where((l) => l.id.equals(id))).write(
         LedgersCompanion(kind: Value(LedgerKind.business)),
       );

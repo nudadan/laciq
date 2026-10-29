@@ -37,6 +37,7 @@ Baru: Mode usaha dan Laba Rugi (Premium). Kelompokkan kategori sebagai pendapata
 | Risiko | Penjelasan | Mitigasi |
 |---|---|---|
 | Migrasi database v11 → v12 | Menambah `categories.reportGroup` dan `ledgers.kind`, lalu mengisi kelompok kategori bawaan | Diuji otomatis dari semua versi lama; **uji dengan data nyata build 15** (L1) dan ekspor backup berkas sebelum memperbarui |
+| **Pemulihan backup lama (< v9) memberi kelompok kosong** (ditemukan di uji Redmi 2026-10-29) | Utang/Piutang/Tabungan dan kategori usaha jatuh ke bawaan jenis; buku usaha kembali pribadi; Laba Rugi menyesatkan | **Diperbaiki di kode** (commit pasca +16, `BackupService.parse`); butuh build baru **+17**. Build +16 di jalur internal tidak boleh dipromosikan ke Produksi |
 | Backup v9 tidak terbaca di versi lama | Pengguna yang kembali ke +15 atau lebih lama tidak bisa memulihkan backup baru | Jarang; cukup dicatat (sama seperti v8) |
 | Laba Rugi menyesatkan bila kategori salah kelompok | Modal/cicilan/peralatan dianggap beban | Saran otomatis, penanda "otomatis", rekonsiliasi kas, penafian di layar dan PDF; pengguna yang memakai buku pribadi diajak menyalakan Mode usaha |
 | Penjualan kredit baru terhitung saat uangnya diterima | Pendapatan tampak lebih kecil dari kenyataan | Dicatat di layar dan PDF; keputusan U8 di Fase 2 |

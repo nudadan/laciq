@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart' show Value;
+
 import 'database.dart';
 
 class BackupException implements Exception {
@@ -50,6 +52,25 @@ class BackupData {
 
   int get activeTransactionCount =>
       transactions.where((t) => t.deletedAt == null).length;
+
+  /// Salinan dengan [ledgers] dan/atau [categories] diganti; sisanya sama.
+  BackupData copyWith({List<Ledger>? ledgers, List<Category>? categories}) =>
+      BackupData(
+        exportedAt: exportedAt,
+        ledgers: ledgers ?? this.ledgers,
+        accounts: accounts,
+        categories: categories ?? this.categories,
+        transactions: transactions,
+        budgets: budgets,
+        recurringRules: recurringRules,
+        savingsGoals: savingsGoals,
+        goalContributions: goalContributions,
+        tags: tags,
+        transactionTags: transactionTags,
+        agendaReminders: agendaReminders,
+        debts: debts,
+        savingsAccounts: savingsAccounts,
+      );
 }
 
 /// Backup berupa JSON berversi, bukan salinan file SQLite: formatnya tidak
@@ -205,14 +226,38 @@ class BackupService {
           withLedger: true,
         ),
       );
-      _checkIntegrity(data);
-      return data;
+      // Backup format < 9 dibuat sebelum kelompok laporan dan sifat buku ada: beri nilai
+      // bawaan yang sama seperti migrasi skema v12 (Utang/Piutang/Tabungan di luar laba
+      // rugi, buku bertemplate Bisnis = buku usaha). Tanpa ini, pemulihan dari backup
+      // lama akan menghitung pembayaran utang sebagai beban pada Laba Rugi.
+      final restored = version < 9 ? _withReportDefaults(data) : data;
+      _checkIntegrity(restored);
+      return restored;
     } on BackupException {
       rethrow;
     } catch (_) {
       // TypeError/FormatException/dst. dari data yang rusak atau dimodifikasi.
       throw const BackupException('Isi backup rusak atau tidak lengkap.');
     }
+  }
+
+  /// Mengisi `reportGroup` kategori dan `kind` buku untuk data dari backup format < 9
+  /// (lihat [seedReportGroupFor] dan [businessLedgerIdsOf]).
+  static BackupData _withReportDefaults(BackupData d) {
+    final business = businessLedgerIdsOf(d.categories);
+    return d.copyWith(
+      categories: [
+        for (final c in d.categories)
+          () {
+            final g = seedReportGroupFor(c);
+            return g == null ? c : c.copyWith(reportGroup: Value(g));
+          }(),
+      ],
+      ledgers: [
+        for (final l in d.ledgers)
+          business.contains(l.id) ? l.copyWith(kind: LedgerKind.business) : l,
+      ],
+    );
   }
 
   /// Buku Utama bawaan, untuk backup lama dan untuk `restore` bila daftar buku kosong.

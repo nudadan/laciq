@@ -153,7 +153,7 @@ tetap cocokkan sebelum rilis. Deskripsi listing Play perlu satu paragraf baru (L
    "Penjualan" bawaan template Bisnis otomatis ditandai buku usaha; (c) sub-kategori tidak punya kelompok sendiri (mengikuti
    induk), dijaga di API (`setCategoryReportGroup`, `addCategory`, `updateCategory`) dan di validasi backup; (d) kelompok
    harus cocok dengan jenis (`ReportGroup.allowedFor`), juga divalidasi di backup; (e) API baru `setLedgerKind`;
-   (f) backup v9, backup lama tanpa kunci baru tetap terbaca (buku pribadi, kelompok kosong).
+   (f) backup v9, backup lama tanpa kunci baru tetap terbaca. **Koreksi 2026-10-29 (temuan uji Redmi):** semula backup lama (format < 9) dipulihkan dengan kelompok KOSONG, sehingga setelah pulih dari backup, kategori sistem (Utang, Piutang, Tabungan, Penyesuaian Saldo) dan kategori usaha bawaan jatuh ke bawaan jenis dan pembayaran utang terhitung sebagai beban pada Laba Rugi. Kini `parse` menerapkan aturan yang SAMA dengan migrasi v12 untuk backup format < 9 (`seedReportGroupFor`, `businessLedgerIdsOf`); backup v9 dihormati apa adanya.
 3. ~~`profit_loss.dart` + tes unit (belum ada UI)~~ **selesai 2026-10-29** (`lib/data/profit_loss.dart`, `test/profit_loss_test.dart`,
    26 tes). API: `buildProfitLoss(items, categories, from, to)` -> `ProfitLoss` (bagian pendapatan/HPP/beban/lain/di luar laba rugi,
    `grossProfit`, `operatingProfit`, `netProfit`, `nonPnlNet`, `cashChange`, `reconciles`, margin), `previousPeriod`,

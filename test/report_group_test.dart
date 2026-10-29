@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:dompet_pintar/data/backup.dart';
 import 'package:dompet_pintar/data/database.dart';
+import 'package:dompet_pintar/data/profit_loss.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Kelompok laporan kategori dan sifat buku (skema v12, backup v9). Lihat
@@ -346,7 +347,7 @@ void main() {
       expect(kinds[kMainLedgerId], LedgerKind.personal);
     });
 
-    test('backup lama (v8) tanpa kunci baru tetap pulih: buku pribadi, kelompok kosong', () async {
+    test('backup lama (v8) tanpa kunci baru tetap pulih: buku pribadi, kelompok bawaan hanya untuk kategori sistem', () async {
       final map = await backupMap(db);
       map['version'] = 8;
       for (final l in (map['ledgers'] as List).cast<Map<String, dynamic>>()) {
@@ -358,7 +359,12 @@ void main() {
       }
       final data = BackupService.parse(jsonEncode(map));
       expect(data.ledgers.single.kind, LedgerKind.personal);
-      expect(data.categories.every((c) => c.reportGroup == null), isTrue);
+      // Hanya kategori sistem yang mendapat kelompok bawaan; buatan pengguna tetap kosong.
+      final g = {for (final c in data.categories) c.id: c.reportGroup};
+      expect(g['cat-exp-utang'], ReportGroup.nonPnl);
+      expect(g['cat-inc-piutang'], ReportGroup.nonPnl);
+      expect(g['cat-exp-makan'], isNull);
+      expect(g['cat-inc-gaji'], isNull);
 
       final other = AppDatabase(NativeDatabase.memory());
       addTearDown(other.close);
@@ -379,6 +385,90 @@ void main() {
       }
       final data = BackupService.parse(jsonEncode(map));
       expect(data.ledgers.single.kind, LedgerKind.personal);
+    });
+
+    test('pemulihan backup lama (v8): kelompok bawaan terisi, buku usaha dikenali, Laba Rugi benar', () async {
+      final biz = await addBiz();
+      // Kategori buatan pengguna bernama sistem, dan sub-kategori.
+      final tab = await db.addCategory(
+        type: TxType.expense,
+        name: 'Tabungan',
+        icon: 'savings',
+        color: 1,
+      );
+      final sub = await db.addCategory(
+        type: TxType.expense,
+        name: 'Warteg',
+        icon: 'food',
+        color: 1,
+        parentId: 'cat-exp-makan',
+      );
+      final acc = ledgerSeedId(biz, 'acc-tunai');
+      final d = DateTime(2026, 10, 10);
+      Future<void> t(TxType ty, int a, String c) => db.addTransaction(
+        type: ty,
+        amount: a,
+        accountId: acc,
+        categoryId: c,
+        date: d,
+      );
+      await t(TxType.income, 1000000, ledgerSeedId(biz, 'cat-inc-penjualan'));
+      await t(TxType.expense, 200000, ledgerSeedId(biz, 'cat-exp-stok'));
+      await t(TxType.expense, 100000, ledgerSeedId(biz, 'cat-exp-utang'));
+      await t(TxType.income, 500000, ledgerSeedId(biz, 'cat-inc-modal'));
+
+      // Ubah menjadi backup format v8: tanpa kunci baru sama sekali.
+      final map = await backupMap(db);
+      map['version'] = 8;
+      for (final l in (map['ledgers'] as List).cast<Map<String, dynamic>>()) {
+        l.remove('kind');
+      }
+      for (final c
+          in (map['categories'] as List).cast<Map<String, dynamic>>()) {
+        c.remove('reportGroup');
+      }
+
+      final other = AppDatabase(NativeDatabase.memory());
+      addTearDown(other.close);
+      await BackupService(other).restore(BackupService.parse(jsonEncode(map)));
+
+      final g = {
+        for (final c in await other.select(other.categories).get())
+          c.id: c.reportGroup,
+      };
+      expect(g[ledgerSeedId(biz, 'cat-exp-stok')], ReportGroup.cogs);
+      expect(g[ledgerSeedId(biz, 'cat-inc-modal')], ReportGroup.nonPnl);
+      expect(g[ledgerSeedId(biz, 'cat-exp-utang')], ReportGroup.nonPnl);
+      expect(g[ledgerSeedId(biz, 'cat-inc-penjualan')], isNull);
+      expect(g[tab], ReportGroup.nonPnl);
+      expect(g[sub], isNull);
+      final kinds = {
+        for (final l in await other.select(other.ledgers).get()) l.id: l.kind,
+      };
+      expect(kinds[biz], LedgerKind.business);
+      expect(kinds[kMainLedgerId], LedgerKind.personal);
+
+      // Akibatnya Laba Rugi benar: bayar utang dan modal tidak memengaruhi laba.
+      final r = buildProfitLoss(
+        items: await other.getTransactions(ledgerId: biz),
+        categories: await other.select(other.categories).get(),
+        from: DateTime(2026, 10),
+        to: DateTime(2026, 11),
+      );
+      expect(r.netProfit, 800000);
+      expect(r.nonPnlNet, 400000);
+      expect(r.reconciles, isTrue);
+    });
+
+    test('backup v9 dihormati apa adanya: kelompok yang sengaja dikosongkan tidak diisi ulang', () async {
+      await db.setCategoryReportGroup('cat-exp-utang', null);
+      final map = await backupMap(db);
+      expect(map['version'], 9);
+      final data = BackupService.parse(jsonEncode(map));
+      expect(
+        data.categories.firstWhere((c) => c.id == 'cat-exp-utang').reportGroup,
+        isNull,
+      );
     });
 
     test('nilai yang menyimpang ditolak sebagai backup rusak', () async {
