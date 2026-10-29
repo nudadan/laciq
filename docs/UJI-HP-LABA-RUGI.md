@@ -84,6 +84,29 @@ Catat di **buku usaha baru "Warung uji"** (template Bisnis; dompet "Kas Usaha").
 - [ ] **L12** Tema terang dan gelap, ukuran huruf sistem besar, dan layar lipat/kecil (Fold6 tertutup): tabel dan tombol tidak terpotong, kontras terbaca, tidak ada overflow kuning-hitam.
 - [ ] **L13** Ukuran: catat ukuran AAB/APK dibanding +15 (87,4 MB). Catat bila naik > 1 MB.
 
+## 3b. Gladi di emulator (2026-10-29): migrasi pembaruan di tempat
+Dilakukan SEBELUM uji di Redmi, dengan APK debug di emulator Android 15 (`aisha_api35`), bukan pengganti uji Play (L1) di HP nyata.
+
+**Cara:** baseline persis 1.1.0+15 (commit `3fa6f29`, skema v11) dibangun debug di worktree terpisah dan dipasang; DB-nya diisi data realistis
+(2 buku, 19 transaksi, 38 kategori termasuk kategori buatan pengguna bernama "Tabungan", sub-kategori, utang dengan pembayaran, transfer);
+aplikasi baseline dibuka dan membaca data dengan benar (Total Saldo Rp 10.307.000 = Tunai -343.000 + BCA 10.650.000); lalu APK baru dipasang
+**di atasnya** (`adb install -r`, `firstInstallTime` tetap, `lastUpdateTime` berubah) dan dibuka.
+
+| Pemeriksaan | Hasil |
+|---|---|
+| `PRAGMA user_version` | 11 → **12** |
+| Kolom baru | `categories.report_group` dan `ledgers.kind` ada |
+| Jumlah baris | transaksi 19, kategori 38, dompet 3, utang 1: **sama** sebelum dan sesudah |
+| Saldo dompet (dihitung ulang dari DB) | Tunai -343.000, BCA 10.650.000, Kas Usaha 1.350.000: **sama** |
+| Kelompok kategori terisi | Utang, Piutang (utama dan buku usaha), Pembelian Stok = HPP (1), Peralatan, Cicilan Usaha, Modal Masuk, Utang/Piutang buku usaha = di luar laba rugi (5), Pendapatan Lain = lain (3); **kategori buatan "Tabungan" = di luar laba rugi**; sisanya kosong; sub-kategori "Warteg" kosong (mengikuti induk) |
+| Sifat buku | Buku Utama = pribadi (0); "Warung Bu Sari" (punya kategori "Penjualan" bawaan) = **usaha (1)** otomatis |
+| UI Lainnya | Tile "Mode usaha" ada (mati); "Buku Kas · 1 buku terkunci" (benar tanpa Ultimate); "Laba Rugi · Fitur Premium" |
+| UI Kategori setelah Mode usaha dinyalakan | Subjudul "Beban operasional · otomatis" di kategori utama; sub-kategori tanpa subjudul |
+| UI Kategori Baru, ketik "Beli stok" | Otomatis terpilih **Harga pokok penjualan (HPP)** + penjelasan + "Disarankan dari nama kategori. Ubah bila perlu." |
+
+**Belum tercakup gladi ini (tetap perlu uji HP):** layar Laba Rugi dan ekspor PDF/Excel (butuh Premium; emulator tanpa langganan), pembaruan dari build **Play**
+yang bertanda tangan Play (L1 sebenarnya), tampilan di layar HP nyata, WhatsApp/Excel/Google Sheets.
+
 ## 4. Catatan hasil
 | Butir | Lulus? | Perangkat / versi | Catatan |
 |---|---|---|---|
