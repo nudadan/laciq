@@ -41,6 +41,59 @@ class SubscriptionException implements Exception {
   String toString() => message;
 }
 
+/// Penyebab kegagalan memuat paket atau memulihkan pembelian, dipakai untuk
+/// memilih pesan yang tidak menyesatkan.
+enum BillingFailure {
+  /// Tidak bisa menjangkau server (RevenueCat) atau waktu habis.
+  network,
+
+  /// Google Play tidak bisa dipakai: tidak terpasang, usang, belum masuk akun,
+  /// atau perangkat tanpa layanan Google. Bukan masalah internet.
+  storeUnavailable,
+
+  /// Selain itu (konfigurasi, respons server tak terduga, dst.).
+  other,
+}
+
+/// Mengelompokkan galat dari SDK RevenueCat. Aman untuk objek apa pun: yang
+/// bukan [PlatformException] atau kodenya tak terbaca jatuh ke [BillingFailure.other].
+BillingFailure classifyBillingError(Object error) {
+  if (error is! PlatformException) return BillingFailure.other;
+  final PurchasesErrorCode code;
+  try {
+    code = PurchasesErrorHelper.getErrorCode(error);
+  } catch (_) {
+    return BillingFailure.other;
+  }
+  switch (code) {
+    case PurchasesErrorCode.networkError:
+    case PurchasesErrorCode.offlineConnectionError:
+    case PurchasesErrorCode.productRequestTimeout:
+    case PurchasesErrorCode.apiEndpointBlocked:
+      return BillingFailure.network;
+    case PurchasesErrorCode.purchaseNotAllowedError:
+    case PurchasesErrorCode.storeProblemError:
+      return BillingFailure.storeUnavailable;
+    default:
+      return BillingFailure.other;
+  }
+}
+
+/// Pesan untuk pengguna. [action] melanjutkan "Gagal ...", mis.
+/// "memuat paket langganan". Galat aslinya dicatat agar penyebabnya bisa
+/// ditelusuri (sebelumnya semua galat dilaporkan sebagai masalah internet).
+String billingErrorMessage(String action, Object error) {
+  debugPrint('Gagal $action: $error');
+  return switch (classifyBillingError(error)) {
+    BillingFailure.network => 'Gagal $action. Periksa koneksi internetmu.',
+    BillingFailure.storeUnavailable =>
+      'Gagal $action. Google Play belum bisa dipakai di perangkat ini. '
+          'Pastikan Play Store terpasang dan sudah diperbarui, lalu masuk '
+          'ke akun Google.',
+    BillingFailure.other => 'Gagal $action. Coba lagi nanti.',
+  };
+}
+
 /// Pengguna membatalkan sendiri dialog pembelian — bukan kegagalan yang
 /// perlu ditampilkan sebagai error.
 class SubscriptionCancelled implements Exception {
@@ -221,8 +274,8 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
       final packages = offerings.current?.availablePackages ?? const [];
       return [for (final p in packages) ?_toPackage(p)];
     } catch (e) {
-      throw const SubscriptionException(
-        'Gagal memuat paket langganan. Periksa koneksi internetmu.',
+      throw SubscriptionException(
+        billingErrorMessage('memuat paket langganan', e),
       );
     }
   }
@@ -379,8 +432,8 @@ class RevenueCatSubscriptionStatus implements SubscriptionStatus {
     try {
       restored = await Purchases.restorePurchases();
     } catch (e) {
-      throw const SubscriptionException(
-        'Gagal memulihkan pembelian. Periksa koneksi internetmu.',
+      throw SubscriptionException(
+        billingErrorMessage('memulihkan pembelian', e),
       );
     }
     _pushedInfo.add(restored);
