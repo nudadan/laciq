@@ -136,7 +136,9 @@ void main() {
         currentStatus: _available(),
         claimResult: TrialClaimResult(
           TrialClaimOutcome.granted,
-          endsAt: DateTime(2026, 11, 13),
+          // Relatif terhadap hari ini: tanggal tetap membuat uji ini gagal begitu
+          // sisa trial masuk fase hitung mundur "urgent" (<= 3 hari).
+          endsAt: DateTime.now().add(const Duration(days: 30)),
         ),
       ),
     );
