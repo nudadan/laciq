@@ -1,5 +1,9 @@
-# Rilis 1.2.0+22 (disusun 2026-11-11, belum diunggah)
+# Rilis 1.2.0+22 (disusun 2026-11-11, DITERBITKAN ke Pengujian internal 2026-11-11 17.46)
 
+> **Status:** rilis "22 (1.2.0)" berstatus "Tersedia untuk penguji internal" di Play Console (jalur Pengujian internal, 1 kode versi), menggantikan +21.
+> Pratinjau Play: tidak ada perangkat yang tidak lagi didukung (0 di semua faktor bentuk), ukuran instal baru 21,6 MB (-617 byte vs +21), ukuran pembaruan 2,09 MB.
+> **Belum dipromosikan ke Produksi**; Produksi tetap +20.
+>
 > Pengganti +21 (jalur Pengujian internal) dan, bila lulus uji, calon pengganti produksi +20. Isinya sama dengan [+21](RILIS-1.2.0+21.md)
 > ditambah satu perbaikan tampilan yang ditemukan saat uji +21 di HP Samsung: teks bantu penarikan tabungan ke **Lainnya** tidak lagi terpotong.
 > **Produksi tetap +20.** Jalur internal tetap +21 sampai +22 diunggah.
@@ -49,7 +53,9 @@ Baru: opsi "Lainnya" pada setor dan tarik Tabungan, untuk dana yang berasal dari
 
 ## Urutan rilis
 0. [x] Naikkan versi dan bangun AAB (2026-11-11), lihat Artefak.
-1. [ ] **Unggah ke Pengujian internal** di Play Console (menggantikan +21). Cek pratinjau: tidak ada perangkat yang hilang, ukuran instal sekitar 21,6 MB.
+1. [x] **Unggah ke Pengujian internal** di Play Console: diunggah dan **diterbitkan 2026-11-11 17.46** (nama rilis `22 (1.2.0)`, catatan rilis sama dengan +21, bundle +21 tidak disertakan).
+       Pratinjau: tidak ada perangkat yang hilang, ukuran instal 21,6 MB. AAB 96.821.097 byte diunggah lewat halaman Play Console dengan cara yang sama seperti +21
+       (berkas disajikan sementara di `127.0.0.1` karena alat unggah Chrome dibatasi 10 MB; server dimatikan setelah unggahan).
 2. [ ] Perbarui di HP penguji (+21 → +22 lewat Play) dan lihat dialog Tarik dengan Lainnya: kalimat pertama teks bantu harus terbaca penuh.
 3. [ ] Uji sisa daftar +21 (Backup/Pulihkan v10, pesan galat langganan, pembelian) di perangkat.
 4. [ ] Promosikan **bundel yang sama** ke Produksi bertahap hanya bila langkah 2 dan 3 lulus. Data Safety dan kebijakan privasi tidak berubah.
