@@ -303,22 +303,25 @@ void main() {
     Future<Map<String, dynamic>> backupMap(AppDatabase from) async =>
         jsonDecode(await BackupService(from).export()) as Map<String, dynamic>;
 
-    test('versi format 9 dan kunci baru tertulis', () async {
-      await db.setCategoryReportGroup('cat-exp-makan', ReportGroup.cogs);
-      await db.setLedgerKind(kMainLedgerId, LedgerKind.business);
-      final map = await backupMap(db);
-      expect(map['version'], 9);
-      expect(BackupService.formatVersion, 9);
-      final cats = (map['categories'] as List).cast<Map<String, dynamic>>();
-      expect(
-        cats.firstWhere((c) => c['id'] == 'cat-exp-makan')['reportGroup'],
-        ReportGroup.cogs.index,
-      );
-      expect(
-        (map['ledgers'] as List).single['kind'],
-        LedgerKind.business.index,
-      );
-    });
+    test(
+      'kunci kelompok laporan dan sifat buku tertulis (format 10)',
+      () async {
+        await db.setCategoryReportGroup('cat-exp-makan', ReportGroup.cogs);
+        await db.setLedgerKind(kMainLedgerId, LedgerKind.business);
+        final map = await backupMap(db);
+        expect(map['version'], 10);
+        expect(BackupService.formatVersion, 10);
+        final cats = (map['categories'] as List).cast<Map<String, dynamic>>();
+        expect(
+          cats.firstWhere((c) => c['id'] == 'cat-exp-makan')['reportGroup'],
+          ReportGroup.cogs.index,
+        );
+        expect(
+          (map['ledgers'] as List).single['kind'],
+          LedgerKind.business.index,
+        );
+      },
+    );
 
     test('putaran penuh: kelompok kategori dan sifat buku pulih', () async {
       final biz = await addBiz();
@@ -462,8 +465,11 @@ void main() {
 
     test('backup v9 dihormati apa adanya: kelompok yang sengaja dikosongkan tidak diisi ulang', () async {
       await db.setCategoryReportGroup('cat-exp-utang', null);
-      final map = await backupMap(db);
-      expect(map['version'], 9);
+      // Diperlakukan sebagai berkas backup v9 (sebelum entri tabungan Lainnya
+      // ada), bukan ekspor terkini.
+      final map = await backupMap(db)
+        ..['version'] = 9
+        ..remove('savingsExternalEntries');
       final data = BackupService.parse(jsonEncode(map));
       expect(
         data.categories.firstWhere((c) => c.id == 'cat-exp-utang').reportGroup,

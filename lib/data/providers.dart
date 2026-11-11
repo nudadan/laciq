@@ -301,9 +301,10 @@ final savingsProvider = StreamProvider.autoDispose<List<SavingsView>>(
       .watchSavings(ledgerId: ref.watch(activeLedgerIdProvider)),
 );
 
-/// Setoran dan penarikan satu tabungan (transaksi dompet bertanda tabungan).
+/// Setoran dan penarikan satu tabungan: transaksi dompet bertanda tabungan
+/// digabung entri "Lainnya" (di luar dompet).
 final savingsEntriesProvider = StreamProvider.autoDispose
-    .family<List<TxView>, String>(
+    .family<List<SavingsEntry>, String>(
       (ref, savingsId) =>
           ref.watch(databaseProvider).watchSavingsEntries(savingsId),
     );

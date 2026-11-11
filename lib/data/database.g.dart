@@ -7011,6 +7011,573 @@ class SavingsAccountsCompanion extends UpdateCompanion<SavingsAccount> {
   }
 }
 
+class $SavingsExternalEntriesTable extends SavingsExternalEntries
+    with TableInfo<$SavingsExternalEntriesTable, SavingsExternalEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavingsExternalEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _savingsIdMeta = const VerificationMeta(
+    'savingsId',
+  );
+  @override
+  late final GeneratedColumn<String> savingsId = GeneratedColumn<String>(
+    'savings_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES savings_accounts (id)',
+    ),
+  );
+  static const VerificationMeta _depositMeta = const VerificationMeta(
+    'deposit',
+  );
+  @override
+  late final GeneratedColumn<bool> deposit = GeneratedColumn<bool>(
+    'deposit',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("deposit" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(amount).isBiggerThanValue(0),
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    savingsId,
+    deposit,
+    amount,
+    date,
+    note,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'savings_external_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SavingsExternalEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('savings_id')) {
+      context.handle(
+        _savingsIdMeta,
+        savingsId.isAcceptableOrUnknown(data['savings_id']!, _savingsIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_savingsIdMeta);
+    }
+    if (data.containsKey('deposit')) {
+      context.handle(
+        _depositMeta,
+        deposit.isAcceptableOrUnknown(data['deposit']!, _depositMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_depositMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SavingsExternalEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavingsExternalEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      savingsId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}savings_id'],
+      )!,
+      deposit: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}deposit'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+    );
+  }
+
+  @override
+  $SavingsExternalEntriesTable createAlias(String alias) {
+    return $SavingsExternalEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class SavingsExternalEntry extends DataClass
+    implements Insertable<SavingsExternalEntry> {
+  final String id;
+  final String savingsId;
+
+  /// true = setoran (menambah saldo tabungan), false = penarikan.
+  final bool deposit;
+
+  /// Nominal dalam Rupiah utuh, selalu positif. Arah ditentukan oleh [deposit].
+  final int amount;
+  final DateTime date;
+  final String? note;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const SavingsExternalEntry({
+    required this.id,
+    required this.savingsId,
+    required this.deposit,
+    required this.amount,
+    required this.date,
+    this.note,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['savings_id'] = Variable<String>(savingsId);
+    map['deposit'] = Variable<bool>(deposit);
+    map['amount'] = Variable<int>(amount);
+    map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  SavingsExternalEntriesCompanion toCompanion(bool nullToAbsent) {
+    return SavingsExternalEntriesCompanion(
+      id: Value(id),
+      savingsId: Value(savingsId),
+      deposit: Value(deposit),
+      amount: Value(amount),
+      date: Value(date),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory SavingsExternalEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavingsExternalEntry(
+      id: serializer.fromJson<String>(json['id']),
+      savingsId: serializer.fromJson<String>(json['savingsId']),
+      deposit: serializer.fromJson<bool>(json['deposit']),
+      amount: serializer.fromJson<int>(json['amount']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      note: serializer.fromJson<String?>(json['note']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'savingsId': serializer.toJson<String>(savingsId),
+      'deposit': serializer.toJson<bool>(deposit),
+      'amount': serializer.toJson<int>(amount),
+      'date': serializer.toJson<DateTime>(date),
+      'note': serializer.toJson<String?>(note),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  SavingsExternalEntry copyWith({
+    String? id,
+    String? savingsId,
+    bool? deposit,
+    int? amount,
+    DateTime? date,
+    Value<String?> note = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+  }) => SavingsExternalEntry(
+    id: id ?? this.id,
+    savingsId: savingsId ?? this.savingsId,
+    deposit: deposit ?? this.deposit,
+    amount: amount ?? this.amount,
+    date: date ?? this.date,
+    note: note.present ? note.value : this.note,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+  );
+  SavingsExternalEntry copyWithCompanion(SavingsExternalEntriesCompanion data) {
+    return SavingsExternalEntry(
+      id: data.id.present ? data.id.value : this.id,
+      savingsId: data.savingsId.present ? data.savingsId.value : this.savingsId,
+      deposit: data.deposit.present ? data.deposit.value : this.deposit,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      date: data.date.present ? data.date.value : this.date,
+      note: data.note.present ? data.note.value : this.note,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsExternalEntry(')
+          ..write('id: $id, ')
+          ..write('savingsId: $savingsId, ')
+          ..write('deposit: $deposit, ')
+          ..write('amount: $amount, ')
+          ..write('date: $date, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    savingsId,
+    deposit,
+    amount,
+    date,
+    note,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavingsExternalEntry &&
+          other.id == this.id &&
+          other.savingsId == this.savingsId &&
+          other.deposit == this.deposit &&
+          other.amount == this.amount &&
+          other.date == this.date &&
+          other.note == this.note &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class SavingsExternalEntriesCompanion
+    extends UpdateCompanion<SavingsExternalEntry> {
+  final Value<String> id;
+  final Value<String> savingsId;
+  final Value<bool> deposit;
+  final Value<int> amount;
+  final Value<DateTime> date;
+  final Value<String?> note;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const SavingsExternalEntriesCompanion({
+    this.id = const Value.absent(),
+    this.savingsId = const Value.absent(),
+    this.deposit = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.date = const Value.absent(),
+    this.note = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SavingsExternalEntriesCompanion.insert({
+    required String id,
+    required String savingsId,
+    required bool deposit,
+    required int amount,
+    required DateTime date,
+    this.note = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       savingsId = Value(savingsId),
+       deposit = Value(deposit),
+       amount = Value(amount),
+       date = Value(date),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<SavingsExternalEntry> custom({
+    Expression<String>? id,
+    Expression<String>? savingsId,
+    Expression<bool>? deposit,
+    Expression<int>? amount,
+    Expression<DateTime>? date,
+    Expression<String>? note,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (savingsId != null) 'savings_id': savingsId,
+      if (deposit != null) 'deposit': deposit,
+      if (amount != null) 'amount': amount,
+      if (date != null) 'date': date,
+      if (note != null) 'note': note,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SavingsExternalEntriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? savingsId,
+    Value<bool>? deposit,
+    Value<int>? amount,
+    Value<DateTime>? date,
+    Value<String?>? note,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return SavingsExternalEntriesCompanion(
+      id: id ?? this.id,
+      savingsId: savingsId ?? this.savingsId,
+      deposit: deposit ?? this.deposit,
+      amount: amount ?? this.amount,
+      date: date ?? this.date,
+      note: note ?? this.note,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (savingsId.present) {
+      map['savings_id'] = Variable<String>(savingsId.value);
+    }
+    if (deposit.present) {
+      map['deposit'] = Variable<bool>(deposit.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavingsExternalEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('savingsId: $savingsId, ')
+          ..write('deposit: $deposit, ')
+          ..write('amount: $amount, ')
+          ..write('date: $date, ')
+          ..write('note: $note, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -7514,6 +8081,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SavingsAccountsTable savingsAccounts = $SavingsAccountsTable(
     this,
   );
+  late final $SavingsExternalEntriesTable savingsExternalEntries =
+      $SavingsExternalEntriesTable(this);
   late final $TagsTable tags = $TagsTable(this);
   late final $TransactionTagsTable transactionTags = $TransactionTagsTable(
     this,
@@ -7538,6 +8107,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     savingsGoals,
     goalContributions,
     savingsAccounts,
+    savingsExternalEntries,
     tags,
     transactionTags,
     idxTxDate,
@@ -12505,6 +13075,41 @@ typedef $$SavingsAccountsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
+final class $$SavingsAccountsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $SavingsAccountsTable, SavingsAccount> {
+  $$SavingsAccountsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $SavingsExternalEntriesTable,
+    List<SavingsExternalEntry>
+  >
+  _savingsExternalEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.savingsExternalEntries,
+        aliasName: 'savings_accounts__id__savings_external_entries__savings_id',
+      );
+
+  $$SavingsExternalEntriesTableProcessedTableManager
+  get savingsExternalEntriesRefs {
+    final manager = $$SavingsExternalEntriesTableTableManager(
+      $_db,
+      $_db.savingsExternalEntries,
+    ).filter((f) => f.savingsId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _savingsExternalEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$SavingsAccountsTableFilterComposer
     extends Composer<_$AppDatabase, $SavingsAccountsTable> {
   $$SavingsAccountsTableFilterComposer({
@@ -12553,6 +13158,32 @@ class $$SavingsAccountsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> savingsExternalEntriesRefs(
+    Expression<bool> Function($$SavingsExternalEntriesTableFilterComposer f) f,
+  ) {
+    final $$SavingsExternalEntriesTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.savingsExternalEntries,
+          getReferencedColumn: (t) => t.savingsId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsExternalEntriesTableFilterComposer(
+                $db: $db,
+                $table: $db.savingsExternalEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$SavingsAccountsTableOrderingComposer
@@ -12637,6 +13268,32 @@ class $$SavingsAccountsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> savingsExternalEntriesRefs<T extends Object>(
+    Expression<T> Function($$SavingsExternalEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$SavingsExternalEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.savingsExternalEntries,
+          getReferencedColumn: (t) => t.savingsId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$SavingsExternalEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.savingsExternalEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$SavingsAccountsTableTableManager
@@ -12650,16 +13307,9 @@ class $$SavingsAccountsTableTableManager
           $$SavingsAccountsTableAnnotationComposer,
           $$SavingsAccountsTableCreateCompanionBuilder,
           $$SavingsAccountsTableUpdateCompanionBuilder,
-          (
-            SavingsAccount,
-            BaseReferences<
-              _$AppDatabase,
-              $SavingsAccountsTable,
-              SavingsAccount
-            >,
-          ),
+          (SavingsAccount, $$SavingsAccountsTableReferences),
           SavingsAccount,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool savingsExternalEntriesRefs})
         > {
   $$SavingsAccountsTableTableManager(
     _$AppDatabase db,
@@ -12722,15 +13372,42 @@ class $$SavingsAccountsTableTableManager
               .map(
                 (e) => (
                   e.readTable<$SavingsAccountsTable, SavingsAccount>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $SavingsAccountsTable,
-                    SavingsAccount
-                  >(db, table, e),
+                  $$SavingsAccountsTableReferences(db, table, e),
                 ),
               )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({savingsExternalEntriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (savingsExternalEntriesRefs) db.savingsExternalEntries,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (savingsExternalEntriesRefs)
+                    await $_getPrefetchedData<
+                      SavingsAccount,
+                      $SavingsAccountsTable,
+                      SavingsExternalEntry
+                    >(
+                      currentTable: table,
+                      referencedTable: $$SavingsAccountsTableReferences
+                          ._savingsExternalEntriesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$SavingsAccountsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).savingsExternalEntriesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.savingsId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -12745,12 +13422,426 @@ typedef $$SavingsAccountsTableProcessedTableManager =
       $$SavingsAccountsTableAnnotationComposer,
       $$SavingsAccountsTableCreateCompanionBuilder,
       $$SavingsAccountsTableUpdateCompanionBuilder,
-      (
-        SavingsAccount,
-        BaseReferences<_$AppDatabase, $SavingsAccountsTable, SavingsAccount>,
-      ),
+      (SavingsAccount, $$SavingsAccountsTableReferences),
       SavingsAccount,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool savingsExternalEntriesRefs})
+    >;
+typedef $$SavingsExternalEntriesTableCreateCompanionBuilder =
+    SavingsExternalEntriesCompanion Function({
+      required String id,
+      required String savingsId,
+      required bool deposit,
+      required int amount,
+      required DateTime date,
+      Value<String?> note,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+typedef $$SavingsExternalEntriesTableUpdateCompanionBuilder =
+    SavingsExternalEntriesCompanion Function({
+      Value<String> id,
+      Value<String> savingsId,
+      Value<bool> deposit,
+      Value<int> amount,
+      Value<DateTime> date,
+      Value<String?> note,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+
+final class $$SavingsExternalEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $SavingsExternalEntriesTable,
+          SavingsExternalEntry
+        > {
+  $$SavingsExternalEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SavingsAccountsTable _savingsIdTable(_$AppDatabase db) =>
+      db.savingsAccounts.createAlias(
+        'savings_external_entries__savings_id__savings_accounts__id',
+      );
+
+  $$SavingsAccountsTableProcessedTableManager get savingsId {
+    final $_column = $_itemColumn<String>('savings_id')!;
+
+    final manager = $$SavingsAccountsTableTableManager(
+      $_db,
+      $_db.savingsAccounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_savingsIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SavingsExternalEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $SavingsExternalEntriesTable> {
+  $$SavingsExternalEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get deposit => $composableBuilder(
+    column: $table.deposit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SavingsAccountsTableFilterComposer get savingsId {
+    final $$SavingsAccountsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.savingsId,
+      referencedTable: $db.savingsAccounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SavingsAccountsTableFilterComposer(
+            $db: $db,
+            $table: $db.savingsAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SavingsExternalEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SavingsExternalEntriesTable> {
+  $$SavingsExternalEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get deposit => $composableBuilder(
+    column: $table.deposit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SavingsAccountsTableOrderingComposer get savingsId {
+    final $$SavingsAccountsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.savingsId,
+      referencedTable: $db.savingsAccounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SavingsAccountsTableOrderingComposer(
+            $db: $db,
+            $table: $db.savingsAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SavingsExternalEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SavingsExternalEntriesTable> {
+  $$SavingsExternalEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<bool> get deposit =>
+      $composableBuilder(column: $table.deposit, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$SavingsAccountsTableAnnotationComposer get savingsId {
+    final $$SavingsAccountsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.savingsId,
+      referencedTable: $db.savingsAccounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SavingsAccountsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.savingsAccounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SavingsExternalEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SavingsExternalEntriesTable,
+          SavingsExternalEntry,
+          $$SavingsExternalEntriesTableFilterComposer,
+          $$SavingsExternalEntriesTableOrderingComposer,
+          $$SavingsExternalEntriesTableAnnotationComposer,
+          $$SavingsExternalEntriesTableCreateCompanionBuilder,
+          $$SavingsExternalEntriesTableUpdateCompanionBuilder,
+          (SavingsExternalEntry, $$SavingsExternalEntriesTableReferences),
+          SavingsExternalEntry,
+          PrefetchHooks Function({bool savingsId})
+        > {
+  $$SavingsExternalEntriesTableTableManager(
+    _$AppDatabase db,
+    $SavingsExternalEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavingsExternalEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$SavingsExternalEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$SavingsExternalEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> savingsId = const Value.absent(),
+                Value<bool> deposit = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SavingsExternalEntriesCompanion(
+                id: id,
+                savingsId: savingsId,
+                deposit: deposit,
+                amount: amount,
+                date: date,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String savingsId,
+                required bool deposit,
+                required int amount,
+                required DateTime date,
+                Value<String?> note = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SavingsExternalEntriesCompanion.insert(
+                id: id,
+                savingsId: savingsId,
+                deposit: deposit,
+                amount: amount,
+                date: date,
+                note: note,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $SavingsExternalEntriesTable,
+                    SavingsExternalEntry
+                  >(table),
+                  $$SavingsExternalEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({savingsId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (savingsId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.savingsId,
+                        referencedTable: $$SavingsExternalEntriesTableReferences
+                            ._savingsIdTable(db),
+                        referencedColumn:
+                            $$SavingsExternalEntriesTableReferences
+                                ._savingsIdTable(db)
+                                .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$SavingsExternalEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SavingsExternalEntriesTable,
+      SavingsExternalEntry,
+      $$SavingsExternalEntriesTableFilterComposer,
+      $$SavingsExternalEntriesTableOrderingComposer,
+      $$SavingsExternalEntriesTableAnnotationComposer,
+      $$SavingsExternalEntriesTableCreateCompanionBuilder,
+      $$SavingsExternalEntriesTableUpdateCompanionBuilder,
+      (SavingsExternalEntry, $$SavingsExternalEntriesTableReferences),
+      SavingsExternalEntry,
+      PrefetchHooks Function({bool savingsId})
     >;
 typedef $$TagsTableCreateCompanionBuilder = TagsCompanion Function({
   required String id,
@@ -13386,6 +14477,11 @@ class $AppDatabaseManager {
       $$GoalContributionsTableTableManager(_db, _db.goalContributions);
   $$SavingsAccountsTableTableManager get savingsAccounts =>
       $$SavingsAccountsTableTableManager(_db, _db.savingsAccounts);
+  $$SavingsExternalEntriesTableTableManager get savingsExternalEntries =>
+      $$SavingsExternalEntriesTableTableManager(
+        _db,
+        _db.savingsExternalEntries,
+      );
   $$TagsTableTableManager get tags => $$TagsTableTableManager(_db, _db.tags);
   $$TransactionTagsTableTableManager get transactionTags =>
       $$TransactionTagsTableTableManager(_db, _db.transactionTags);

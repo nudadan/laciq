@@ -29,6 +29,7 @@ class BackupData {
     this.agendaReminders = const [],
     this.debts = const [],
     this.savingsAccounts = const [],
+    this.savingsExternalEntries = const [],
   });
 
   final DateTime? exportedAt;
@@ -50,6 +51,10 @@ class BackupData {
   final List<Debt> debts;
   final List<SavingsAccount> savingsAccounts;
 
+  /// Setoran/penarikan tabungan ke/dari "Lainnya" (di luar dompet). Backup
+  /// format < 10 tidak punya daftar ini.
+  final List<SavingsExternalEntry> savingsExternalEntries;
+
   int get activeTransactionCount =>
       transactions.where((t) => t.deletedAt == null).length;
 
@@ -70,6 +75,7 @@ class BackupData {
         agendaReminders: agendaReminders,
         debts: debts,
         savingsAccounts: savingsAccounts,
+        savingsExternalEntries: savingsExternalEntries,
       );
 }
 
@@ -91,10 +97,13 @@ class BackupService {
   /// menambah `debts` (utang/piutang), v7 menambah `ledgers` (multi buku kas)
   /// dan `ledgerId` di dompet/kategori/target/agenda/utang, v8 menambah
   /// `savingsAccounts` (tabungan) dan `savingsId` di transaksi, v9 menambah
-  /// `reportGroup` di kategori dan `kind` di buku kas (laporan Laba Rugi). Backup
-  /// versi lama tetap bisa dipulihkan: semua isinya masuk ke Buku Utama, kelompok
-  /// laporan kosong (= bawaan jenis) dan buku bersifat pribadi.
-  static const formatVersion = 9;
+  /// `reportGroup` di kategori dan `kind` di buku kas (laporan Laba Rugi), v10
+  /// menambah `savingsExternalEntries` (setoran/penarikan tabungan ke/dari
+  /// "Lainnya", di luar dompet). Backup versi lama tetap bisa dipulihkan: semua
+  /// isinya masuk ke Buku Utama, kelompok laporan kosong (= bawaan jenis), buku
+  /// bersifat pribadi, dan tanpa entri "Lainnya". Backup v10 TIDAK bisa
+  /// dipulihkan di aplikasi lama (akan salah menghitung saldo tabungan).
+  static const formatVersion = 10;
 
   Future<String> export() async {
     final ledgersList = await _db.select(_db.ledgers).get();
@@ -110,6 +119,7 @@ class BackupService {
     final agenda = await _db.select(_db.agendaReminders).get();
     final debtsList = await _db.select(_db.debts).get();
     final savingsList = await _db.select(_db.savingsAccounts).get();
+    final savingsExternal = await _db.select(_db.savingsExternalEntries).get();
     return const JsonEncoder.withIndent(' ').convert({
       'format': formatName,
       'version': formatVersion,
@@ -127,6 +137,7 @@ class BackupService {
       'agendaReminders': [for (final e in agenda) e.toJson()],
       'debts': [for (final e in debtsList) e.toJson()],
       'savingsAccounts': [for (final e in savingsList) e.toJson()],
+      'savingsExternalEntries': [for (final e in savingsExternal) e.toJson()],
     });
   }
 
@@ -224,6 +235,11 @@ class BackupService {
           SavingsAccount.fromJson,
           optional: true,
           withLedger: true,
+        ),
+        savingsExternalEntries: read(
+          'savingsExternalEntries',
+          SavingsExternalEntry.fromJson,
+          optional: true,
         ),
       );
       // Backup format < 9 dibuat sebelum kelompok laporan dan sifat buku ada: beri nilai
@@ -522,6 +538,22 @@ class BackupService {
             (t.type == TxType.expense ? t.amount : -t.amount);
       }
     }
+    // Entri "Lainnya": ID tidak ganda, merujuk tabungan yang ada, nominal positif;
+    // yang masih aktif ikut dihitung dalam saldo (setoran +, penarikan -).
+    if ({for (final e in d.savingsExternalEntries) e.id}.length !=
+        d.savingsExternalEntries.length) {
+      throw corrupt;
+    }
+    for (final e in d.savingsExternalEntries) {
+      if (!savingsLedger.containsKey(e.savingsId) || e.amount <= 0) {
+        throw corrupt;
+      }
+      if (e.deletedAt == null) {
+        savingsBalance[e.savingsId] =
+            (savingsBalance[e.savingsId] ?? 0) +
+            (e.deposit ? e.amount : -e.amount);
+      }
+    }
     if (savingsBalance.values.any((v) => v < 0)) throw corrupt;
   }
 
@@ -540,6 +572,7 @@ class BackupService {
       await _db.delete(_db.tags).go();
       await _db.delete(_db.goalContributions).go();
       await _db.delete(_db.savingsGoals).go();
+      await _db.delete(_db.savingsExternalEntries).go();
       await _db.delete(_db.savingsAccounts).go();
       await _db.delete(_db.transactions).go();
       await _db.delete(_db.recurringRules).go();
@@ -591,6 +624,9 @@ class BackupService {
         ]);
         b.insertAll(_db.savingsAccounts, [
           for (final e in data.savingsAccounts) e.toCompanion(false),
+        ]);
+        b.insertAll(_db.savingsExternalEntries, [
+          for (final e in data.savingsExternalEntries) e.toCompanion(false),
         ]);
       });
     });

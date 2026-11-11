@@ -15,6 +15,7 @@ import 'generated_migrations/schema_v8.dart' as v8;
 import 'generated_migrations/schema_v9.dart' as v9;
 import 'generated_migrations/schema_v10.dart' as v10;
 import 'generated_migrations/schema_v11.dart' as v11;
+import 'generated_migrations/schema_v12.dart' as v12;
 
 /// Data pengguna nyata di setiap versi lama harus selamat dari semua migrasi.
 void main() {
@@ -22,9 +23,9 @@ void main() {
   late SchemaVerifier verifier;
   setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
 
-  const latest = 12;
+  const latest = 13;
 
-  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
+  for (final from in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
     test(
       'skema hasil migrasi v$from -> v$latest identik dengan skema v$latest baru',
       () async {
@@ -604,6 +605,66 @@ void main() {
         (await db.select(db.ledgers).get()).single.kind,
         LedgerKind.personal,
       );
+      await db.close();
+    },
+  );
+
+  // v13: tabel `savings_external_entries` (setoran/penarikan tabungan ke/dari
+  // "Lainnya"). Tabungan dan setoran dompet lama harus utuh, dan fitur baru
+  // langsung berfungsi pada data hasil migrasi.
+  test(
+    'v12 -> v$latest: tabungan dan setoran dompet utuh; setoran/penarikan Lainnya berfungsi',
+    () async {
+      final schema = await verifier.schemaAt(12);
+      final old = v12.DatabaseAtV12(schema.newConnection());
+      await old.customStatement(
+        "INSERT INTO ledgers (id, name, icon, color, sort_order, archived, created_at, updated_at) "
+        "VALUES ('ledger-main', 'Buku Utama', 'savings', 1, 0, 0, 1700000000, 1700000000)",
+      );
+      await old.customStatement(
+        "INSERT INTO accounts (id, name, kind, initial_balance, archived, updated_at, ledger_id) "
+        "VALUES ('a1', 'BCA', 1, 1000000, 0, 1700000000, 'ledger-main')",
+      );
+      await old.customStatement(
+        "INSERT INTO savings_accounts (id, name, icon, color, archived, ledger_id, created_at, updated_at) "
+        "VALUES ('s1', 'Liburan', 'savings', 1, 0, 'ledger-main', 1700000000, 1700000000)",
+      );
+      // Setoran Rp200.000 dari dompet BCA (pengeluaran bertanda tabungan).
+      await old.customStatement(
+        "INSERT INTO transactions (id, type, amount, account_id, category_id, "
+        "transfer_to_account_id, date, note, created_at, updated_at, deleted_at, savings_id) "
+        "VALUES ('t1', 1, 200000, 'a1', NULL, NULL, 1700000000, 'setor', 1700000000, 1700000000, NULL, 's1')",
+      );
+      await old.close();
+
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, latest);
+
+      var view = (await db.watchSavings().first).single;
+      expect(view.balance, 200000);
+      expect(view.deposited, 200000);
+      expect(view.withdrawn, 0);
+      expect(await db.select(db.savingsExternalEntries).get(), isEmpty);
+
+      // Setoran dan penarikan ke/dari "Lainnya" menggeser saldo tabungan saja.
+      await db.depositToSavings(
+        savingsId: 's1',
+        accountId: null,
+        amount: 50000,
+        date: DateTime(2026, 1, 1),
+      );
+      await db.withdrawFromSavings(
+        savingsId: 's1',
+        accountId: null,
+        amount: 80000,
+        date: DateTime(2026, 1, 2),
+      );
+      view = (await db.watchSavings().first).single;
+      expect(view.deposited, 250000);
+      expect(view.withdrawn, 80000);
+      expect(view.balance, 170000);
+      // Saldo dompet hanya terpengaruh setoran dompet lama (1.000.000 - 200.000).
+      expect((await db.watchAccountBalances().first).single.balance, 800000);
       await db.close();
     },
   );

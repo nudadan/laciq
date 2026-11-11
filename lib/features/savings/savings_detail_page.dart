@@ -161,7 +161,7 @@ class SavingsDetailPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Text('Riwayat', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
-            AsyncBody<List<TxView>>(
+            AsyncBody<List<SavingsEntry>>(
               value: entries,
               builder: (list) => list.isEmpty
                   ? const Padding(
@@ -170,7 +170,7 @@ class SavingsDetailPage extends ConsumerWidget {
                         icon: Icons.history,
                         message:
                             'Belum ada setoran.\n'
-                            'Ketuk "Setor" untuk memindahkan uang dari dompet.',
+                            'Ketuk "Setor" untuk menambah dana ke tabungan ini.',
                       ),
                     )
                   : Column(
@@ -195,10 +195,6 @@ class SavingsDetailPage extends ConsumerWidget {
   }) async {
     final messenger = ScaffoldMessenger.of(context);
     final db = ref.read(databaseProvider);
-    if (wallets.isEmpty) {
-      notify(messenger, 'Belum ada dompet aktif.');
-      return;
-    }
     final result = await showDialog<_MoveInput>(
       context: context,
       builder: (context) => _MoveDialog(
@@ -298,25 +294,31 @@ class SavingsDetailPage extends ConsumerWidget {
 class _EntryTile extends ConsumerWidget {
   const _EntryTile(this.e, {required this.savingsName});
 
-  final TxView e;
+  final SavingsEntry e;
   final String savingsName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tx = e.tx;
-    final isDeposit = tx.type == TxType.expense;
+    final isDeposit = e.deposit;
     final color = isDeposit ? context.palette.income : context.palette.expense;
-    final date = DateFormat('d MMM yyyy', 'id_ID').format(tx.date);
+    final date = DateFormat('d MMM yyyy', 'id_ID').format(e.date);
     final defaultNote = isDeposit
         ? 'Setoran ke $savingsName'
         : 'Penarikan dari $savingsName';
-    final wallet = isDeposit
-        ? 'dari ${e.account.name}'
-        : 'ke ${e.account.name}';
-    final note = tx.note == null || tx.note == defaultNote ? null : tx.note;
+    // Tanpa dompet = "Lainnya" (di luar dompet pengguna).
+    final party = e.accountName ?? 'Lainnya';
+    final wallet = isDeposit ? 'dari $party' : 'ke $party';
+    final note = e.note == null || e.note == defaultNote ? null : e.note;
+    // Pesan setelah dihapus: entri dompet mengembalikan/mengurangi saldo dompet,
+    // entri "Lainnya" tidak menyentuh dompet mana pun.
+    final deletedMessage = e.isExternal
+        ? (isDeposit ? 'Setoran dihapus' : 'Penarikan dihapus')
+        : (isDeposit
+              ? 'Setoran dihapus, saldo ${e.accountName} dikembalikan'
+              : 'Penarikan dihapus, saldo ${e.accountName} dikurangi');
 
     return Dismissible(
-      key: ValueKey(tx.id),
+      key: ValueKey(e.id),
       direction: DismissDirection.endToStart,
       background: Container(
         decoration: BoxDecoration(
@@ -333,21 +335,19 @@ class _EntryTile extends ConsumerWidget {
         final messenger = ScaffoldMessenger.of(context);
         final db = ref.read(databaseProvider);
         try {
-          await db.setSavingsEntryDeleted(tx.id, deleted: true);
+          await db.setSavingsEntryDeleted(e.id, deleted: true);
         } on SavingsException catch (ex) {
           notify(messenger, ex.message);
           return false;
         }
         notify(
           messenger,
-          isDeposit
-              ? 'Setoran dihapus, saldo ${e.account.name} dikembalikan'
-              : 'Penarikan dihapus, saldo ${e.account.name} dikurangi',
+          deletedMessage,
           action: SnackBarAction(
             label: 'Batal',
             onPressed: () async {
               try {
-                await db.setSavingsEntryDeleted(tx.id, deleted: false);
+                await db.setSavingsEntryDeleted(e.id, deleted: false);
               } on SavingsException catch (ex) {
                 notify(messenger, ex.message);
               }
@@ -371,7 +371,7 @@ class _EntryTile extends ConsumerWidget {
           note == null ? '$date · $wallet' : '$date · $wallet · $note',
         ),
         trailing: Text(
-          '${isDeposit ? '+' : '-'}${rupiah(tx.amount)}',
+          '${isDeposit ? '+' : '-'}${rupiah(e.amount)}',
           style: TextStyle(color: color, fontWeight: FontWeight.w600),
         ),
       ),
@@ -379,9 +379,10 @@ class _EntryTile extends ConsumerWidget {
   }
 }
 
+/// [accountId] null = "Lainnya" (di luar dompet pengguna).
 typedef _MoveInput = ({
   int amount,
-  String accountId,
+  String? accountId,
   DateTime date,
   String? note,
 });
@@ -405,10 +406,14 @@ class _MoveDialog extends StatefulWidget {
   State<_MoveDialog> createState() => _MoveDialogState();
 }
 
+/// Nilai item "Lainnya" pada pilihan dompet (bukan ID dompet mana pun).
+const _otherWallet = '__lainnya__';
+
 class _MoveDialogState extends State<_MoveDialog> {
   final _amount = TextEditingController();
   final _note = TextEditingController();
-  late String _accountId = widget.wallets.first.id;
+  // Dompet pertama bila ada; tanpa dompet aktif, satu-satunya pilihan "Lainnya".
+  late String _accountId = widget.wallets.firstOrNull?.id ?? _otherWallet;
   DateTime _date = dateOnly(DateTime.now());
   String? _error;
 
@@ -418,6 +423,8 @@ class _MoveDialogState extends State<_MoveDialog> {
     _note.dispose();
     super.dispose();
   }
+
+  bool get _isOther => _accountId == _otherWallet;
 
   AccountBalance get _wallet =>
       widget.wallets.firstWhere((w) => w.id == _accountId);
@@ -448,7 +455,7 @@ class _MoveDialogState extends State<_MoveDialog> {
     final note = _note.text.trim();
     Navigator.pop<_MoveInput>(context, (
       amount: amount,
-      accountId: _accountId,
+      accountId: _isOther ? null : _accountId,
       date: _date,
       note: note.isEmpty ? null : note,
     ));
@@ -472,7 +479,14 @@ class _MoveDialogState extends State<_MoveDialog> {
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: deposit ? 'Dari dompet' : 'Ke dompet',
-                helperText: 'Saldo dompet ${rupiah(_wallet.balance)}',
+                helperText: _isOther
+                    ? (deposit
+                          ? 'Dana dari luar dompet-mu. Saldo dompet tidak berubah.'
+                          : 'Dana dipakai di luar dompet-mu, mis. transfer ke '
+                                'rekening orang lain atau bayar tagihan. '
+                                'Saldo dompet tidak berubah.')
+                    : 'Saldo dompet ${rupiah(_wallet.balance)}',
+                helperMaxLines: 3,
               ),
               items: [
                 for (final w in widget.wallets)
@@ -480,6 +494,10 @@ class _MoveDialogState extends State<_MoveDialog> {
                     value: w.id,
                     child: Text(w.name, overflow: TextOverflow.ellipsis),
                   ),
+                const DropdownMenuItem(
+                  value: _otherWallet,
+                  child: Text('Lainnya', overflow: TextOverflow.ellipsis),
+                ),
               ],
               onChanged: (v) => setState(() => _accountId = v ?? _accountId),
             ),
@@ -500,9 +518,11 @@ class _MoveDialogState extends State<_MoveDialog> {
                 labelText: 'Nominal',
                 errorText: _error,
                 helperText: deposit
-                    ? 'Dicatat sebagai pengeluaran dompet'
+                    ? (_isOther
+                          ? 'Hanya menambah saldo tabungan'
+                          : 'Dicatat sebagai pengeluaran dompet')
                     : 'Tersedia ${rupiah(widget.balance)} · '
-                          'dicatat sebagai pemasukan dompet',
+                          '${_isOther ? 'hanya mengurangi saldo tabungan' : 'dicatat sebagai pemasukan dompet'}',
                 helperMaxLines: 2,
               ),
             ),
