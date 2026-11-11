@@ -1,5 +1,9 @@
-# Rilis 1.2.0+21 (disusun 2026-11-11, belum diunggah)
+# Rilis 1.2.0+21 (disusun 2026-11-11, DITERBITKAN ke Pengujian internal 2026-11-11 16.48)
 
+> **Status:** rilis "21 (1.2.0)" berstatus "Tersedia untuk penguji internal" di Play Console (jalur Pengujian internal, 1 kode versi).
+> Pratinjau Play: tidak ada perangkat yang tidak lagi didukung (0 di semua faktor bentuk), ukuran instal baru 21,6 MB (+10,3 KB vs +20),
+> ukuran pembaruan 2,08 MB. **Belum dipromosikan ke Produksi**; Produksi tetap +20.
+>
 > Pengganti produksi saat ini (+20). Membawa dua perubahan: opsi **Lainnya** pada setor/tarik Tabungan, dan pesan galat
 > langganan yang membedakan penyebab. Dibangun untuk diuji di HP penguji internal lewat Play sebelum dipromosikan.
 
@@ -56,7 +60,9 @@ Baru: opsi "Lainnya" pada setor dan tarik Tabungan, untuk dana yang berasal dari
 
 ## Urutan rilis
 0. [x] Naikkan versi dan bangun AAB (2026-11-11), lihat Artefak.
-1. [ ] **Unggah ke Pengujian internal** di Play Console (pemilik). Cek pratinjau: tidak ada perangkat yang hilang, ukuran instal sekitar 21,6 MB.
+1. [x] **Unggah ke Pengujian internal** di Play Console: diunggah dan **diterbitkan 2026-11-11 16.48** (nama rilis `21 (1.2.0)`, catatan rilis di bawah, bundle +20 lama tidak disertakan).
+       Pratinjau: tidak ada perangkat yang hilang, ukuran instal 21,6 MB. AAB 96.820.837 byte diunggah lewat halaman Play Console (alat unggah Chrome dibatasi 10 MB, jadi
+       berkas disajikan sementara di `127.0.0.1` dan dimasukkan ke input berkas; server dimatikan setelah unggahan).
 2. [ ] Uji di HP penguji internal (daftar "Belum diuji"). Semua butir migrasi dan backup harus lulus.
 3. [ ] Promosikan **bundel yang sama** ke Produksi bertahap hanya bila langkah 2 lulus. Data Safety dan kebijakan privasi tidak berubah (tidak ada data baru).
 4. [ ] Setelah tayang: perbarui dokumen ini dan [MATRIKS-FITUR-PAKET.md](MATRIKS-FITUR-PAKET.md) bila perlu.
