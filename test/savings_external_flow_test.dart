@@ -124,10 +124,29 @@ void main() {
       await tester.tap(find.text('Tarik'));
       await settle(tester);
       await _pickOther(tester);
+      // Kalimat terpenting ada di depan, supaya tidak ikut terpotong di layar
+      // sempit (ditemukan saat uji di HP: teks bantu dulu terpotong di baris 3).
+      expect(
+        find.textContaining(
+          'Saldo dompet tidak berubah. Dana dipakai di luar dompet-mu',
+        ),
+        findsOneWidget,
+      );
       expect(
         find.textContaining('transfer ke rekening orang lain'),
         findsOneWidget,
       );
+      // Teks bantu cukup panjang untuk 4 baris, dan pesan galat nominal (mis.
+      // "Saldo tabungan hanya Rp25.028.257.") untuk 2 baris.
+      final dropdown = tester.widget<InputDecorator>(
+        find.descendant(
+          of: find.byType(DropdownButtonFormField<String>),
+          matching: find.byType(InputDecorator),
+        ),
+      );
+      expect(dropdown.decoration.helperMaxLines, 4);
+      final amount = tester.widget<TextField>(find.byType(TextField).first);
+      expect(amount.decoration!.errorMaxLines, 2);
 
       // Batas saldo tabungan tetap berlaku untuk Lainnya.
       await tester.enterText(find.byType(TextField).first, '999999');

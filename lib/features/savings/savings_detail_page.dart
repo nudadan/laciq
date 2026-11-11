@@ -482,11 +482,13 @@ class _MoveDialogState extends State<_MoveDialog> {
                 helperText: _isOther
                     ? (deposit
                           ? 'Dana dari luar dompet-mu. Saldo dompet tidak berubah.'
-                          : 'Dana dipakai di luar dompet-mu, mis. transfer ke '
-                                'rekening orang lain atau bayar tagihan. '
-                                'Saldo dompet tidak berubah.')
+                          // Kalimat terpenting di depan: di layar sempit sisanya
+                          // boleh terpotong, ini tidak.
+                          : 'Saldo dompet tidak berubah. Dana dipakai di luar '
+                                'dompet-mu, mis. transfer ke rekening orang '
+                                'lain atau bayar tagihan.')
                     : 'Saldo dompet ${rupiah(_wallet.balance)}',
-                helperMaxLines: 3,
+                helperMaxLines: 4,
               ),
               items: [
                 for (final w in widget.wallets)
@@ -517,6 +519,8 @@ class _MoveDialogState extends State<_MoveDialog> {
                 prefixText: 'Rp ',
                 labelText: 'Nominal',
                 errorText: _error,
+                // Pesan "Saldo tabungan hanya Rp ..." panjang: jangan dipotong.
+                errorMaxLines: 2,
                 helperText: deposit
                     ? (_isOther
                           ? 'Hanya menambah saldo tabungan'
